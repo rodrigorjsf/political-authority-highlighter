@@ -1,0 +1,24 @@
+{
+  "name": "@pah/db",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./public-schema": "./src/public-schema.ts",
+    "./internal-schema": "./src/internal-schema.ts",
+    "./clients": "./src/clients.ts",
+    "./migrate": "./src/migrate.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@pah/shared": "workspace:*",
+    "drizzle-orm": "^0.36.0",
+    "postgres": "^3.4.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.27.0",
+    "typescript": "^5.4.0"
+  }
+}
