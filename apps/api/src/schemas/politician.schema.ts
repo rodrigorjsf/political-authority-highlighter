@@ -1,0 +1,42 @@
+import { Type, type Static } from '@sinclair/typebox'
+
+/**
+ * Query parameters for GET /api/v1/politicians.
+ * Phase 1: cursor + limit only. role, state, search added in Phases 2-4.
+ */
+export const PoliticianListQuerySchema = Type.Object({
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 50, default: 20 })),
+  cursor: Type.Optional(
+    Type.String({ description: 'Opaque base64url cursor from previous response' }),
+  ),
+  // Phase 2: role
+  role: Type.Optional(Type.Union([Type.Literal('deputado'), Type.Literal('senador')])),
+  // Phase 3: state
+  state: Type.Optional(Type.String({ minLength: 2, maxLength: 2 })),
+})
+
+export type PoliticianListQuery = Static<typeof PoliticianListQuerySchema>
+
+/**
+ * Single politician card in list response.
+ * DR-001: exclusion_flag is NOT in this schema — only shown on profile page (RF-007).
+ * DR-002: No qualitative labels, only raw data.
+ */
+export const PoliticianCardSchema = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  slug: Type.String(),
+  name: Type.String(),
+  party: Type.String(),
+  state: Type.String(),
+  role: Type.String(),
+  photoUrl: Type.Union([Type.String(), Type.Null()]),
+  tenureStartDate: Type.Union([Type.String(), Type.Null()]),
+  overallScore: Type.Integer({ minimum: 0, maximum: 100 }),
+})
+
+export type PoliticianCardDto = Static<typeof PoliticianCardSchema>
+
+export const PoliticianListResponseSchema = Type.Object({
+  data: Type.Array(PoliticianCardSchema),
+  cursor: Type.Union([Type.String(), Type.Null()]),
+})
