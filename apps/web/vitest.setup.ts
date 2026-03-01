@@ -35,3 +35,10 @@ vi.mock('next/link', () => ({
     className?: string
   }) => React.createElement('a', { href, className }, children),
 }))
+
+// Mock next/navigation — use vi.fn() factories so tests can call mockReturnValueOnce
+vi.mock('next/navigation', () => ({
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+  useRouter: vi.fn(() => ({ push: vi.fn(), prefetch: vi.fn(), back: vi.fn(), forward: vi.fn(), refresh: vi.fn(), replace: vi.fn() })),
+  usePathname: vi.fn(() => '/politicos'),
+}))
