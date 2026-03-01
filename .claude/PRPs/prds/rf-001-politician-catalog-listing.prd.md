@@ -203,7 +203,7 @@ LIMIT 21  -- fetch 21 to determine hasMore
 | # | Phase | Description | Status | Parallel | Depends | PRP Plan |
 |---|-------|-------------|--------|----------|---------|----------|
 | 1 | Base Listing | API endpoint + Next.js listing page with cards and cursor pagination | complete | - | - | `.claude/PRPs/plans/completed/rf-001-politician-catalog-listing.plan.md` |
-| 2 | Role Filter (RF-002) | Add `role` filter to API + UI dropdown | in-progress | with 3 | 1 | `.claude/PRPs/plans/rf-002-role-filter.plan.md` |
+| 2 | Role Filter (RF-002) | Add `role` filter to API + UI dropdown | complete | with 3 | 1 | `.claude/PRPs/plans/completed/rf-002-role-filter.plan.md` |
 | 3 | State Filter (RF-003) | Add `state` filter to API + UI dropdown | pending | with 2 | 1 | - |
 | 4 | Name Search (RF-015) | Add `search` param to API + search input (tsvector) | pending | - | 2, 3 | - |
 
