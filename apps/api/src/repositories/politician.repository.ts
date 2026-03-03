@@ -1,4 +1,4 @@
-import { eq, and, desc, lt, or } from 'drizzle-orm'
+import { eq, and, desc, lt, or, sql } from 'drizzle-orm'
 import type { PublicDb } from '@pah/db/clients'
 import { politicians, integrityScores } from '@pah/db/public-schema'
 
@@ -7,6 +7,7 @@ export interface ListFilters {
   cursor?: { overallScore: number; politicianId: string } | undefined
   role?: string | undefined
   state?: string | undefined
+  search?: string | undefined
 }
 
 export interface PoliticianWithScore {
@@ -42,6 +43,11 @@ export function createPoliticianRepository(db: PublicDb): {
       }
       if (filters.state !== undefined) {
         conditions.push(eq(politicians.state, filters.state))
+      }
+      if (filters.search !== undefined) {
+        conditions.push(
+          sql`${politicians.searchVector} @@ plainto_tsquery('simple', unaccent(${filters.search}))`,
+        )
       }
       if (filters.cursor !== undefined) {
         const { overallScore, politicianId } = filters.cursor

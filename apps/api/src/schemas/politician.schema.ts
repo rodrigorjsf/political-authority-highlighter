@@ -13,6 +13,8 @@ export const PoliticianListQuerySchema = Type.Object({
   role: Type.Optional(Type.Union([Type.Literal('deputado'), Type.Literal('senador')])),
   // Phase 3: state
   state: Type.Optional(Type.String({ minLength: 2, maxLength: 2 })),
+  // Phase 4: search (RF-015)
+  search: Type.Optional(Type.String({ minLength: 2, maxLength: 100 })),
 })
 
 export type PoliticianListQuery = Static<typeof PoliticianListQuerySchema>

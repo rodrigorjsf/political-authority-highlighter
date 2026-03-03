@@ -37,6 +37,7 @@ export interface FindByFiltersInput {
   cursor?: string | undefined
   role?: string | undefined
   state?: string | undefined
+  search?: string | undefined
 }
 
 export interface FindByFiltersResult {
@@ -60,6 +61,7 @@ export function createPoliticianService(repository: PoliticianRepository): {
         cursor: decodedCursor,
         role: input.role,
         state: input.state,
+        search: input.search,
       })
 
       const hasMore = rows.length > input.limit
