@@ -54,6 +54,7 @@ We believe a clean, fast politician listing page sorted by integrity score will 
 ## Users & Context
 
 **Primary User**
+
 - **Who:** Cidadão Engajado — Brazilian voter aged 18-45, digitally literate, arrives via Google search
 - **Current behavior:** Manually visits Camara and Senado portals separately, finds no unified view
 - **Trigger:** Upcoming election, news story about a politician, social media share
@@ -63,6 +64,7 @@ We believe a clean, fast politician listing page sorted by integrity score will 
 When I want to evaluate my federal representatives before an election, I want to see all politicians ranked by their integrity score in one page, so I can quickly decide which profiles are worth investigating further.
 
 **Non-Users**
+
 - Journalists (they need deeper data, not the listing — they go to profiles directly)
 - API researchers (post-MVP public API)
 - Users on metered connections (we mitigate with SSG/ISR + Cloudflare CDN, not by simplifying the page)
@@ -204,12 +206,13 @@ LIMIT 21  -- fetch 21 to determine hasMore
 |---|-------|-------------|--------|----------|---------|----------|
 | 1 | Base Listing | API endpoint + Next.js listing page with cards and cursor pagination | complete | - | - | `.claude/PRPs/plans/completed/rf-001-politician-catalog-listing.plan.md` |
 | 2 | Role Filter (RF-002) | Add `role` filter to API + UI dropdown | complete | with 3 | 1 | `.claude/PRPs/plans/completed/rf-002-role-filter.plan.md` |
-| 3 | State Filter (RF-003) | Add `state` filter to API + UI dropdown | pending | with 2 | 1 | - |
-| 4 | Name Search (RF-015) | Add `search` param to API + search input (tsvector) | pending | - | 2, 3 | - |
+| 3 | State Filter (RF-003) | Add `state` filter to API + UI dropdown | complete | with 2 | 1 | `.claude/PRPs/plans/completed/rf-003-state-filter.plan.md` |
+| 4 | Name Search (RF-015) | Add `search` param to API + search input (tsvector) | complete | - | 2, 3 | `.claude/PRPs/plans/completed/rf-015-name-search.plan.md` |
 
 ### Phase Details
 
 **Phase 1: Base Listing**
+
 - **Goal:** Users can browse all active politicians sorted by score with pagination
 - **Scope:**
   - `packages/shared/`: `PoliticianCard` type, `ListPoliticiansResponse` type
@@ -219,6 +222,7 @@ LIMIT 21  -- fetch 21 to determine hasMore
 - **Success signal:** `pnpm test` passes, Lighthouse LCP < 2s on localhost, cards display all 6 fields
 
 **Phase 2: Role Filter (RF-002)**
+
 - **Goal:** Users can filter listing to deputados or senadores only
 - **Scope:**
   - `apps/api/`: add `role` query param to existing endpoint
@@ -227,6 +231,7 @@ LIMIT 21  -- fetch 21 to determine hasMore
 - **Success signal:** Selecting "Senador" returns max 81 results, URL reflects `?role=senador`
 
 **Phase 3: State Filter (RF-003)**
+
 - **Goal:** Users can filter by Brazilian state (UF), combinable with role filter
 - **Scope:**
   - `apps/api/`: add `state` query param to existing endpoint
@@ -235,6 +240,7 @@ LIMIT 21  -- fetch 21 to determine hasMore
 - **Success signal:** Empty state shown when no results; URL reflects combined filters
 
 **Phase 4: Name Search (RF-015)**
+
 - **Goal:** Users can search politicians by name using full-text search
 - **Scope:**
   - `apps/api/`: add `search` query param, tsvector FTS query via Drizzle
@@ -274,11 +280,13 @@ Phases 2 and 3 can be implemented in parallel in separate git worktrees — they
 ## Research Summary
 
 **Domain Context**
+
 - 594 politicians total (513 deputados + 81 senadores) — small dataset; full listing is fast
 - Data from Camara API and Senado API populates the listing; ingestion runs daily at 02:00-02:15 UTC
 - Composite cursor `(overall_score, id)` required because multiple politicians may share identical scores
 
 **Technical Context**
+
 - All required indexes pre-planned in ER.md (`idx_scores_overall`, `idx_politicians_active`, `idx_politicians_role`, `idx_politicians_state`)
 - `tenure_start_date` field is an open question — not explicitly in `politicians` table in ER.md; may need to be added or derived from `candidacies`
 - No existing frontend code — greenfield implementation

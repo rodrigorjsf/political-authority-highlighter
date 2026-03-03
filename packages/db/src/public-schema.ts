@@ -8,7 +8,16 @@ import {
   text,
   date,
   index,
+  customType,
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
+
+// RF-015: tsvector custom type for PostgreSQL FTS (not natively supported by Drizzle)
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return 'tsvector'
+  },
+})
 
 export const publicData = pgSchema('public_data')
 
@@ -36,6 +45,10 @@ export const politicians = publicData.table(
     tenureStartDate: date('tenure_start_date'),
     // DR-001: Silent exclusion — only boolean crosses schema boundary
     exclusionFlag: boolean('exclusion_flag').notNull().default(false),
+    // RF-015: FTS generated column — kept in sync with name by PostgreSQL automatically
+    searchVector: tsvector('search_vector').generatedAlwaysAs(
+      sql`to_tsvector('simple', unaccent(coalesce(name, '')))`,
+    ),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -45,6 +58,8 @@ export const politicians = publicData.table(
     index('idx_politicians_party').on(table.party),
     index('idx_politicians_role').on(table.role),
     index('idx_politicians_active').on(table.active),
+    // RF-015: GIN index for sub-100ms full-text search
+    index('idx_politicians_search').using('gin', table.searchVector),
   ],
 )
 

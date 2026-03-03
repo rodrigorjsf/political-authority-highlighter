@@ -6,6 +6,7 @@ import { fetchPoliticians } from '../../lib/api-client'
 import { PoliticianCard } from '../../components/politician/politician-card'
 import { RoleFilter } from '../../components/filters/role-filter'
 import { StateFilter } from '../../components/filters/state-filter'
+import { SearchBar } from '../../components/filters/search-bar'
 import type { Metadata } from 'next'
 import type { PoliticianFilters } from '@pah/shared'
 import Link from 'next/link'
@@ -27,23 +28,33 @@ export default async function PoliticosPage({ searchParams }: Props): Promise<Re
   const cursor = typeof params['cursor'] === 'string' ? params['cursor'] : undefined
   const role = typeof params['role'] === 'string' ? params['role'] : undefined
   const state = typeof params['state'] === 'string' ? params['state'] : undefined
+  const search = typeof params['search'] === 'string' ? params['search'] : undefined
 
   // exactOptionalPropertyTypes: build filters object conditionally (no undefined spreads)
   const filters: PoliticianFilters = {}
   if (cursor !== undefined) filters.cursor = cursor
   if (role !== undefined) filters.role = role as 'deputado' | 'senador'
   if (state !== undefined) filters.state = state
+  if (search !== undefined) filters.search = search
 
   const result = await fetchPoliticians(filters)
 
-  // Build base params for pagination links (preserves role + state, excludes cursor)
+  // Build base params for pagination links (preserves role + state + search, excludes cursor)
   const baseParams = new URLSearchParams()
   if (role !== undefined) baseParams.set('role', role)
   if (state !== undefined) baseParams.set('state', state)
+  if (search !== undefined) baseParams.set('search', search)
 
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-foreground">Políticos</h1>
+
+      {/* Search bar — primary search action above filter bar */}
+      <div className="mb-4">
+        <Suspense fallback={<div className="h-10 w-64 animate-pulse rounded-md bg-muted" />}>
+          <SearchBar />
+        </Suspense>
+      </div>
 
       {/* Filter bar */}
       <div className="mb-6 flex items-center gap-4">

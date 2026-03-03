@@ -26,13 +26,14 @@ export function createPoliticiansRoute(deps: RouteDeps): FastifyPluginAsyncTypeb
         },
       },
       async (request, reply) => {
-        const { limit = 20, cursor, role, state } = request.query
+        const { limit = 20, cursor, role, state, search } = request.query
 
         const result = await deps.politicianService.findByFilters({
           limit,
           cursor,
           role,
           state,
+          search,
         })
 
         void reply.header('Cache-Control', 'public, max-age=300, s-maxage=3600')
