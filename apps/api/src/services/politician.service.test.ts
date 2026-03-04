@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createPoliticianService } from './politician.service.js'
-import type { PoliticianRepository, PoliticianWithScore } from '../repositories/politician.repository.js'
+import type {
+  PoliticianRepository,
+  PoliticianWithScore,
+  PoliticianProfileRow,
+} from '../repositories/politician.repository.js'
 
 function buildRow(overrides: Partial<PoliticianWithScore> = {}): PoliticianWithScore {
   return {
@@ -22,6 +26,7 @@ function buildRepository(
 ): PoliticianRepository {
   return {
     selectWithFilters: vi.fn().mockResolvedValue(rows),
+    selectBySlug: vi.fn().mockResolvedValue(undefined),
   }
 }
 
@@ -110,6 +115,64 @@ describe('createPoliticianService', () => {
       await expect(service.findByFilters({ limit: 20, cursor: 'not-valid-base64url-json' })).rejects.toThrow(
         'Invalid cursor',
       )
+    })
+  })
+
+  describe('findBySlug', () => {
+    it('returns mapped PoliticianProfileDto when repository finds a row', async () => {
+      const mockRow: PoliticianProfileRow = {
+        id: 'uuid-123',
+        slug: 'joao-silva-sp',
+        name: 'João Silva',
+        party: 'PSDB',
+        state: 'SP',
+        role: 'deputado',
+        photoUrl: null,
+        bioSummary: null,
+        tenureStartDate: null,
+        overallScore: 72,
+        transparencyScore: 20,
+        legislativeScore: 18,
+        financialScore: 22,
+        anticorruptionScore: 12,
+        exclusionFlag: false,
+        methodologyVersion: 'v1.0',
+      }
+      const repository: PoliticianRepository = {
+        selectWithFilters: vi.fn(),
+        selectBySlug: vi.fn().mockResolvedValue(mockRow),
+      }
+      const service = createPoliticianService(repository)
+      const result = await service.findBySlug('joao-silva-sp')
+
+      expect(result).toEqual({
+        id: 'uuid-123',
+        slug: 'joao-silva-sp',
+        name: 'João Silva',
+        party: 'PSDB',
+        state: 'SP',
+        role: 'deputado',
+        photoUrl: null,
+        bioSummary: null,
+        tenureStartDate: null,
+        overallScore: 72,
+        transparencyScore: 20,
+        legislativeScore: 18,
+        financialScore: 22,
+        anticorruptionScore: 12,
+        exclusionFlag: false,
+        methodologyVersion: 'v1.0',
+      })
+    })
+
+    it('returns undefined when repository finds no row', async () => {
+      const repository: PoliticianRepository = {
+        selectWithFilters: vi.fn(),
+        selectBySlug: vi.fn().mockResolvedValue(undefined),
+      }
+      const service = createPoliticianService(repository)
+      const result = await service.findBySlug('unknown-slug')
+      expect(result).toBeUndefined()
     })
   })
 })
