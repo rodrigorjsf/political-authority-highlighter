@@ -2,9 +2,13 @@ import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox'
 import {
   PoliticianListQuerySchema,
   PoliticianListResponseSchema,
+  PoliticianParamsSchema,
+  PoliticianProfileSchema,
   type PoliticianListQuery,
+  type PoliticianParams,
 } from '../schemas/politician.schema.js'
 import type { PoliticianService } from '../services/politician.service.js'
+import { NotFoundError } from '../hooks/error-handler.js'
 
 interface RouteDeps {
   politicianService: PoliticianService
@@ -37,6 +41,28 @@ export function createPoliticiansRoute(deps: RouteDeps): FastifyPluginAsyncTypeb
         })
 
         void reply.header('Cache-Control', 'public, max-age=300, s-maxage=3600')
+
+        return result
+      },
+    )
+
+    app.get<{ Params: PoliticianParams }>(
+      '/politicians/:slug',
+      {
+        schema: {
+          params: PoliticianParamsSchema,
+          response: { 200: PoliticianProfileSchema },
+        },
+      },
+      async (request, reply) => {
+        const { slug } = request.params
+        const result = await deps.politicianService.findBySlug(slug)
+
+        if (result === undefined) {
+          throw new NotFoundError('Politician', slug)
+        }
+
+        void reply.header('Cache-Control', 'public, max-age=3600, s-maxage=86400')
 
         return result
       },

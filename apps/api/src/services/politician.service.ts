@@ -1,5 +1,5 @@
-import type { PoliticianRepository, PoliticianWithScore } from '../repositories/politician.repository.js'
-import type { PoliticianCardDto } from '../schemas/politician.schema.js'
+import type { PoliticianRepository, PoliticianWithScore, PoliticianProfileRow } from '../repositories/politician.repository.js'
+import type { PoliticianCardDto, PoliticianProfileDto } from '../schemas/politician.schema.js'
 
 interface Cursor {
   overallScore: number
@@ -32,6 +32,27 @@ function toPoliticianCardDto(row: PoliticianWithScore): PoliticianCardDto {
   }
 }
 
+function toPoliticianProfileDto(row: PoliticianProfileRow): PoliticianProfileDto {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    party: row.party,
+    state: row.state,
+    role: row.role,
+    photoUrl: row.photoUrl,
+    bioSummary: row.bioSummary,
+    tenureStartDate: row.tenureStartDate,
+    overallScore: row.overallScore,
+    transparencyScore: row.transparencyScore,
+    legislativeScore: row.legislativeScore,
+    financialScore: row.financialScore,
+    anticorruptionScore: row.anticorruptionScore,
+    exclusionFlag: row.exclusionFlag,
+    methodologyVersion: row.methodologyVersion,
+  }
+}
+
 export interface FindByFiltersInput {
   limit: number
   cursor?: string | undefined
@@ -51,6 +72,7 @@ export interface FindByFiltersResult {
  */
 export function createPoliticianService(repository: PoliticianRepository): {
   findByFilters: (input: FindByFiltersInput) => Promise<FindByFiltersResult>
+  findBySlug: (slug: string) => Promise<PoliticianProfileDto | undefined>
 } {
   return {
     async findByFilters(input: FindByFiltersInput): Promise<FindByFiltersResult> {
@@ -74,6 +96,12 @@ export function createPoliticianService(repository: PoliticianRepository): {
           : null
 
       return { data: data.map(toPoliticianCardDto), cursor: nextCursor }
+    },
+
+    async findBySlug(slug: string): Promise<PoliticianProfileDto | undefined> {
+      const row = await repository.selectBySlug(slug)
+      if (row === undefined) return undefined
+      return toPoliticianProfileDto(row)
     },
   }
 }

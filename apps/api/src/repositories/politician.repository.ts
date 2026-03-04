@@ -22,12 +22,32 @@ export interface PoliticianWithScore {
   overallScore: number
 }
 
+export interface PoliticianProfileRow {
+  id: string
+  slug: string
+  name: string
+  party: string
+  state: string
+  role: string
+  photoUrl: string | null
+  bioSummary: string | null
+  tenureStartDate: string | null
+  overallScore: number
+  transparencyScore: number
+  legislativeScore: number
+  financialScore: number
+  anticorruptionScore: number
+  exclusionFlag: boolean
+  methodologyVersion: string
+}
+
 /**
  * Repository for public_data.politicians queries.
  * All Drizzle access is isolated here — never inline queries in services or routes.
  */
 export function createPoliticianRepository(db: PublicDb): {
   selectWithFilters: (filters: ListFilters) => Promise<PoliticianWithScore[]>
+  selectBySlug: (slug: string) => Promise<PoliticianProfileRow | undefined>
 } {
   return {
     /**
@@ -91,6 +111,47 @@ export function createPoliticianRepository(db: PublicDb): {
         tenureStartDate: row.tenureStartDate ?? null,
         overallScore: Number(row.overallScore),
       }))
+    },
+
+    async selectBySlug(slug: string): Promise<PoliticianProfileRow | undefined> {
+      const rows = await db
+        .select({
+          id: politicians.id,
+          slug: politicians.slug,
+          name: politicians.name,
+          party: politicians.party,
+          state: politicians.state,
+          role: politicians.role,
+          photoUrl: politicians.photoUrl,
+          bioSummary: politicians.bioSummary,
+          tenureStartDate: politicians.tenureStartDate,
+          overallScore: integrityScores.overallScore,
+          transparencyScore: integrityScores.transparencyScore,
+          legislativeScore: integrityScores.legislativeScore,
+          financialScore: integrityScores.financialScore,
+          anticorruptionScore: integrityScores.anticorruptionScore,
+          exclusionFlag: politicians.exclusionFlag,
+          methodologyVersion: integrityScores.methodologyVersion,
+        })
+        .from(politicians)
+        .innerJoin(integrityScores, eq(politicians.id, integrityScores.politicianId))
+        .where(and(eq(politicians.slug, slug), eq(politicians.active, true)))
+        .limit(1)
+
+      const row = rows.at(0)
+      if (row === undefined) return undefined
+
+      return {
+        ...row,
+        photoUrl: row.photoUrl ?? null,
+        bioSummary: row.bioSummary ?? null,
+        tenureStartDate: row.tenureStartDate ?? null,
+        overallScore: Number(row.overallScore),
+        transparencyScore: Number(row.transparencyScore),
+        legislativeScore: Number(row.legislativeScore),
+        financialScore: Number(row.financialScore),
+        anticorruptionScore: Number(row.anticorruptionScore),
+      }
     },
   }
 }
