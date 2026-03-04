@@ -1,8 +1,8 @@
-import type { ListPoliticiansResponse, PoliticianFilters, ProblemDetail } from './api-types'
+import type { ListPoliticiansResponse, PoliticianFilters, PoliticianProfile, ProblemDetail } from './api-types'
 
 const API_BASE_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001/api/v1'
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(
     public readonly status: number,
     public readonly body: ProblemDetail,
@@ -49,5 +49,16 @@ export async function fetchPoliticians(
 
   return apiFetch<ListPoliticiansResponse>(`/politicians?${params.toString()}`, {
     next: { revalidate: 300, tags: ['politicians'] },
+  })
+}
+
+/**
+ * Fetches a single politician profile by slug with ISR caching.
+ * revalidate: 3600 = Next.js fetch cache (1 hour)
+ * tags: ['politician-{slug}'] = allows on-demand revalidation via pipeline webhook
+ */
+export async function fetchPoliticianBySlug(slug: string): Promise<PoliticianProfile> {
+  return apiFetch<PoliticianProfile>(`/politicians/${encodeURIComponent(slug)}`, {
+    next: { revalidate: 3600, tags: [`politician-${slug}`] },
   })
 }
