@@ -1,7 +1,7 @@
 # RF-MVP — Remaining MVP Core Features (RF-004 to RF-017)
 
 > **PRD Reference:** `docs/prd/PRD.md` § 2.1 RF-004 through RF-017
-> **Status:** DRAFT — Implementation Tracker
+> **Status:** DRAFT — Implementation Tracker (2 complete, 7 pending)
 > **Generated:** 2026-03-03
 > **Prerequisite:** All Phases from `rf-001-politician-catalog-listing.prd.md` are COMPLETE
 
@@ -73,6 +73,9 @@ We'll know we're right when average session depth reaches ≥ 3 pages within 30 
 | RF-002 | Filter by Political Role | merged: main |
 | RF-003 | Filter by State/UF | merged: main |
 | RF-015 | Search Politician by Name | PR #4: feat/PAH-015-name-search |
+| RF-005 | Methodology Page | merged: main |
+| RF-007 | Politician Profile Overview | merged: main |
+| RF-008 | Profile Section — Bills | PR #5: feat/PAH-007-politician-profile-overview |
 
 ### Partial Implementations (schema/structure exists, logic missing)
 
@@ -85,7 +88,7 @@ We'll know we're right when average session depth reaches ≥ 3 pages within 30 
 
 ### Not Started
 
-RF-005, RF-007, RF-008, RF-009, RF-010, RF-011, RF-012, RF-013, RF-014
+RF-009, RF-010, RF-011, RF-012, RF-013, RF-014
 
 ---
 
@@ -165,8 +168,8 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 |---|-------|-------------|--------|----------|---------|----------|
 | 1 | Methodology Page (RF-005) | Static SSG page at /metodologia explaining 4 score components, sources, and silent exclusion | complete | with 2 | - | `.claude/PRPs/plans/completed/rf-005-methodology-page.plan.md` |
 | 2 | Politician Profile — Overview (RF-007) | ISR profile page at /politicos/[slug] with photo, score breakdown, section navigation | complete | with 1 | - | `.claude/PRPs/plans/completed/rf-007-politician-profile-overview.plan.md` |
-| 3 | Profile Section — Bills (RF-008) | Paginated bills table on profile, API endpoint, DB schema | pending | with 4,5 | 2 | - |
-| 4 | Profile Section — Voting Record (RF-009) | Paginated votes table on profile, API endpoint, DB schema | pending | with 3,5 | 2 | - |
+| 3 | Profile Section — Bills (RF-008) | Paginated bills table on profile, API endpoint, DB schema | complete | with 4,5 | 2 | `.claude/PRPs/plans/completed/rf-008-profile-bills-section.plan.md` |
+| 4 | Profile Section — Voting Record (RF-009) | Paginated votes table on profile, API endpoint, DB schema | in-progress | with 3,5 | 2 | `.claude/PRPs/plans/rf-009-profile-votes-section.plan.md` |
 | 5 | Profile Section — Expenses (RF-012) | Paginated expenses table with BRL formatting, API endpoint, DB schema | pending | with 3,4 | 2 | - |
 | 6 | Profile Sections — Proposals + Agenda (RF-010, RF-011) | Proposals list + committee memberships, API endpoints, DB schema | pending | - | 2 | - |
 | 7 | Data Ingestion Pipeline (RF-013) | Bootstrap pipeline app, 6 source adapters, pg-boss scheduler, internal schema | pending | - | - | - |
