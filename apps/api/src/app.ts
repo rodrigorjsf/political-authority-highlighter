@@ -7,6 +7,9 @@ import { createPublicDb } from '@pah/db/clients'
 import { createPoliticianRepository } from './repositories/politician.repository.js'
 import { createPoliticianService } from './services/politician.service.js'
 import { createPoliticiansRoute } from './routes/politicians.route.js'
+import { createBillRepository } from './repositories/bill.repository.js'
+import { createBillService } from './services/bill.service.js'
+import { createBillsRoute } from './routes/bills.route.js'
 import { errorHandler } from './hooks/error-handler.js'
 import { env } from './config/env.js'
 
@@ -34,9 +37,12 @@ export function buildApp() {
   const db = createPublicDb(env.DATABASE_URL_READER)
   const politicianRepository = createPoliticianRepository(db)
   const politicianService = createPoliticianService(politicianRepository)
+  const billRepository = createBillRepository(db)
+  const billService = createBillService(billRepository)
 
   // Routes
   void app.register(createPoliticiansRoute({ politicianService }), { prefix: '/api/v1' })
+  void app.register(createBillsRoute({ billService }), { prefix: '/api/v1' })
 
   // Health check (no prefix)
   void app.get(

@@ -34,3 +34,28 @@ export interface ListPoliticiansResponse {
   data: PoliticianCard[]
   cursor: string | null
 }
+
+/**
+ * Full profile of a politician as displayed on the profile overview page (RF-007).
+ * Includes score breakdown and bio fields not present in PoliticianCard.
+ * DR-001: exclusionFlag is a boolean only — no source, date, or record details.
+ * DR-002: No qualitative labels derived from score values.
+ */
+export interface PoliticianProfile {
+  id: string
+  slug: string
+  name: string
+  party: string
+  state: string
+  role: 'deputado' | 'senador'
+  photoUrl: string | null
+  bioSummary: string | null
+  tenureStartDate: string | null
+  overallScore: number
+  transparencyScore: number
+  legislativeScore: number
+  financialScore: number
+  anticorruptionScore: number
+  exclusionFlag: boolean
+  methodologyVersion: string
+}
