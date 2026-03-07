@@ -88,3 +88,31 @@ export const integrityScores = publicData.table(
     index('idx_scores_overall_desc').on(table.overallScore, table.politicianId),
   ],
 )
+
+/**
+ * Legislative bills authored or co-authored by a politician (RF-008).
+ * Populated by the pipeline from Camara and Senado sources.
+ */
+export const bills = publicData.table(
+  'bills',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    politicianId: uuid('politician_id').references(() => politicians.id).notNull(),
+    externalId: varchar('external_id', { length: 100 }).notNull(),
+    source: varchar('source', { length: 20 }).notNull(), // 'camara' | 'senado'
+    title: text('title').notNull(),
+    billType: varchar('bill_type', { length: 20 }).notNull(), // 'PL', 'PEC', etc.
+    billNumber: varchar('bill_number', { length: 20 }).notNull(),
+    billYear: smallint('bill_year').notNull(),
+    status: varchar('status', { length: 50 }).notNull(),
+    submissionDate: date('submission_date').notNull(),
+    sourceUrl: varchar('source_url', { length: 500 }), // nullable
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_bills_politician').on(table.politicianId),
+    // Composite index for keyset pagination (politician_id, date DESC, id DESC)
+    index('idx_bills_pagination').on(table.politicianId, table.submissionDate, table.id),
+  ],
+)
