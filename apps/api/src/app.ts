@@ -10,6 +10,9 @@ import { createPoliticiansRoute } from './routes/politicians.route.js'
 import { createBillRepository } from './repositories/bill.repository.js'
 import { createBillService } from './services/bill.service.js'
 import { createBillsRoute } from './routes/bills.route.js'
+import { createVoteRepository } from './repositories/vote.repository.js'
+import { createVoteService } from './services/vote.service.js'
+import { createVotesRoute } from './routes/votes.route.js'
 import { errorHandler } from './hooks/error-handler.js'
 import { env } from './config/env.js'
 
@@ -39,10 +42,13 @@ export function buildApp() {
   const politicianService = createPoliticianService(politicianRepository)
   const billRepository = createBillRepository(db)
   const billService = createBillService(billRepository)
+  const voteRepository = createVoteRepository(db)
+  const voteService = createVoteService(voteRepository)
 
   // Routes
   void app.register(createPoliticiansRoute({ politicianService }), { prefix: '/api/v1' })
   void app.register(createBillsRoute({ billService }), { prefix: '/api/v1' })
+  void app.register(createVotesRoute({ voteService }), { prefix: '/api/v1' })
 
   // Health check (no prefix)
   void app.get(
