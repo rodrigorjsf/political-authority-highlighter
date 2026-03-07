@@ -169,7 +169,7 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 | 1 | Methodology Page (RF-005) | Static SSG page at /metodologia explaining 4 score components, sources, and silent exclusion | complete | with 2 | - | `.claude/PRPs/plans/completed/rf-005-methodology-page.plan.md` |
 | 2 | Politician Profile — Overview (RF-007) | ISR profile page at /politicos/[slug] with photo, score breakdown, section navigation | complete | with 1 | - | `.claude/PRPs/plans/completed/rf-007-politician-profile-overview.plan.md` |
 | 3 | Profile Section — Bills (RF-008) | Paginated bills table on profile, API endpoint, DB schema | complete | with 4,5 | 2 | `.claude/PRPs/plans/completed/rf-008-profile-bills-section.plan.md` |
-| 4 | Profile Section — Voting Record (RF-009) | Paginated votes table on profile, API endpoint, DB schema | in-progress | with 3,5 | 2 | `.claude/PRPs/plans/rf-009-profile-votes-section.plan.md` |
+| 4 | Profile Section — Voting Record (RF-009) | Paginated votes table on profile, API endpoint, DB schema | complete | with 3,5 | 2 | `.claude/PRPs/plans/completed/rf-009-profile-votes-section.plan.md` |
 | 5 | Profile Section — Expenses (RF-012) | Paginated expenses table with BRL formatting, API endpoint, DB schema | pending | with 3,4 | 2 | - |
 | 6 | Profile Sections — Proposals + Agenda (RF-010, RF-011) | Proposals list + committee memberships, API endpoints, DB schema | pending | - | 2 | - |
 | 7 | Data Ingestion Pipeline (RF-013) | Bootstrap pipeline app, 6 source adapters, pg-boss scheduler, internal schema | pending | - | - | - |
