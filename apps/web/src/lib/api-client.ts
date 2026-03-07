@@ -5,6 +5,8 @@ import type {
   ProblemDetail,
   BillFilters,
   BillListResponse,
+  VoteFilters,
+  VoteListResponse,
 } from './api-types'
 
 const API_BASE_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001/api/v1'
@@ -85,5 +87,23 @@ export async function fetchPoliticianBills(
   return apiFetch<BillListResponse>(
     `/politicians/${encodeURIComponent(slug)}/bills?${params.toString()}`,
     { next: { revalidate: 300, tags: [`politician-${slug}-bills`] } },
+  )
+}
+
+/**
+ * Fetches paginated votes for a politician with ISR caching.
+ * revalidate: 300 = 5 min
+ * tags: ['politician-{slug}-votes'] = allows targeted on-demand revalidation
+ */
+export async function fetchPoliticianVotes(
+  slug: string,
+  filters: VoteFilters = {},
+): Promise<VoteListResponse> {
+  const params = new URLSearchParams()
+  if (filters.cursor !== undefined) params.set('cursor', filters.cursor)
+  if (filters.limit !== undefined) params.set('limit', String(filters.limit))
+  return apiFetch<VoteListResponse>(
+    `/politicians/${encodeURIComponent(slug)}/votes?${params.toString()}`,
+    { next: { revalidate: 300, tags: [`politician-${slug}-votes`] } },
   )
 }

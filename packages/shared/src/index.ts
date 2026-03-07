@@ -5,3 +5,4 @@ export type {
   PoliticianProfile,
 } from './types/politician.js'
 export type { Bill, BillFilters, BillListResponse } from './types/bill.js'
+export type { Vote, VoteFilters, VoteListResponse } from './types/vote.js'

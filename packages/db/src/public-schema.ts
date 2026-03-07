@@ -116,3 +116,29 @@ export const bills = publicData.table(
     index('idx_bills_pagination').on(table.politicianId, table.submissionDate, table.id),
   ],
 )
+
+/**
+ * Parliamentary voting records for a politician (RF-009).
+ * Populated by the pipeline from Camara and Senado sources.
+ */
+export const votes = publicData.table(
+  'votes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    politicianId: uuid('politician_id').references(() => politicians.id).notNull(),
+    externalId: varchar('external_id', { length: 100 }).notNull(),
+    source: varchar('source', { length: 20 }).notNull(), // 'camara' | 'senado'
+    sessionDate: date('session_date').notNull(),
+    matterDescription: text('matter_description').notNull(),
+    voteCast: varchar('vote_cast', { length: 20 }).notNull(), // 'sim'|'não'|'abstenção'|'ausente'
+    sessionResult: varchar('session_result', { length: 100 }).notNull(),
+    sourceUrl: varchar('source_url', { length: 500 }), // nullable
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_votes_politician').on(table.politicianId),
+    // Composite index for keyset pagination (politician_id, date DESC, id DESC)
+    index('idx_votes_pagination').on(table.politicianId, table.sessionDate, table.id),
+  ],
+)
