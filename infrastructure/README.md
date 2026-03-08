@@ -1,66 +1,44 @@
-# Infrastructure & DevOps Guide
+# Infrastructure & DevOps
 
-Configuration and scripts for orchestrating the Political Authority Highlighter's infrastructure. Built with **Docker Compose**, **PostgreSQL 16**, and **Nginx**.
+Orchestration for the Political Authority Highlighter via **Docker Compose**, **PostgreSQL 16**, and **Nginx**.
 
-## Deployment Architecture
+## Architecture
 
-- **Backend (API + Database)**: Docker Compose on a Hetzner Cloud VPS (CX22).
-- **Frontend (Web)**: Vercel Free tier.
-- **CDN/DNS**: Cloudflare Free.
+- **Backend** — Docker Compose on Hetzner VPS (CX22).
+- **Frontend** — Vercel Free.
+- **CDN/DNS** — Cloudflare Free.
 
-## Stack
+## Tech Stack
 
-| Component | Technology | Role |
-|-----------|------------|------|
-| **PostgreSQL 16** | Database | Dual-schema storage (`public_data` + `internal_data`). |
-| **Nginx** | Reverse Proxy | TLS termination (Let's Encrypt) and basic rate limiting. |
-| **Docker** | Containerization | Reproducible environments across Dev and Prod. |
-| **GitHub Actions** | CI/CD | Automated testing, build, and VPS deployment. |
+- **Database:** PostgreSQL 16 (dual-schema).
+- **Proxy:** Nginx (TLS + Rate limiting).
+- **CI/CD:** GitHub Actions.
 
-## Core Principles
+## Principles
 
-- **12-Factor App**: Configuration strictly in environment variables.
-- **Dev/Prod Parity**: Identical PostgreSQL and schema setup locally and in production.
-- **Least Privilege**: Application-specific database roles (`api_reader` vs `pipeline_admin`).
-- **Disposable Infrastructure**: Entire stack reproducible from code in < 30 minutes.
+- **12-Factor** — Config in environment variables.
+- **Parity** — Identical PostgreSQL setup for Dev and Prod.
+- **Least Privilege** — `api_reader` vs `pipeline_admin` roles.
+- **Disposable** — Full stack reproducible in < 30 minutes.
 
 ## Structure
 
 ```
-infrastructure/
-├── docker-compose.yml       # Production service definitions
-├── docker-compose.dev.yml   # Development overrides (hot reload)
-├── init-schemas.sql         # Database schema and role initialization script
-├── postgresql.conf          # Custom PostgreSQL tuning for Hetzner CX22
-├── nginx/                   # Reverse proxy and TLS configuration
-└── scripts/                 # Backup, restoration, and deployment scripts
+├── docker-compose.yml     # Production services
+├── docker-compose.dev.yml # Development overrides
+├── init-schemas.sql       # Schema & role init
+└── scripts/               # Backup and deploy scripts
 ```
 
 ## Workflows
 
-### Setup Production
+- **Deploy:** `docker compose up -d`.
+- **Backups:** `scripts/backup.sh` daily (01:00 UTC).
+- **Restore:** `scripts/restore.sh <file>`.
 
-```bash
-# Copy and configure environment variables
-cp .env.example .env.prod
+## Cost
 
-# Deploy with Docker Compose
-docker compose up -d
-```
-
-### Backups & Restoration
-
-- **Backups**: `scripts/backup.sh` runs daily via cron (01:00 UTC).
-- **Restoration**: `scripts/restore.sh <backup-filename>`.
-
-## CI/CD Pipeline
-
-- **CI**: Runs lint, typecheck, and tests (Vitest + Playwright) on every PR.
-- **Deploy**: Automatically builds Docker images and pushes to the VPS on `main` branch updates.
-
-## Cost Target
-
-Infrastructure is optimized for a **~$7/month** total budget:
+Optimized for **~$7/month**:
 - Hetzner CX22 (2 vCPU, 4GB RAM): ~$6/mo.
 - Domain: ~$1/mo.
-- Vercel/Cloudflare: Free tier.
+- Vercel/Cloudflare: Free.

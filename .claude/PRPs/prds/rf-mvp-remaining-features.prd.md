@@ -176,6 +176,7 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 | 8 | Scoring + Anti-Corruption + Freshness (RF-004, RF-006, RF-014) | Scoring engine, exclusion detection, data_source_status, /fontes page | pending | - | 7 | - |
 | 9 | SEO + Responsive Polish (RF-017, RF-016) | generateMetadata() per profile, JSON-LD, sitemap.xml, robots.txt, mobile audit | pending | - | 2,6 | - |
 | 10 | Frontend Security Hardening (DR-008) | CSP header, server-only guards, ESLint restrictions, CI bundle scan, pnpm audit (RNF-SEC-011,012,014,017) | pending | with 5 | - | - |
+| 11 | Code Quality & Best Practices Refactor | Align codebase with TypeScript best practices (interfaces, enums, type guards, destructuring, ms package) | pending | - | 10 | - |
 
 ### Phase Details
 
@@ -260,6 +261,19 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 - **Success signal:** `next build` fails if any Client Component imports `@pah/db`. CI fails on high vulnerabilities. CI fails if `drizzle-orm` or `DATABASE_URL` appear in `.next/static/chunks/`. CSP header visible in browser DevTools Network tab.
 - **Parallel with:** Phase 5 (completely independent — config and tooling only, no feature code)
 - **Note:** Phase 7 pipeline must also implement HTML stripping of government source text in transformers (RNF-SEC-013) when built.
+
+**Phase 11: Code Quality & Best Practices Refactor**
+
+- **Goal:** Align existing and new code with the updated project standards in `CLAUDE.md`.
+- **Scope:**
+  - Convert `role` ('deputado' | 'senador') and `source` ('camara' | 'senado') string literals to Enums in `packages/shared`.
+  - Replace type assertions (`as`) with type guards or Zod schema validation (e.g., in `decodeCursor`, `apiFetch`).
+  - Ensure `import 'server-only'` is present in all `@pah/db` internal modules (DR-008).
+  - Apply object destructuring across services and route handlers.
+  - Integrate `ms` package for time-related configurations (e.g., Fastify rate-limit).
+  - Export all types/interfaces by default.
+- **Success signal:** `pnpm lint` and `pnpm typecheck` pass; no `as` assertions in business logic; enums used consistently.
+- **Depends on:** Phase 10 (Security hardening)
 
 ### Parallelism Notes
 

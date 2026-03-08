@@ -126,6 +126,15 @@ For any frontend change, verify DR-008 compliance:
 - [ ] No external scripts without `integrity` and `crossorigin` attributes? (RNF-SEC-016)
 - [ ] `import 'server-only'` present in all `packages/db/src/` files? (RNF-SEC-012)
 
+### 8. Code Quality and Best Practices
+
+- [ ] Interfaces over types for object shapes?
+- [ ] Enums used for constant value unions?
+- [ ] All types exported by default?
+- [ ] Type guards used instead of `as` assertions?
+- [ ] Destructuring used for objects?
+- [ ] `ms` package used for time configurations?
+
 ## Violation Response
 
 If any check fails:

@@ -46,6 +46,14 @@ All `tsconfig.json` files must include:
 }
 ```
 
+**Best Practices (CLAUDE.md):**
+- [ ] Interfaces over types for object shapes
+- [ ] Use Enums for constant values (e.g., `PoliticalRole`, `DataSource`)
+- [ ] Export all types by default
+- [ ] Use type guards instead of type assertions (`as`)
+- [ ] Destructure objects (e.g., `const { name } = user`)
+- [ ] Use `ms` package for time-related configuration
+
 **Forbidden patterns:**
 - `any` type (use `unknown` + type guards)
 - `as` type assertions (except `as const` and test factories)

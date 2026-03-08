@@ -166,6 +166,21 @@ interface ScoreBreakdownProps {
   score: IntegrityScore
   showMethodologyLink?: boolean
 }
+
+// Enums for constant values (RF-002, RF-013)
+export enum PoliticalRole {
+  DEPUTADO = 'deputado',
+  SENADOR = 'senador',
+}
+
+export enum DataSource {
+  CAMARA = 'camara',
+  SENADO = 'senado',
+  TRANSPARENCIA = 'transparencia',
+  TSE = 'tse',
+  TCU = 'tcu',
+  CGU = 'cgu',
+}
 ```
 
 ### Pages (App Router)
@@ -211,6 +226,14 @@ async function fetchSourcesStatus(): Promise<SourceStatusResponse[]>
 ---
 
 ## Code Standards
+
+### Formatting Rules (CLAUDE.md)
+
+- No semicolons (enforced)
+- Single quotes (enforced)
+- No unnecessary curly braces (enforced)
+- 2-space indentation
+- Import order: external → internal → types
 
 ### Server Components vs Client Components
 
@@ -339,8 +362,16 @@ export async function POST(request: NextRequest) {
 - **Extract sub-components** when JSX nesting exceeds 3 levels.
 - **Co-locate data fetching** in page files (Server Components), not in deeply nested components.
 - **No business logic in components** -- use utility functions from `lib/` or `packages/shared/`.
+- **Use object destructuring** where possible for cleaner code.
 
-### Error Handling
+```typescript
+// GOOD: Destructured props
+export function PoliticianCard({ politician: { name, party, state } }: PoliticianCardProps) {
+  return <div>{name} ({party}-{state})</div>
+}
+```
+
+### ISR (Incremental Static Regeneration)
 
 ```typescript
 // app/error.tsx -- Global error boundary
@@ -797,7 +828,9 @@ test('politician profile page has no accessibility violations', async ({ page })
 
 1. **No `useEffect` for data that can be fetched on the server.** This is the most common mistake. If data comes from the API and does not depend on browser state, fetch it in a Server Component.
 
-2. **Use `next/image`** for all images. Set explicit `width`/`height` to prevent CLS. Use `priority` for above-the-fold images.
+2. **Use `ms` package** for time-related configurations (e.g., `revalidate` times) and environment variables.
+
+3. **Use `next/image`** for all images. Set explicit `width`/`height` to prevent CLS. Use `priority` for above-the-fold images.
 
 3. **Dynamic import** interactive components (charts, maps) with `next/dynamic` and `{ ssr: false }` when they are below the fold.
 
