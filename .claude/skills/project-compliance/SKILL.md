@@ -81,6 +81,7 @@ Enforces compliance with Brazilian data protection and transparency laws applica
 ### G. Data Subject Rights (Art. 18)
 
 If user registration is added post-MVP:
+
 - [ ] Right to access: users can view their data
 - [ ] Right to correction: users can update their data
 - [ ] Right to deletion: users can delete their account
@@ -101,8 +102,8 @@ If user registration is added post-MVP:
 
 ### Respect API Terms
 
-- [ ] Portal da Transparência rate limits respected: 90 req/min (peak), 300 req/min (off-peak)
-- [ ] API key used as required by Portal da Transparência
+- [ ] Portal da Transparencia rate limits respected: 90 req/min (peak), 300 req/min (off-peak)
+- [ ] API key used as required by Portal da Transparencia
 - [ ] No scraping of HTML pages when APIs are available
 - [ ] Bulk CSV downloads used for large datasets (TSE, CGU-PAD)
 
@@ -144,7 +145,7 @@ If user registration is added post-MVP:
 ### Secret Management
 
 - [ ] Database passwords in environment variables, never in code
-- [ ] Portal da Transparência API key in environment variable
+- [ ] Portal da Transparencia API key in environment variable
 - [ ] CPF encryption key in environment variable
 - [ ] No secrets in git history (`git log -p -- '*.env*'` returns nothing)
 - [ ] `.env` files in `.gitignore`
@@ -158,6 +159,20 @@ If user registration is added post-MVP:
 - [ ] No superuser credentials in application code
 - [ ] Database not exposed to public internet (Docker internal network)
 - [ ] Encrypted connections to database (sslmode=require)
+
+### Frontend Security Baseline
+
+- [ ] Content-Security-Policy header configured in `next.config.ts` headers() (RNF-SEC-011)
+- [ ] CSP deployed as `Content-Security-Policy-Report-Only` initially, then enforced after validation
+- [ ] CSP policy: `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self'; connect-src 'self' {API_URL}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests`
+- [ ] `server-only` package installed and imported in all `packages/db/src/` modules
+- [ ] ESLint `no-restricted-imports` forbids `@pah/db`, `pg`, `drizzle-orm` in `apps/web/`
+- [ ] CI post-build scan: grep `.next/static/chunks/` for forbidden patterns
+- [ ] Only `NEXT_PUBLIC_API_URL` uses `NEXT_PUBLIC_` prefix
+- [ ] All `error.tsx` boundaries show generic messages only
+- [ ] Pipeline transformers strip HTML tags from government source text before storing in `public_data`
+- [ ] No external scripts without SRI attributes
+- [ ] Future auth implementation: httpOnly Secure SameSite=Strict cookies, CSRF protection, RS256 JWT, <=24h session
 
 ### Backup and Recovery
 
@@ -180,6 +195,8 @@ If user registration is added post-MVP:
 | CPF leakage check | Every PR (automated) |
 | Backup restore test | Monthly |
 | SSL certificate validity | Automated (Caddy) |
+| Frontend CSP validation | Every deploy (CI) |
+| Client bundle leak scan | Every build (CI) |
 
 ---
 
@@ -188,3 +205,4 @@ If user registration is added post-MVP:
 | Date | PRD Version | Summary |
 |------|-------------|---------|
 | 2026-02-28 | 1.0 | Initial compliance enforcement skill |
+| 2026-03-07 | 1.1 | Add Frontend Security Baseline section |

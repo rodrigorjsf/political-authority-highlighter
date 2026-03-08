@@ -175,6 +175,7 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 | 7 | Data Ingestion Pipeline (RF-013) | Bootstrap pipeline app, 6 source adapters, pg-boss scheduler, internal schema | pending | - | - | - |
 | 8 | Scoring + Anti-Corruption + Freshness (RF-004, RF-006, RF-014) | Scoring engine, exclusion detection, data_source_status, /fontes page | pending | - | 7 | - |
 | 9 | SEO + Responsive Polish (RF-017, RF-016) | generateMetadata() per profile, JSON-LD, sitemap.xml, robots.txt, mobile audit | pending | - | 2,6 | - |
+| 10 | Frontend Security Hardening (DR-008) | CSP header, server-only guards, ESLint restrictions, CI bundle scan, pnpm audit (RNF-SEC-011,012,014,017) | pending | with 5 | - | - |
 
 ### Phase Details
 
@@ -245,6 +246,20 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
   - RF-017: `generateMetadata()` in `/politicos/[slug]/page.tsx` with dynamic `og:title`, `og:description`, `og:image` (politician photo URL), canonical URL. JSON-LD `Person` schema component. `sitemap.xml` route at `/sitemap.xml` (dynamic, reads all slugs from API). `robots.txt` at `/robots.txt` (static, allows all). All pages: unique titles, unique descriptions.
   - RF-016: Full viewport audit 320px–2560px across all pages. Verify 44×44px tap targets on all interactive elements. Fix any horizontal overflow on mobile. Stack profile section tabs vertically on mobile.
 - **Depends on:** Phases 2 and 6 (all profile pages must exist before SEO can be applied)
+
+**Phase 10: Frontend Security Hardening (DR-008)**
+
+- **Goal:** Apply the security-first principle (PRD v1.1) to all existing and future frontend code
+- **Scope:**
+  - **CSP Header (RNF-SEC-011):** Add full `Content-Security-Policy-Report-Only` header to `next.config.ts` via `headers()` function. Policy: `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self'; connect-src 'self' {NEXT_PUBLIC_API_URL}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests`.
+  - **`server-only` guards (RNF-SEC-012):** Add `import 'server-only'` to `packages/db/src/public-schema.ts`, `internal-schema.ts`, `clients.ts`, and `migrate.ts`. Install `server-only` as a dependency of `@pah/db`.
+  - **ESLint restrictions (RNF-SEC-012):** Add `no-restricted-imports` rule to `apps/web/.eslintrc.cjs` forbidding `@pah/db`, `pg`, `drizzle-orm`, `pg-boss`.
+  - **CI bundle scan (RNF-SEC-017):** Add `pnpm audit --audit-level=high` step and post-build forbidden-pattern grep to `.github/workflows/ci.yml` (per project-cicd skill Security CI Steps).
+  - **Error sanitization verification (RNF-SEC-014):** Audit existing `error.tsx` and `api-client.ts` to confirm no internal details leak. The existing implementations already comply; this is a verification task.
+- **DB changes:** None
+- **Success signal:** `next build` fails if any Client Component imports `@pah/db`. CI fails on high vulnerabilities. CI fails if `drizzle-orm` or `DATABASE_URL` appear in `.next/static/chunks/`. CSP header visible in browser DevTools Network tab.
+- **Parallel with:** Phase 5 (completely independent — config and tooling only, no feature code)
+- **Note:** Phase 7 pipeline must also implement HTML stripping of government source text in transformers (RNF-SEC-013) when built.
 
 ### Parallelism Notes
 

@@ -1,6 +1,6 @@
 # Product Requirements Document — Political Authority Highlighter
 
-> **Version:** 1.0 | **Status:** Active | **Last Updated:** 2026-02-28
+> **Version:** 1.1 | **Status:** Active | **Last Updated:** 2026-03-07
 > **Stack reference:** [ARCHITECTURE.md](./ARCHITECTURE.md)
 > **ER model:** [ER.md](./ER.md)
 
@@ -162,6 +162,13 @@
 | RNF-SEC-008 | Security headers | Helmet.js: CSP, X-Frame-Options, X-Content-Type-Options |
 | RNF-SEC-009 | CORS restriction | Restricted to `autoridade-politica.com.br` and `localhost` |
 | RNF-SEC-010 | Dependency auditing | `npm audit` in CI, Dependabot enabled |
+| RNF-SEC-011 | Content-Security-Policy on frontend | Static CSP via `next.config.ts` `headers()`: `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self'; connect-src 'self' {NEXT_PUBLIC_API_URL}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests`. Deploy with `Content-Security-Policy-Report-Only` first, enforce after validation. Nonces NOT used (incompatible with ISR per ADR-002). |
+| RNF-SEC-012 | Client bundle sensitive data prevention | `import 'server-only'` in all `packages/db/src/` files. ESLint `no-restricted-imports` forbidding `@pah/db`, `pg`, `drizzle-orm` in `apps/web/`. CI post-build grep on `.next/static/chunks/` for forbidden patterns (`drizzle-orm`, `DATABASE_URL`, `CPF_ENCRYPTION_KEY`). Only `NEXT_PUBLIC_API_URL` may use `NEXT_PUBLIC_` prefix. |
+| RNF-SEC-013 | API response rendering safety | All government-sourced text fields rendered via React JSX auto-escaping only. No `innerHTML` or `dangerouslySetInnerHTML` except JSON-LD `<script>` tags with `JSON.stringify()` sanitized data. Pipeline transformers strip HTML tags from government source text before storing in `public_data`. |
+| RNF-SEC-014 | Error message sanitization | No server stack traces, database table names, internal URLs, or SQL query text in any user-facing error response. API returns RFC 7807 ProblemDetail with generic messages. Frontend `error.tsx` boundary shows user-friendly message only. Error `digest` property used for server-side correlation without exposing internals. |
+| RNF-SEC-015 | Future authentication token security | When authentication is implemented post-MVP: tokens stored in httpOnly Secure SameSite=Strict cookies only (never localStorage/sessionStorage). CSRF protection via double-submit cookie or Synchronizer Token pattern. JWT signed with RS256 minimum. Token rotation on privilege escalation. Session expiry <= 24 hours with sliding window. |
+| RNF-SEC-016 | Subresource Integrity for external scripts | Any external script added to the frontend must include `integrity` and `crossorigin` attributes. No external scripts permitted without SRI hashes. MVP has zero external scripts (no analytics, no third-party widgets). |
+| RNF-SEC-017 | Security testing in CI | `pnpm audit --audit-level=high` must pass. Post-build client bundle scan for forbidden patterns (server-only modules, secret variable names). Secret pattern regex scan on all staged files pre-commit. |
 
 ### 3.3 Availability & Reliability
 
@@ -249,6 +256,7 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 | DR-005 | CPFNonExposureRule | CPF numbers MUST never appear in any public-facing interface, API response, log file, error message, or URL. CPFs exist only in `internal_data.politician_identifiers` as encrypted bytes and SHA-256 hashes. | CPF stored as AES-256-GCM encrypted `bytea` and SHA-256 hash in `internal_data` schema only. Pipeline code handles CPF in memory only during ingestion. Structured logging configured to redact any 11-digit numeric patterns. |
 | DR-006 | NoRetaliationDesignRule | The platform MUST highlight positive integrity indicators. It MUST NOT expose negative details that could enable targeted retaliation against specific politicians. A low score is permissible; exposing the specific reasons from anti-corruption databases is not. | Silent exclusion pattern (ADR-004): anti-corruption component is 0 or 25, with no details. UI displays only "Information from anti-corruption databases affected this score." No drill-down into exclusion records. |
 | DR-007 | IngestionIdempotencyRule | Running the same ingestion job multiple times with the same source data MUST produce identical database state. No duplicate records, no score drift, no side effects. | Upsert operations keyed on `(source, external_id)`. Idempotency keys on `exclusion_records`. Score calculation is a pure function of current data state. `raw_source_data` deduplication via source + external_id. |
+| DR-008 | FrontendSecurityFirstInvariant | The frontend layer must never be a vector for data exposure, injection, or trust boundary violation. All frontend code changes must satisfy: (1) no server-only modules in client bundles, (2) no sensitive data in `NEXT_PUBLIC_` variables, (3) CSP headers enforced at the edge, (4) government-sourced text rendered via JSX auto-escaping only, (5) error boundaries show generic user messages only, (6) no external scripts without SRI. | Build-time: `server-only` import guard + ESLint import boundaries. CI: client bundle forbidden-pattern scan + `pnpm audit`. Runtime: CSP headers via `next.config.ts`. Code review: project-guardian checklist. |
 
 ### 4.2 Ubiquitous Language (Glossary)
 
@@ -273,12 +281,12 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 
 | System | Type | Protocol | Auth Method | Rate Limit | Cadence | Official Docs |
 |--------|------|----------|-------------|------------|---------|---------------|
-| Camara dos Deputados API | REST API | HTTPS, JSON | None (public) | No published limit | Daily | https://dadosabertos.camara.leg.br/swagger/api.html |
-| Senado Federal API | REST API | HTTPS, XML/JSON | None (public) | No published limit | Daily | https://legis.senado.leg.br/dadosabertos/ |
-| Portal da Transparencia | REST API | HTTPS, JSON | API key (header) | 90 req/min | Daily | https://portaldatransparencia.gov.br/api-de-dados |
-| TSE (Tribunal Superior Eleitoral) | Bulk Data | HTTPS, CSV download | None (public) | N/A (bulk) | Weekly | https://dadosabertos.tse.jus.br/ |
-| TCU CADIRREG | REST API | HTTPS, JSON | None (public) | No published limit | Weekly | https://portal.tcu.gov.br/contas/contas-e-relatorios/ |
-| CGU-PAD | Bulk Data | HTTPS, CSV download | None (public) | N/A (bulk) | Monthly | https://www.gov.br/cgu/pt-br/acesso-a-informacao/dados-abertos |
+| Camara dos Deputados API | REST API | HTTPS, JSON | None (public) | No published limit | Daily | <https://dadosabertos.camara.leg.br/swagger/api.html> |
+| Senado Federal API | REST API | HTTPS, XML/JSON | None (public) | No published limit | Daily | <https://legis.senado.leg.br/dadosabertos/> |
+| Portal da Transparencia | REST API | HTTPS, JSON | API key (header) | 90 req/min | Daily | <https://portaldatransparencia.gov.br/api-de-dados> |
+| TSE (Tribunal Superior Eleitoral) | Bulk Data | HTTPS, CSV download | None (public) | N/A (bulk) | Weekly | <https://dadosabertos.tse.jus.br/> |
+| TCU CADIRREG | REST API | HTTPS, JSON | None (public) | No published limit | Weekly | <https://portal.tcu.gov.br/contas/contas-e-relatorios/> |
+| CGU-PAD | Bulk Data | HTTPS, CSV download | None (public) | N/A (bulk) | Monthly | <https://www.gov.br/cgu/pt-br/acesso-a-informacao/dados-abertos> |
 
 ### Integration Details
 
@@ -322,16 +330,16 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 
 | Topic | Source | URL | Validated |
 |-------|--------|-----|-----------|
-| Camara dos Deputados Open Data | Brazilian Chamber of Deputies | https://dadosabertos.camara.leg.br/ | Yes |
-| Senado Federal Open Data | Brazilian Federal Senate | https://legis.senado.leg.br/dadosabertos/ | Yes |
-| Portal da Transparencia API | Brazilian Comptroller General (CGU) | https://portaldatransparencia.gov.br/api-de-dados | Yes |
-| TSE Open Data | Brazilian Superior Electoral Court | https://dadosabertos.tse.jus.br/ | Yes |
-| TCU Open Data | Brazilian Federal Court of Accounts | https://portal.tcu.gov.br/ | Yes |
-| CGU Open Data | Brazilian Comptroller General | https://www.gov.br/cgu/pt-br/acesso-a-informacao/dados-abertos | Yes |
-| LGPD Full Text | Brazilian Government | https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm | Yes |
-| LAI Full Text | Brazilian Government | https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12527.htm | Yes |
-| Lei da Ficha Limpa | Brazilian Government | https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp135.htm | Yes |
-| Marco Civil da Internet | Brazilian Government | https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l12965.htm | Yes |
+| Camara dos Deputados Open Data | Brazilian Chamber of Deputies | <https://dadosabertos.camara.leg.br/> | Yes |
+| Senado Federal Open Data | Brazilian Federal Senate | <https://legis.senado.leg.br/dadosabertos/> | Yes |
+| Portal da Transparencia API | Brazilian Comptroller General (CGU) | <https://portaldatransparencia.gov.br/api-de-dados> | Yes |
+| TSE Open Data | Brazilian Superior Electoral Court | <https://dadosabertos.tse.jus.br/> | Yes |
+| TCU Open Data | Brazilian Federal Court of Accounts | <https://portal.tcu.gov.br/> | Yes |
+| CGU Open Data | Brazilian Comptroller General | <https://www.gov.br/cgu/pt-br/acesso-a-informacao/dados-abertos> | Yes |
+| LGPD Full Text | Brazilian Government | <https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm> | Yes |
+| LAI Full Text | Brazilian Government | <https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2011/lei/l12527.htm> | Yes |
+| Lei da Ficha Limpa | Brazilian Government | <https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp135.htm> | Yes |
+| Marco Civil da Internet | Brazilian Government | <https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l12965.htm> | Yes |
 
 ---
 
@@ -340,3 +348,4 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 | Version | Date | Change | Updated Artifacts |
 |---------|------|--------|-------------------|
 | 1.0 | 2026-02-28 | Initial PRD — 17 functional requirements, 6 data sources, domain model, compliance framework | PRD.md, ARCHITECTURE.md, ER.md |
+| 1.1 | 2026-03-07 | Frontend security-first principle — 7 new security NFRs (RNF-SEC-011 to RNF-SEC-017), new domain rule DR-008 (FrontendSecurityFirstInvariant) | PRD.md, project-guardian, project-domain-rules, project-compliance, project-cicd, apps/web/CLAUDE.md |
