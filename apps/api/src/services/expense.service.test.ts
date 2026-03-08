@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import type { ExpenseRow } from '../repositories/expense.repository.js'
 import { createExpenseService } from './expense.service.js'
 
@@ -21,8 +21,8 @@ describe('ExpenseService', () => {
 
   it('returns empty data and no cursor when no expenses', async () => {
     const mockRepository = {
-      selectByPoliticianSlug: async () => [] as ExpenseRow[],
-      selectYearlyTotals: async () => [],
+      selectByPoliticianSlug: vi.fn<() => Promise<ExpenseRow[]>>().mockResolvedValue([]),
+      selectYearlyTotals: vi.fn<() => Promise<{ year: number; total: string }[]>>().mockResolvedValue([]),
     }
     const service = createExpenseService(mockRepository)
 
@@ -35,8 +35,8 @@ describe('ExpenseService', () => {
 
   it('converts numeric string amounts to numbers', async () => {
     const mockRepository = {
-      selectByPoliticianSlug: async () => [buildExpenseRow()],
-      selectYearlyTotals: async () => [],
+      selectByPoliticianSlug: vi.fn<() => Promise<ExpenseRow[]>>().mockResolvedValue([buildExpenseRow()]),
+      selectYearlyTotals: vi.fn<() => Promise<{ year: number; total: string }[]>>().mockResolvedValue([]),
     }
     const service = createExpenseService(mockRepository)
 
@@ -52,8 +52,8 @@ describe('ExpenseService', () => {
     )
 
     const mockRepository = {
-      selectByPoliticianSlug: async () => rows,
-      selectYearlyTotals: async () => [],
+      selectByPoliticianSlug: vi.fn<() => Promise<ExpenseRow[]>>().mockResolvedValue(rows),
+      selectYearlyTotals: vi.fn<() => Promise<{ year: number; total: string }[]>>().mockResolvedValue([]),
     }
     const service = createExpenseService(mockRepository)
 
@@ -67,8 +67,8 @@ describe('ExpenseService', () => {
     const rows = [buildExpenseRow(), buildExpenseRow({ id: 'id-2' })]
 
     const mockRepository = {
-      selectByPoliticianSlug: async () => rows,
-      selectYearlyTotals: async () => [],
+      selectByPoliticianSlug: vi.fn<() => Promise<ExpenseRow[]>>().mockResolvedValue(rows),
+      selectYearlyTotals: vi.fn<() => Promise<{ year: number; total: string }[]>>().mockResolvedValue([]),
     }
     const service = createExpenseService(mockRepository)
 

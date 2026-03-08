@@ -12,7 +12,9 @@ interface ExpenseCursor {
   expenseId: string
 }
 
-export function createExpenseService(expenseRepository: ExpenseRepository) {
+export function createExpenseService(expenseRepository: ExpenseRepository): {
+  findByPoliticianSlug: (slug: string, cursor?: string, limit?: number) => Promise<ExpenseListResponseDto>
+} {
   return {
     /**
      * Fetches paginated expenses for a politician with yearly totals aggregation.
