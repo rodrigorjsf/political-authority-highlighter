@@ -31,6 +31,7 @@ The Political Authority Highlighter is a public web platform that surfaces Brazi
 - **Data isolation**: Two PostgreSQL schemas enforce a hard boundary between public-facing data and internal anti-corruption records.
 - **Offline-first scoring**: All integrity scores are pre-computed during batch ingestion, so the public API serves static-like data with sub-300ms latency.
 - **SEO performance**: Server-side generated pages via Next.js ensure organic discoverability.
+- **Managed Security**: Uses Supabase Row Level Security (RLS) as a second defensive layer on top of schema isolation.
 - **Budget efficiency**: The entire stack runs on approximately $25/month infrastructure using Supabase and Vercel.
 
 ---
@@ -84,7 +85,7 @@ The Political Authority Highlighter is a public web platform that surfaces Brazi
 
 #### Drizzle ORM 0.36+
 
-- **Why this product**: First-class PostgreSQL schema support (`pgSchema`), allowing type-safe models for both `public_data` and `internal_data` schemas in separate module boundaries. SQL-like query builder produces predictable queries (critical for performance). Zero runtime overhead compared to Prisma.
+- **Why this product**: First-class PostgreSQL schema support (`pgSchema`), allowing type-safe models for both `public` and `internal_data` schemas in separate module boundaries. SQL-like query builder produces predictable queries (critical for performance). Zero runtime overhead compared to Prisma.
 - **Trade-offs**: Younger ecosystem than Prisma, fewer guides. Mitigated by strong TypeScript inference and growing community.
 
 #### pg-boss 10 (Job Queue)
@@ -130,7 +131,7 @@ The system consists of three logical modules in a single TypeScript monorepo:
 | `api`        | Fastify REST API serving public data                | `api_reader`    |
 | `pipeline`   | Data ingestion, transformation, score calculation   | `pipeline_admin`|
 
-The `api_reader` PostgreSQL role has `SELECT` privileges ONLY on the `public_data` schema. The `pipeline_admin` role has full privileges on both `public_data` and `internal_data` schemas. This is the **hard security boundary** that enforces Domain Rule DR-001 (silent exclusion).
+The `api_reader` PostgreSQL role has `SELECT` privileges ONLY on the `public` schema. The `pipeline_admin` role has full privileges on both `public` and `internal_data` schemas. This is the **hard security boundary** that enforces Domain Rule DR-001 (silent exclusion).
 
 ---
 
@@ -157,7 +158,7 @@ flowchart TB
         end
 
         subgraph DB_Instance["Managed PostgreSQL 16"]
-            subgraph Public_Schema["Schema: public_data"]
+            subgraph Public_Schema["Schema: public"]
                 Politicians[(politicians)]
                 Scores[(integrity_scores)]
                 Bills[(bills / votes)]
@@ -230,7 +231,7 @@ flowchart TB
                         /          \
               [Vercel/Next.js]    [Hetzner VPS]
               (SSG/ISR pages)         |
-                    |           [Fastify API]---SELECT--->[public_data schema]
+                    |           [Fastify API]---SELECT--->[public schema]
                     |                                      - politicians
               calls /api/v1                                - integrity_scores
                                                            - bills, votes
@@ -295,7 +296,7 @@ Step 5: SCORE CALCULATION (Offline)
     - methodology_version tracks scoring algorithm changes
 
 Step 6: PUBLISH TO PUBLIC SCHEMA
-  Pre-computed data written to public_data:
+  Pre-computed data written to public:
     - Upsert politicians (name, state, party, role, photo)
     - Upsert integrity_scores with all components
     - Upsert bills, votes, expenses, assets, candidacies
@@ -322,7 +323,7 @@ Browser -> Cloudflare CDN
          |
          |--> API call: Cloudflare proxies to Hetzner VPS
                 |
-                Fastify (api_reader role) -> SELECT from public_data schema
+                Fastify (api_reader role) -> SELECT from public schema
                 |
                 Response with Cache-Control headers
 ```
@@ -367,7 +368,7 @@ anticorruption_score:
 ```mermaid
 erDiagram
     %% ==========================================
-    %% PUBLIC SCHEMA (public_data)
+    %% PUBLIC SCHEMA (public)
     %% ==========================================
 
     politicians {
@@ -559,28 +560,28 @@ erDiagram
 
 ### 6.2 Schema Separation Summary
 
-| Aspect | `public_data` Schema | `internal_data` Schema |
+| Aspect | `public` Schema | `internal_data` Schema |
 |--------|---------------------|----------------------|
 | **DB Role** | `api_reader` (SELECT only) | `pipeline_admin` (ALL) |
 | **Contains** | Politician profiles, scores, parliamentary activity | CPFs, exclusion records, raw data, audit logs |
 | **Accessed by** | Fastify API, Next.js (via API) | Pipeline worker only |
 | **Sensitive data** | None (by design) | CPF (encrypted), corruption records |
-| **Cross-schema bridge** | `exclusion_flag` boolean in `integrity_scores` | `politician_id` FK to `public_data.politicians` |
+| **Cross-schema bridge** | `exclusion_flag` boolean in `integrity_scores` | `politician_id` FK to `public.politicians` |
 
 ### 6.3 Key Indexes
 
 ```sql
--- public_data schema
-CREATE INDEX idx_politicians_slug ON public_data.politicians(slug);
-CREATE INDEX idx_politicians_state ON public_data.politicians(state);
-CREATE INDEX idx_politicians_party ON public_data.politicians(party);
-CREATE INDEX idx_politicians_role ON public_data.politicians(role);
-CREATE INDEX idx_politicians_search ON public_data.politicians USING GIN(search_vector);
-CREATE INDEX idx_politicians_active ON public_data.politicians(active) WHERE active = true;
-CREATE INDEX idx_scores_politician ON public_data.integrity_scores(politician_id);
-CREATE INDEX idx_scores_overall ON public_data.integrity_scores(overall_score DESC);
-CREATE INDEX idx_bills_politician ON public_data.bills(politician_id);
-CREATE INDEX idx_expenses_politician_year ON public_data.expenses(politician_id, year, month);
+-- public schema
+CREATE INDEX idx_politicians_slug ON public.politicians(slug);
+CREATE INDEX idx_politicians_state ON public.politicians(state);
+CREATE INDEX idx_politicians_party ON public.politicians(party);
+CREATE INDEX idx_politicians_role ON public.politicians(role);
+CREATE INDEX idx_politicians_search ON public.politicians USING GIN(search_vector);
+CREATE INDEX idx_politicians_active ON public.politicians(active) WHERE active = true;
+CREATE INDEX idx_scores_politician ON public.integrity_scores(politician_id);
+CREATE INDEX idx_scores_overall ON public.integrity_scores(overall_score DESC);
+CREATE INDEX idx_bills_politician ON public.bills(politician_id);
+CREATE INDEX idx_expenses_politician_year ON public.expenses(politician_id, year, month);
 
 -- internal_data schema
 CREATE UNIQUE INDEX idx_identifiers_cpf_hash ON internal_data.politician_identifiers(cpf_hash);
@@ -602,9 +603,9 @@ CREATE INDEX idx_raw_data_unprocessed ON internal_data.raw_source_data(processed
 The system must enforce a hard boundary between public-facing politician data and internal anti-corruption records (exclusion lists, CPFs). Domain rules DR-001 (silent exclusion) and DR-005 (CPF never exposed) require that the public API cannot, under any circumstances, access internal data -- even if the application code has a bug.
 
 **Decision:**
-Use a single PostgreSQL 16 instance with two schemas (`public_data` and `internal_data`) and two database roles:
-- `api_reader`: `GRANT SELECT ON ALL TABLES IN SCHEMA public_data`. No grants on `internal_data`.
-- `pipeline_admin`: `GRANT ALL ON ALL TABLES IN SCHEMA public_data, internal_data`.
+Use a single PostgreSQL 16 instance with two schemas (`public` and `internal_data`) and two database roles:
+- `api_reader`: `GRANT SELECT ON ALL TABLES IN SCHEMA public`. No grants on `internal_data`.
+- `pipeline_admin`: `GRANT ALL ON ALL TABLES IN SCHEMA public, internal_data`.
 
 The Fastify API connects using `api_reader`. The pipeline worker connects using `pipeline_admin`.
 
@@ -704,7 +705,7 @@ Brazilian anti-corruption databases (CEIS, CNEP, CEAF, CEPIM) contain sensitive 
 Implement a "silent exclusion" pattern:
 1. The pipeline reads exclusion records from internal sources and stores them in `internal_data.exclusion_records`.
 2. During score calculation, if ANY exclusion record exists for a politician, the `anticorruption_score` component is set to 0 (out of 25).
-3. A boolean `exclusion_flag` is set to `true` in `public_data.integrity_scores`.
+3. A boolean `exclusion_flag` is set to `true` in `public.integrity_scores`.
 4. The public API and frontend can see that the anticorruption component is 0, but CANNOT see why (no record details, no source names, no dates).
 5. The frontend displays this as "Information from anti-corruption databases affected this score" without specifics.
 
@@ -730,11 +731,11 @@ Implement a "silent exclusion" pattern:
 **Date:** 2026-02-28
 
 **Context:**
-The codebase must interact with two PostgreSQL schemas (`public_data`, `internal_data`) with strict type safety to prevent accidental cross-schema queries from the API layer. The ORM must support schema-qualified table references, migrations, and work well with TypeScript and AI-assisted development.
+The codebase must interact with two PostgreSQL schemas (`public`, `internal_data`) with strict type safety to prevent accidental cross-schema queries from the API layer. The ORM must support schema-qualified table references, migrations, and work well with TypeScript and AI-assisted development.
 
 **Decision:**
 Use Drizzle ORM with:
-- `pgSchema('public_data')` and `pgSchema('internal_data')` for schema-qualified table definitions.
+- `pgSchema('public')` and `pgSchema('internal_data')` for schema-qualified table definitions.
 - Two separate Drizzle client instances: `publicDb` (using `api_reader` connection) and `pipelineDb` (using `pipeline_admin` connection).
 - The API module imports ONLY from `src/db/public-schema.ts`. The pipeline module can import from both.
 - ESLint rule or import boundary enforcement to prevent API code from importing internal schema types.
@@ -960,7 +961,7 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
-      DATABASE_URL: postgresql://api_reader:***@postgres/authority_highlighter?schema=public_data
+      DATABASE_URL: postgresql://api_reader:***@postgres/authority_highlighter?schema=public
     depends_on:
       postgres: { condition: service_healthy }
     restart: unless-stopped
@@ -1051,12 +1052,12 @@ political-authority-highlighter/
 |   |   +-- package.json
 |   +-- db/                         # Database schemas, migrations, clients
 |       +-- src/
-|       |   +-- public-schema.ts    # Drizzle schema for public_data
+|       |   +-- public-schema.ts    # Drizzle schema for public
 |       |   +-- internal-schema.ts  # Drizzle schema for internal_data
 |       |   +-- clients.ts          # publicDb + pipelineDb instances
 |       |   +-- migrate.ts          # Migration runner
 |       +-- migrations/
-|       |   +-- public/             # public_data migrations
+|       |   +-- public/             # public migrations
 |       |   +-- internal/           # internal_data migrations
 |       +-- package.json
 +-- apps/
@@ -1131,7 +1132,7 @@ political-authority-highlighter/
         |   |       +-- legislative.ts
         |   |       +-- financial.ts
         |   |       +-- anticorruption.ts
-        |   +-- publisher/                  # Writes to public_data schema
+        |   +-- publisher/                  # Writes to public schema
         |   |   +-- publisher.ts
         |   |   +-- revalidator.ts          # Triggers Vercel ISR
         |   +-- crypto/
@@ -1187,7 +1188,7 @@ Still well under the $100/month budget at 500k MAU.
 -- init-schemas.sql (runs on first PostgreSQL start)
 
 -- Create schemas
-CREATE SCHEMA IF NOT EXISTS public_data;
+CREATE SCHEMA IF NOT EXISTS public;
 CREATE SCHEMA IF NOT EXISTS internal_data;
 
 -- Create roles
@@ -1195,13 +1196,13 @@ CREATE ROLE api_reader WITH LOGIN PASSWORD '${API_READER_PASSWORD}';
 CREATE ROLE pipeline_admin WITH LOGIN PASSWORD '${PIPELINE_ADMIN_PASSWORD}';
 
 -- Grant privileges
-GRANT USAGE ON SCHEMA public_data TO api_reader;
-GRANT SELECT ON ALL TABLES IN SCHEMA public_data TO api_reader;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public_data GRANT SELECT ON TABLES TO api_reader;
+GRANT USAGE ON SCHEMA public TO api_reader;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO api_reader;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO api_reader;
 
-GRANT USAGE, CREATE ON SCHEMA public_data TO pipeline_admin;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public_data TO pipeline_admin;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public_data GRANT ALL ON TABLES TO pipeline_admin;
+GRANT USAGE, CREATE ON SCHEMA public TO pipeline_admin;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO pipeline_admin;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO pipeline_admin;
 
 GRANT USAGE, CREATE ON SCHEMA internal_data TO pipeline_admin;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA internal_data TO pipeline_admin;

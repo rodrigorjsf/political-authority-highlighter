@@ -2,10 +2,11 @@ import { config } from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 
-// Load .env.local if it exists (development only) — MUST happen before importing app/env
+// Load environment variables — MUST happen before importing app/env
 const __dir = dirname(fileURLToPath(import.meta.url))
-const envPath = resolve(__dir, '../../.env.local')
-config({ path: envPath, override: false })
+// Try .env.local first, then .env in the workspace root
+config({ path: resolve(__dir, '../../.env.local'), override: false })
+config({ path: resolve(__dir, '../../../.env'), override: false })
 
 // Now safe to import modules that read process.env
 const { buildApp } = await import('./app.js')

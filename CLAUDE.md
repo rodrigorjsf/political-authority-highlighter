@@ -9,7 +9,7 @@
 
 1. **Dependency Rule (Clean Architecture)**: Dependencies point inward. The API layer never references pipeline internals. The frontend never imports database schemas. Domain types in `packages/shared` have zero external dependencies.
 
-2. **Schema Isolation as Security Boundary (DDD Bounded Contexts)**: The `public_data` and `internal_data` PostgreSQL schemas are treated as separate bounded contexts. The API bounded context can only read from `public_data`. The pipeline bounded context owns both schemas. The only data that crosses the boundary is the `exclusion_flag` boolean.
+2. **Schema Isolation as Security Boundary (DDD Bounded Contexts)**: The `public` and `internal_data` PostgreSQL schemas are treated as separate bounded contexts. The API bounded context can only read from `public`. The pipeline bounded context owns both schemas. The only data that crosses the boundary is the `exclusion_flag` boolean.
 
 3. **DRY with Shared Packages (Pragmatic Programmer)**: Domain types (`Politician`, `IntegrityScore`, `Bill`), constants (score weights, source configs), and utilities (slug generation, date formatting) live in `packages/shared`. Never duplicate type definitions across apps.
 
@@ -37,7 +37,7 @@ Political Authority Highlighter is a Brazilian political transparency platform t
 | Silent Exclusion | Pattern where anticorruption impact is visible but details are hidden | ADR-004 |
 | Source Adapter | Module that fetches and parses data from one government API | `*.adapter.ts` files |
 | Ingestion Pipeline | Batch process that fetches, transforms, scores, and publishes data | `apps/pipeline/` |
-| Public Schema | `public_data` PostgreSQL schema serving the API (SELECT only) | `packages/db/public-schema.ts` |
+| Public Schema | `public` PostgreSQL schema serving the API (SELECT only) | `packages/db/public-schema.ts` |
 | Internal Schema | `internal_data` PostgreSQL schema for pipeline processing | `packages/db/internal-schema.ts` |
 | Slug | URL-friendly politician identifier (e.g., `joao-silva-sp`) | `slug` field |
 | Idempotency Key | `source + external_id` composite ensuring no duplicate records | `idempotency_key` field |
@@ -70,12 +70,12 @@ political-authority-highlighter/
 |   |   +-- package.json
 |   +-- db/                         # Drizzle schemas, migrations, database clients
 |       +-- src/
-|       |   +-- public-schema.ts    # Drizzle pgSchema('public_data') tables
+|       |   +-- public-schema.ts    # Drizzle pgSchema('public') tables
 |       |   +-- internal-schema.ts  # Drizzle pgSchema('internal_data') tables
 |       |   +-- clients.ts          # publicDb (api_reader) + pipelineDb (pipeline_admin)
 |       |   +-- migrate.ts          # Migration runner
 |       +-- migrations/
-|       |   +-- public/             # public_data schema migrations
+|       |   +-- public/             # public schema migrations
 |       |   +-- internal/           # internal_data schema migrations
 |       +-- drizzle.config.ts
 |       +-- package.json
@@ -316,7 +316,7 @@ These rules are non-negotiable and must be enforced in code reviews and automate
 
 ### DR-001: Silent Exclusion
 
-The public API and frontend must NEVER expose why a politician's anticorruption score is 0. Only the boolean `exclusion_flag` crosses from `internal_data` to `public_data`. The frontend displays: "Information from anti-corruption databases affected this score" with a link to public government transparency portals. No record details, no source names, no dates.
+The public API and frontend must NEVER expose why a politician's anticorruption score is 0. Only the boolean `exclusion_flag` crosses from `internal_data` to `public`. The frontend displays: "Information from anti-corruption databases affected this score" with a link to public government transparency portals. No record details, no source names, no dates.
 
 ### DR-002: Political Neutrality
 

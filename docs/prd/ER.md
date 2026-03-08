@@ -9,7 +9,7 @@
 ```mermaid
 erDiagram
     %% ==========================================
-    %% PUBLIC SCHEMA (public_data)
+    %% PUBLIC SCHEMA (public)
     %% ==========================================
 
     politicians {
@@ -212,14 +212,14 @@ erDiagram
 
 ## Schema Separation
 
-| Aspect | `public_data` Schema | `internal_data` Schema |
+| Aspect | `public` Schema | `internal_data` Schema |
 |--------|---------------------|----------------------|
 | **DB Role** | `api_reader` (SELECT only) | `pipeline_admin` (ALL) |
 | **Tables** | 10 tables | 5 tables |
 | **Contains** | Politician profiles, scores, parliamentary activity, candidacies | CPFs (encrypted), exclusion records, raw data, audit logs |
 | **Accessed by** | Fastify API, Next.js (via API) | Pipeline worker only |
 | **Sensitive data** | None (by design) | CPF (AES-256-GCM encrypted), corruption records |
-| **Cross-schema bridge** | `exclusion_flag` boolean on `politicians` and `integrity_scores` | `politician_id` FK referencing `public_data.politicians` |
+| **Cross-schema bridge** | `exclusion_flag` boolean on `politicians` and `integrity_scores` | `politician_id` FK referencing `public.politicians` |
 
 ---
 
@@ -227,7 +227,7 @@ erDiagram
 
 ### politicians
 - **Purpose:** Central entity representing a Brazilian federal legislator (deputado federal or senador). Serves as the primary lookup and display entity for all public-facing features.
-- **Schema:** `public_data`
+- **Schema:** `public`
 - **Compliance scope:** None (public data only; no personal identifiers)
 - **Key attributes:**
 
@@ -255,7 +255,7 @@ erDiagram
 
 ### integrity_scores
 - **Purpose:** Stores the computed integrity score and its 4 component scores for each politician. Versioned by `methodology_version` to track algorithm changes.
-- **Schema:** `public_data`
+- **Schema:** `public`
 - **Compliance scope:** None
 - **Key attributes:**
 
@@ -278,7 +278,7 @@ erDiagram
 
 ### score_components
 - **Purpose:** Granular breakdown of each score dimension, providing transparency into how each sub-metric contributed to the final score. Supports the methodology transparency page (RF-005).
-- **Schema:** `public_data`
+- **Schema:** `public`
 - **Compliance scope:** None
 - **Key attributes:**
 
@@ -299,7 +299,7 @@ erDiagram
 
 ### bills
 - **Purpose:** Legislative projects (projetos de lei) authored or co-authored by a politician. Supports RF-008 (profile bills section).
-- **Schema:** `public_data`
+- **Schema:** `public`
 - **Compliance scope:** None
 - **Key attributes:**
 
@@ -324,7 +324,7 @@ erDiagram
 
 ### votes
 - **Purpose:** Record of how a politician voted in legislative sessions. Supports RF-009 (voting record section) and the legislative score component.
-- **Schema:** `public_data`
+- **Schema:** `public`
 - **Compliance scope:** None
 - **Key attributes:**
 
@@ -345,7 +345,7 @@ erDiagram
 
 ### expenses
 - **Purpose:** Parliamentary expenses (CEAP for deputados, CEAPS for senadores). Supports RF-012 (expenses section) and the financial score component.
-- **Schema:** `public_data`
+- **Schema:** `public`
 - **Compliance scope:** None (public expense data under LAI)
 - **Key attributes:**
 
@@ -367,7 +367,7 @@ erDiagram
 
 ### proposals
 - **Purpose:** Formal proposals (requerimentos, indicacoes, etc.) submitted by a politician. Supports RF-010 (proposals section).
-- **Schema:** `public_data`
+- **Schema:** `public`
 - **Compliance scope:** None
 - **Key attributes:**
 
@@ -388,7 +388,7 @@ erDiagram
 
 ### committee_memberships
 - **Purpose:** Tracks politician participation in parliamentary committees. Supports RF-011 (agenda/activities section) and the legislative score component.
-- **Schema:** `public_data`
+- **Schema:** `public`
 - **Compliance scope:** None
 - **Key attributes:**
 
@@ -407,7 +407,7 @@ erDiagram
 
 ### candidacies
 - **Purpose:** Electoral history from TSE data. Tracks past candidacies, results, and votes received. Provides historical context on politician profiles.
-- **Schema:** `public_data`
+- **Schema:** `public`
 - **Compliance scope:** None (public electoral data)
 - **Key attributes:**
 
@@ -427,7 +427,7 @@ erDiagram
 
 ### data_source_status
 - **Purpose:** Tracks the health and freshness of each data source ingestion. Supports RF-014 (data freshness indicator) and operational monitoring.
-- **Schema:** `public_data`
+- **Schema:** `public`
 - **Compliance scope:** None
 - **Key attributes:**
 
@@ -453,7 +453,7 @@ erDiagram
 | Name | Type | Constraints | Description |
 |------|------|-------------|-------------|
 | id | uuid | PK | Unique identifier |
-| politician_id | uuid | FK -> public_data.politicians.id, NOT NULL | Cross-schema reference to public entity |
+| politician_id | uuid | FK -> public.politicians.id, NOT NULL | Cross-schema reference to public entity |
 | cpf_encrypted | bytea | NOT NULL | CPF encrypted with AES-256-GCM (application-layer key) |
 | cpf_hash | varchar | UNIQUE, NOT NULL | SHA-256 hash of normalized CPF for matching without decryption |
 | camara_id | varchar | NULLABLE | Camara dos Deputados identifier |
@@ -554,17 +554,17 @@ erDiagram
 ## Key Indexes
 
 ```sql
--- public_data schema
-CREATE INDEX idx_politicians_slug ON public_data.politicians(slug);
-CREATE INDEX idx_politicians_state ON public_data.politicians(state);
-CREATE INDEX idx_politicians_party ON public_data.politicians(party);
-CREATE INDEX idx_politicians_role ON public_data.politicians(role);
-CREATE INDEX idx_politicians_search ON public_data.politicians USING GIN(search_vector);
-CREATE INDEX idx_politicians_active ON public_data.politicians(active) WHERE active = true;
-CREATE INDEX idx_scores_politician ON public_data.integrity_scores(politician_id);
-CREATE INDEX idx_scores_overall ON public_data.integrity_scores(overall_score DESC);
-CREATE INDEX idx_bills_politician ON public_data.bills(politician_id);
-CREATE INDEX idx_expenses_politician_year ON public_data.expenses(politician_id, year, month);
+-- public schema
+CREATE INDEX idx_politicians_slug ON public.politicians(slug);
+CREATE INDEX idx_politicians_state ON public.politicians(state);
+CREATE INDEX idx_politicians_party ON public.politicians(party);
+CREATE INDEX idx_politicians_role ON public.politicians(role);
+CREATE INDEX idx_politicians_search ON public.politicians USING GIN(search_vector);
+CREATE INDEX idx_politicians_active ON public.politicians(active) WHERE active = true;
+CREATE INDEX idx_scores_politician ON public.integrity_scores(politician_id);
+CREATE INDEX idx_scores_overall ON public.integrity_scores(overall_score DESC);
+CREATE INDEX idx_bills_politician ON public.bills(politician_id);
+CREATE INDEX idx_expenses_politician_year ON public.expenses(politician_id, year, month);
 
 -- internal_data schema
 CREATE UNIQUE INDEX idx_identifiers_cpf_hash ON internal_data.politician_identifiers(cpf_hash);
