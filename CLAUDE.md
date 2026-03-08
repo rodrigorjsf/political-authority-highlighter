@@ -1,7 +1,7 @@
 # Political Authority Highlighter -- Project Development Guide
-# Architecture: Modular Monolith with Pipeline Separation
-# Stack: TypeScript 5.4+ | Next.js 15 | Fastify 5 | PostgreSQL 16 | Drizzle ORM | pg-boss 10
-# Last Updated: 2026-02-28 | PRD Version: 1.0
+# Architecture: Managed Infrastructure with Supabase
+# Stack: TypeScript 5.4+ | Next.js 15 | Fastify 5 | Supabase (PostgreSQL 16) | Drizzle ORM | pg-boss 10
+# Last Updated: 2026-03-08 | PRD Version: 1.1
 
 ## Core Principles
 
@@ -60,7 +60,7 @@ political-authority-highlighter/
 +-- .github/
 |   +-- workflows/
 |       +-- ci.yml                  # Lint, type-check, test, build
-|       +-- deploy.yml              # Deploy backend to Hetzner, frontend auto-deploys on Vercel
+|       +-- deploy.yml              # Deploy backend to Supabase, frontend auto-deploys on Vercel
 +-- packages/
 |   +-- shared/                     # Domain types, constants, utilities
 |   |   +-- src/
@@ -85,22 +85,18 @@ political-authority-highlighter/
     |   +-- src/
     |   +-- next.config.ts
     |   +-- package.json
-    +-- api/                        # Fastify 5 backend API (deployed on Hetzner)
+    +-- api/                        # Fastify 5 backend API (deployed on Supabase Edge)
     |   +-- CLAUDE.md               # Backend development guide
     |   +-- src/
-    |   +-- Dockerfile.api
     |   +-- package.json
-    +-- pipeline/                   # Data ingestion pipeline (deployed on Hetzner)
-        +-- CLAUDE.md               # Pipeline-specific guide (covered in backend CLAUDE.md)
+    +-- pipeline/                   # Data ingestion pipeline (deployed on Supabase / GitHub Actions)
+        +-- CLAUDE.md               # Pipeline-specific guide
         +-- src/
-        +-- Dockerfile.pipeline
         +-- package.json
 +-- infrastructure/
     +-- CLAUDE.md                   # Infrastructure and DevOps guide
-    +-- docker-compose.yml          # Symlinked or referenced from root
-    +-- nginx.conf
+    +-- docker-compose.yml          # Local development environment
     +-- init-schemas.sql
-    +-- backup.sh
 ```
 
 ### Import Boundaries (Enforced via ESLint)
@@ -356,7 +352,7 @@ Internal data (exclusion records, CPF matches, audit logs) must never be publicl
 | ADR-003 | pg-boss (no Redis) | Single data store, $5/month saved, <100 jobs/day does not need Redis throughput |
 | ADR-004 | Silent exclusion via boolean flag | LGPD data minimization, no retaliation risk, political neutrality |
 | ADR-005 | Drizzle ORM dual-schema type safety | Compile-time prevention of cross-schema access from API module |
-| ADR-006 | Single VPS with Docker Compose | $6/month for 2 vCPU/4GB, full PostgreSQL control, solo developer ops simplicity |
+| ADR-006 | Managed infrastructure with Supabase | Zero maintenance, PITR, Supavisor pooling, solo developer ops simplicity |
 | ADR-007 | Application-layer CPF encryption | Encryption key never reaches database process memory |
 
 ---

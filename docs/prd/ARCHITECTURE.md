@@ -31,7 +31,7 @@ The Political Authority Highlighter is a public web platform that surfaces Brazi
 - **Data isolation**: Two PostgreSQL schemas enforce a hard boundary between public-facing data and internal anti-corruption records.
 - **Offline-first scoring**: All integrity scores are pre-computed during batch ingestion, so the public API serves static-like data with sub-300ms latency.
 - **SEO performance**: Server-side generated pages via Next.js ensure organic discoverability.
-- **Budget efficiency**: The entire stack runs on approximately $7/month infrastructure.
+- **Budget efficiency**: The entire stack runs on approximately $25/month infrastructure using Supabase and Vercel.
 
 ---
 
@@ -43,18 +43,18 @@ The Political Authority Highlighter is a public web platform that surfaces Brazi
 |------------------|---------------------|----------|--------------|
 | Language         | TypeScript          | 5.4+     | -            |
 | Frontend         | Next.js (App Router)| 15.x     | $0 (Vercel)  |
-| Backend API      | Fastify             | 5.x      | (on VPS)     |
-| Database         | PostgreSQL          | 16.x     | (on VPS)     |
+| Backend API      | Fastify             | 5.x      | (Serverless/Supabase Edge) |
+| Database         | PostgreSQL (Supabase)| 16.x     | $25 (Pro)    |
 | ORM              | Drizzle ORM         | 0.36+    | -            |
 | Job Queue        | pg-boss             | 10.x     | -            |
 | Validation       | Zod                 | 3.x      | -            |
-| Hosting (BE)     | Hetzner Cloud VPS   | CX22     | ~$6          |
+| Hosting (BE/DB)  | Supabase            | Pro      | $25          |
 | Hosting (FE)     | Vercel              | Hobby    | $0           |
 | CDN/DNS          | Cloudflare          | Free     | $0           |
 | CI/CD            | GitHub Actions      | Free     | $0           |
 | Monitoring       | UptimeRobot         | Free     | $0           |
 
-**Estimated total: $6-8/month**
+**Estimated total: ~$25/month**
 
 ### 2.2 Justification Per Layer
 
@@ -76,10 +76,10 @@ The Political Authority Highlighter is a public web platform that surfaces Brazi
 - **Trade-offs**: Smaller ecosystem than Express/NestJS. Less opinionated structure requires discipline. Mitigated by defining a clear layer structure (see Section 11).
 - **Version**: 5.x (stable, ESM-first).
 
-#### PostgreSQL 16 (Database)
+#### PostgreSQL 16 (Supabase)
 
-- **Why this product**: Native schema support (`CREATE SCHEMA`) enables the two-schema isolation requirement without running two database instances. Row-level security, role-based access control, and `pgcrypto` for CPF encryption are built-in. JSONB columns handle heterogeneous raw source data. Full-text search via `tsvector` handles politician name search without Elasticsearch.
-- **Trade-offs**: Single-node on a VPS means no automatic failover. Mitigated by daily backups and the fact that data is reconstructable from public sources.
+- **Why this product**: Managed database-as-a-service eliminates operational overhead (backups, patches, scaling). Native schema support (`CREATE SCHEMA`) enables the two-schema isolation requirement. Built-in pooling via Supavisor handles serverless connections. JSONB columns handle heterogeneous raw source data. Full-text search via `tsvector` handles politician name search.
+- **Trade-offs**: Higher cost than self-hosting. Fixed monthly cost for Pro tier.
 - **Version**: 16.x for improved logical replication and SIMD-accelerated JSON processing.
 
 #### Drizzle ORM 0.36+
@@ -93,10 +93,10 @@ The Political Authority Highlighter is a public web platform that surfaces Brazi
 - **Trade-offs**: Lower throughput than BullMQ+Redis (hundreds vs thousands of jobs/second). Irrelevant here: the pipeline processes ~700 politicians across 6 sources daily, well under 100 jobs/day.
 - **Version**: 10.x (stable, PostgreSQL 16 support).
 
-#### Hetzner Cloud CX22 (Backend Hosting)
+#### Supabase Pro (Backend/Database Hosting)
 
-- **Why this product**: 2 shared vCPU, 4GB RAM, 40GB NVMe SSD for EUR 4.95/month (~$5.50). This is 5-10x cheaper than equivalent AWS (t3.small + RDS) for the same capability. European data center (Nuremberg/Helsinki) provides acceptable latency to Brazil (~180ms) and LGPD-aligned data processing.
-- **Trade-offs**: No managed database, no auto-scaling. Mitigated by Docker Compose orchestration and the fact that pre-computed data serving is extremely lightweight.
+- **Why this product**: Managed PostgreSQL, Auth, and Edge Functions in one platform. $25/month Pro tier includes automatic backups, PITR (Point-in-Time Recovery), and generous limits for a solo developer project. Eliminates VPS maintenance.
+- **Trade-offs**: More expensive than a raw VPS. Vendor lock-in (partially mitigated by using standard PostgreSQL features).
 
 #### Vercel Hobby (Frontend Hosting)
 
@@ -151,20 +151,12 @@ flowchart TB
         NextJS["Next.js 15<br/>App Router<br/>SSG/ISR Pages"]
     end
 
-    subgraph Hetzner["Hetzner VPS CX22 (Docker Compose)"]
-        subgraph API_Container["API Container"]
+    subgraph Supabase["Supabase (Pro Tier)"]
+        subgraph Edge_Functions["Edge Functions / Fastify"]
             Fastify["Fastify 5 API<br/>/api/v1/*"]
         end
 
-        subgraph Pipeline_Container["Pipeline Container"]
-            PG_Boss["pg-boss<br/>Job Scheduler"]
-            Adapters["Source Adapters<br/>(6 adapters)"]
-            Transformer["Data Transformer<br/>& Normalizer"]
-            Scorer["Score Calculator"]
-            Publisher["Schema Publisher"]
-        end
-
-        subgraph DB_Container["PostgreSQL 16"]
+        subgraph DB_Instance["Managed PostgreSQL 16"]
             subgraph Public_Schema["Schema: public_data"]
                 Politicians[(politicians)]
                 Scores[(integrity_scores)]
@@ -182,6 +174,14 @@ flowchart TB
         end
     end
 
+    subgraph Pipeline_Runner["Pipeline Runner (GitHub Actions / Local)"]
+        PG_Boss["pg-boss<br/>Job Scheduler"]
+        Adapters["Source Adapters<br/>(6 adapters)"]
+        Transformer["Data Transformer<br/>& Normalizer"]
+        Scorer["Score Calculator"]
+        Publisher["Schema Publisher"]
+    end
+
     subgraph External["External Data Sources"]
         Camara["Camara API<br/>REST JSON"]
         Senado["Senado API<br/>REST XML/JSON"]
@@ -194,11 +194,11 @@ flowchart TB
     Browser -->|HTTPS| CF_CDN
     CF_CDN -->|Cache MISS| NextJS
     NextJS -->|"REST /api/v1<br/>(HTTPS)"| CF_CDN
-    CF_CDN -->|Proxy| Fastify
+    CF_CDN -->|Proxy| Edge_Functions
 
-    Fastify -->|"SELECT only<br/>(api_reader role)"| Public_Schema
+    Edge_Functions -->|"SELECT only<br/>(Supavisor pool)"| Public_Schema
 
-    PG_Boss -->|"Cron triggers"| Adapters
+    Pipeline_Runner -->|"Cron triggers"| Adapters
     Adapters -->|Fetch| Camara
     Adapters -->|Fetch| Senado
     Adapters -->|Fetch| Transparencia
@@ -755,37 +755,35 @@ Use Drizzle ORM with:
 
 ---
 
-### ADR-006: Single VPS Deployment with Docker Compose
+### ADR-006: Managed Infrastructure with Supabase (BaaS)
 
 **Status:** Accepted
-**Date:** 2026-02-28
+**Date:** 2026-03-08
 
 **Context:**
-Budget constraint of <$100/month, solo developer, and 99.5% SLA target (allows ~3.6 hours downtime/month). Managed cloud services (AWS RDS + ECS, GCP Cloud Run + Cloud SQL) would cost $50-150/month minimum for equivalent capability.
+The initial plan for self-hosting on a VPS required manual management of PostgreSQL, backups, and security patches. As a solo developer, operational simplicity and data reliability (PITR) are higher priorities than absolute minimum cost. Supabase provides a managed PostgreSQL environment with built-in pooling and scaling.
 
 **Decision:**
-Deploy all backend components on a single Hetzner Cloud CX22 VPS using Docker Compose:
-- `postgres` service: PostgreSQL 16 with mounted volume
-- `api` service: Fastify API (Node.js 22 Alpine)
-- `pipeline` service: Pipeline worker with pg-boss (Node.js 22 Alpine)
-- Docker Compose handles service dependencies and restart policies.
-- Automated daily backups via `pg_dump` to Hetzner Object Storage (~$0.01/GB/month).
+Migrate all backend infrastructure to Supabase (Pro Tier):
+- **Database**: Managed PostgreSQL 16.
+- **Pooling**: Supavisor for serverless connection management.
+- **Backups**: Automatic daily backups with Point-in-Time Recovery (PITR).
+- **Security**: Supabase handles OS hardening and database patches.
+- **Pipeline**: Ingestion jobs will run via GitHub Actions or locally, connecting directly to Supabase.
 
 **Alternatives Considered:**
-1. **AWS Free Tier**: Only 12 months, then costs escalate. t3.micro (1 vCPU, 1GB) too small for PostgreSQL + API + pipeline.
-2. **Railway/Render**: Managed but $5/service minimum. Three services = $15/month + database addon. More expensive for less control.
-3. **Fly.io**: Good pricing but PostgreSQL reliability concerns (community reports of data loss on free tier).
-4. **Oracle Cloud Free Tier**: Generous (4 ARM CPUs, 24GB RAM) but unreliable availability and risk of account termination.
+1. **Hetzner VPS (Original Plan)**: Cheapest (~$6/mo) but requires highest operational effort.
+2. **AWS RDS**: Very expensive (~$50+/mo) for similar managed features.
+3. **Railway/Render**: Good developer experience but database management is less specialized than Supabase.
 
 **Consequences:**
-- Positive: Total backend cost ~$6/month for 2 vCPU, 4GB RAM, 40GB NVMe.
-- Positive: Full control over PostgreSQL configuration, backups, and security.
-- Positive: Docker Compose is simple enough for a solo developer.
-- Negative: No auto-scaling. Vertical scaling only (upgrade VPS plan: CX32 = 3 vCPU, 8GB at ~$10/month).
-- Negative: Single point of failure. Mitigated by: daily backups, Docker restart policies, UptimeRobot monitoring, and the fact that all data is reconstructable from public sources.
-- Negative: Manual security patching. Mitigated by: unattended-upgrades for OS, Docker image rebuild in CI.
+- Positive: Zero database maintenance (managed backups, patches).
+- Positive: PITR for high data reliability.
+- Positive: Built-in connection pooling for serverless environments (Vercel/Edge).
+- Negative: Fixed monthly cost increase (~$25 vs ~$6).
+- Negative: Vendor lock-in (partially mitigated by sticking to standard PostgreSQL features and Drizzle ORM).
 
-**Review Trigger:** When concurrent users regularly exceed 3000, or when the 99.5% SLA is breached due to VPS limitations.
+**Review Trigger:** Monthly active users exceed 500k, or database storage costs grow exponentially.
 
 ---
 
@@ -933,32 +931,15 @@ Future (post-MVP):
                    DNS + CDN + WAF
                   /              \
                  /                \
-        [Vercel Edge]        [Hetzner VPS]
-        Next.js 15           CX22 (2vCPU/4GB)
-        SSG/ISR pages        Docker Compose
-        Free Tier                  |
-                          +--------+--------+
-                          |        |        |
-                       [nginx]  [api]   [pipeline]
-                       reverse   Fastify  pg-boss +
-                       proxy     :3000    adapters
-                          |        |        |
-                          +--------+--------+
-                                   |
-                            [PostgreSQL 16]
-                            public_data schema
-                            internal_data schema
-                                   |
-                            [Volume Mount]
-                            /var/lib/postgresql
-                                   |
-                         [Daily pg_dump backup]
-                                   |
-                         [Hetzner Object Storage]
-                         ~$0.01/GB/month
+        [Vercel Edge]        [Supabase Cloud]
+        Next.js 15           Managed Postgres 16
+        SSG/ISR pages        Edge Functions
+        Free Tier            Pro Tier
 ```
 
-### 9.2 Docker Compose Services
+### 9.2 Development Environment (Docker Compose)
+
+Local development continues to use Docker Compose to provide an environment as close as possible to the Supabase PostgreSQL standard.
 
 ```yaml
 # docker-compose.yml (simplified)
@@ -969,7 +950,7 @@ services:
       POSTGRES_DB: authority_highlighter
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./init-schemas.sql:/docker-entrypoint-initdb.d/01-schemas.sql
+      - ./infrastructure/init-schemas.sql:/docker-entrypoint-initdb.d/01-schemas.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
     restart: unless-stopped
@@ -977,36 +958,11 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile.api
+      dockerfile: apps/api/Dockerfile
     environment:
       DATABASE_URL: postgresql://api_reader:***@postgres/authority_highlighter?schema=public_data
     depends_on:
       postgres: { condition: service_healthy }
-    restart: unless-stopped
-
-  pipeline:
-    build:
-      context: .
-      dockerfile: Dockerfile.pipeline
-    environment:
-      DATABASE_URL: postgresql://pipeline_admin:***@postgres/authority_highlighter
-      CPF_ENCRYPTION_KEY: ${CPF_ENCRYPTION_KEY}
-      TRANSPARENCIA_API_KEY: ${TRANSPARENCIA_API_KEY}
-      VERCEL_REVALIDATE_TOKEN: ${VERCEL_REVALIDATE_TOKEN}
-    depends_on:
-      postgres: { condition: service_healthy }
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "443:443"
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - /etc/letsencrypt:/etc/letsencrypt
-    depends_on:
-      - api
     restart: unless-stopped
 
 volumes:
@@ -1015,22 +971,14 @@ volumes:
 
 ### 9.3 CI/CD Pipeline (GitHub Actions)
 
-```
 Trigger: push to main branch
 
 Steps:
   1. Lint + Type Check (TypeScript)
   2. Unit Tests (Vitest)
   3. Integration Tests (Testcontainers + PostgreSQL)
-  4. Build Docker images
-  5. Push to GitHub Container Registry (free for public repos)
-  6. SSH to Hetzner VPS:
-     - docker compose pull
-     - docker compose up -d --remove-orphans
-     - docker system prune -f
-  7. Smoke test: curl API health endpoint
-  8. Vercel auto-deploys frontend on push (separate build)
-```
+  4. Apply Migrations: `supabase db push`
+  5. Deploy Frontend to Vercel
 
 ### 9.4 Backup Strategy
 
@@ -1211,25 +1159,23 @@ Enforcement: ESLint eslint-plugin-import with import/no-restricted-paths
 
 | Service | Tier | Cost/Month |
 |---------|------|-----------|
-| Hetzner Cloud CX22 | 2 vCPU, 4GB RAM, 40GB SSD | $5.50 |
-| Hetzner Object Storage | ~1GB backups | $0.05 |
+| Supabase | Pro | $25.00 |
 | Vercel | Hobby (Free) | $0.00 |
 | Cloudflare | Free | $0.00 |
 | GitHub Actions | Free (public repo) | $0.00 |
 | UptimeRobot | Free (50 monitors) | $0.00 |
 | Domain (.com.br) | Annual, amortized | ~$1.50 |
-| **Total** | | **~$7.05** |
+| **Total** | | **~$26.50** |
 
 ### 12.2 12-Month Projected Cost
 
 | Service | Cost/Month |
 |---------|-----------|
-| Hetzner Cloud CX42 | $16.00 |
-| Hetzner Object Storage | $0.10 |
+| Supabase Pro (with add-ons) | $40.00 |
 | Vercel Pro | $20.00 |
 | Cloudflare | $0.00 |
 | Domain | $1.50 |
-| **Total** | **~$37.60** |
+| **Total** | **~$61.50** |
 
 Still well under the $100/month budget at 500k MAU.
 
