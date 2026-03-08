@@ -7,6 +7,7 @@ import {
   timestamp,
   text,
   date,
+  numeric,
   index,
   customType,
 } from 'drizzle-orm/pg-core'
@@ -140,5 +141,36 @@ export const votes = publicData.table(
     index('idx_votes_politician').on(table.politicianId),
     // Composite index for keyset pagination (politician_id, date DESC, id DESC)
     index('idx_votes_pagination').on(table.politicianId, table.sessionDate, table.id),
+  ],
+)
+
+/**
+ * Parliamentary expenses (CEAP/CEAPS) for a politician (RF-012).
+ * Populated by the pipeline from Portal da Transparencia (Camara/Senado sources).
+ * Keyset pagination on (year DESC, month DESC, id DESC) for stable ordering.
+ */
+export const expenses = publicData.table(
+  'expenses',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    politicianId: uuid('politician_id').references(() => politicians.id).notNull(),
+    externalId: varchar('external_id', { length: 100 }).notNull(),
+    source: varchar('source', { length: 20 }).notNull(), // 'camara' | 'senado'
+    year: smallint('year').notNull(),
+    month: smallint('month').notNull(),
+    category: varchar('category', { length: 255 }).notNull(),
+    supplierName: varchar('supplier_name', { length: 255 }).notNull(),
+    amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
+    documentNumber: varchar('document_number', { length: 100 }), // nullable
+    sourceUrl: varchar('source_url', { length: 500 }), // nullable
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_expenses_politician').on(table.politicianId),
+    // Composite index for keyset pagination (year DESC, month DESC, id DESC)
+    index('idx_expenses_pagination').on(table.year, table.month, table.id),
+    // Unique constraint: prevent duplicate ingestion via idempotency key
+    { unique: 'uq_expenses_external' },
   ],
 )
