@@ -56,6 +56,9 @@ importers:
       '@sinclair/typebox':
         specifier: ^0.32.0
         version: 0.32.35
+      dotenv:
+        specifier: ^16.0.0
+        version: 16.6.1
       drizzle-orm:
         specifier: ^0.36.0
         version: 0.36.4(@types/react@19.2.14)(postgres@3.4.8)(react@19.2.4)
