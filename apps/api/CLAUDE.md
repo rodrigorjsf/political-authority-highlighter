@@ -212,6 +212,21 @@ interface PoliticianFilters { state?: string; party?: string; role?: string; sea
 
 // Job payload types: append Payload
 interface CamaraSyncPayload { page: number; batchId: string }
+
+// Enums for constant values (RF-002, RF-013)
+export enum PoliticalRole {
+  DEPUTADO = 'deputado',
+  SENADOR = 'senador',
+}
+
+export enum DataSource {
+  CAMARA = 'camara',
+  SENADO = 'senado',
+  TRANSPARENCIA = 'transparencia',
+  TSE = 'tse',
+  TCU = 'tcu',
+  CGU = 'cgu',
+}
 ```
 
 ### Constants
@@ -222,6 +237,11 @@ const MAX_PAGE_SIZE = 50
 const DEFAULT_PAGE_SIZE = 20
 const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX_REQUESTS = 60
+
+// Use ms package for time-related configurations
+import ms from 'ms'
+const CACHE_TTL = ms('1h')
+const RATE_LIMIT_WINDOW = ms('1m')
 
 // Score weights as named const object
 const SCORE_WEIGHTS = {
@@ -236,15 +256,24 @@ const SCORE_WEIGHTS = {
 
 ## Code Standards
 
+### Formatting Rules (CLAUDE.md)
+
+- No semicolons (enforced)
+- Single quotes (enforced)
+- No unnecessary curly braces (enforced)
+- 2-space indentation
+- Import order: external → internal → types
+
 ### Functions and Methods
 
 - **Maximum 30 lines** per function. Extract helper functions if logic grows.
 - **Single responsibility**: a function either fetches, transforms, validates, or persists -- never combines multiple concerns.
 - **Explicit return types** on all exported functions.
 - **No side effects** in pure transformation functions. Adapter fetch methods and repository writes are the only functions allowed to perform I/O.
+- **Use object destructuring** where possible for cleaner code.
 
 ```typescript
-// GOOD: small, single-purpose, typed
+// GOOD: small, single-purpose, typed, uses destructuring
 export async function findPoliticianBySlug(
   slug: string,
 ): Promise<PoliticianWithScore | null> {
@@ -254,14 +283,9 @@ export async function findPoliticianBySlug(
   return { ...politician, score }
 }
 
-// BAD: does too much, no return type, inline query
-export async function getPolitician(slug) {
-  const result = await db.select().from(politicians).where(eq(politicians.slug, slug))
-  if (result.length > 0) {
-    const score = await db.select().from(integrityScores).where(eq(integrityScores.politicianId, result[0].id))
-    return { ...result[0], score: score[0] }
-  }
-  return null
+// GOOD: destructured parameters
+export function parseData({ name, party, state }: PoliticianRow): PoliticianResponse {
+  return { name, party, state }
 }
 ```
 
@@ -270,6 +294,7 @@ export async function getPolitician(slug) {
 - **Prefer functions over classes** for services and repositories. Use classes only for adapters (which carry state like base URL and rate limiter).
 - **One export per concern** per file. A repository file exports functions for one table/entity.
 - **Module size limit**: 300 lines. Split if larger.
+- **Export all types by default**.
 
 ### Error Handling
 
@@ -287,43 +312,22 @@ export class NotFoundError extends Error {
   }
 }
 
-export class ValidationError extends Error {
-  constructor(
-    public readonly field: string,
-    public readonly reason: string,
-  ) {
-    super(`Invalid ${field}: ${reason}`)
-    this.name = 'ValidationError'
-  }
+// ... rest of error handler logic ...
+```
+
+**Use type guards or schema validation** instead of type assertions (`as`).
+
+```typescript
+// GOOD: Type guard for narrowing
+function isNotFoundError(error: unknown): error is NotFoundError {
+  return error instanceof NotFoundError
 }
 
-// Global error handler maps to RFC 7807
-export function errorHandler(
-  error: Error,
-  request: FastifyRequest,
-  reply: FastifyReply,
-): void {
-  if (error instanceof NotFoundError) {
-    reply.status(404).send({
-      type: 'https://autoridade-politica.com.br/errors/not-found',
-      title: `${error.resource} not found`,
-      status: 404,
-      detail: error.message,
-      instance: request.url,
-    })
-    return
-  }
+// GOOD: Schema validation for external data
+const data = PoliticianResponseSchema.parse(await response.json())
 
-  // Log unexpected errors, return generic 500
-  request.log.error(error, 'Unhandled error')
-  reply.status(500).send({
-    type: 'https://autoridade-politica.com.br/errors/internal',
-    title: 'Internal server error',
-    status: 500,
-    detail: 'An unexpected error occurred',
-    instance: request.url,
-  })
-}
+// BAD: Type assertion
+const data = await response.json() as PoliticianResponse
 ```
 
 **Pipeline error handling**: Adapters catch and log source-specific errors, then mark the ingestion job as `partial` or `failed`. The pipeline never throws unhandled exceptions -- all errors are recorded in `internal_data.ingestion_logs`.

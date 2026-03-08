@@ -261,8 +261,17 @@ COPY packages/ ./packages/
 COPY apps/api/ ./apps/api/
 RUN pnpm install --frozen-lockfile
 CMD ["pnpm", "--filter", "@pah/api", "dev"]
-```
+## Code Standards
 
+### Formatting Rules (CLAUDE.md)
+
+- **YAML/JSON**: 2-space indentation (enforced)
+- **Shell Scripts**: 2-space indentation, `set -euo pipefail` required
+- **Dockerfiles**: Multi-stage builds, non-root USER
+- **Import order**: external → internal → types (where applicable)
+
+### Dockerfile Patterns
+...
 ### Build Rules
 
 - Always use `node:22-alpine` for smallest image size (~50MB base).
@@ -271,7 +280,8 @@ CMD ["pnpm", "--filter", "@pah/api", "dev"]
 - Always use multi-stage builds to exclude dev dependencies from production image.
 - Never copy `.env` files into Docker images.
 - Tag images with git SHA: `ghcr.io/user/pah-api:sha-abc1234`.
-
+- **Use `ms` package** for time-related environment variables and script timeouts.
+...
 ---
 
 ## PostgreSQL Configuration

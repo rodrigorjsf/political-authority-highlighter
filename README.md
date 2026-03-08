@@ -1,230 +1,138 @@
 # Political Authority Highlighter
 
-Visibilidade para politicos que servem com integridade — destacando aqueles que realmente trabalham pela sociedade brasileira.
+<p align="center">
+  <img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/fastify-%23202020.svg?style=for-the-badge&logo=fastify&logoColor=white" alt="Fastify" />
+  <img src="https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Drizzle-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black" alt="Drizzle ORM" />
+  <img src="https://img.shields.io/badge/Turborepo-ef4444?style=for-the-badge&logo=turborepo&logoColor=white" alt="Turborepo" />
+  <img src="https://img.shields.io/badge/pnpm-%234a4a4a.svg?style=for-the-badge&logo=pnpm&logoColor=f69220" alt="PNPM" />
+  <img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/Vitest-%23449845?style=for-the-badge&logo=vitest&logoColor=FCC72B" alt="Vitest" />
+  <img src="https://img.shields.io/badge/Playwright-%232EAD33.svg?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright" />
+  <img src="https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
+  <img src="https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=Cloudflare&logoColor=white" alt="Cloudflare" />
+</p>
 
-**Political Authority Highlighter** is a public web platform that surfaces Brazilian politicians demonstrating integrity by cross-referencing 6+ official government data sources. It computes an **Integrity Score (0-100)** based on legislative activity, expense transparency, data availability, and anti-corruption database cross-references.
+Highlights Brazilian politicians who serve with integrity.
+
+**Political Authority Highlighter** cross-references 6+ official government sources to compute an **Integrity Score (0-100)**. It measures legislative activity, expense transparency, data availability, and anti-corruption sanctions.
 
 ## Key Principles
 
-- **Political Neutrality** — Uniform scoring across all parties, states, and roles. No editorial bias. No party colors.
-- **Public Data Only** — Every data point originates from verifiable government sources under Brazil's LAI (Lei de Acesso a Informacao).
-- **Positive Framing** — Highlights integrity, does not expose negatives. Low scores are permissible; exposing corruption details is not.
-- **Privacy by Design** — CPFs encrypted at rest (AES-256-GCM), never exposed publicly. LGPD-compliant.
+- **Neutrality** — Uniform scoring across all parties, states, and roles. No bias.
+- **Public Data** — Verifiable government sources only (LAI).
+- **Positive Framing** — Highlights integrity; does not expose corruption details.
+- **Privacy** — CPFs encrypted at rest (AES-256-GCM). LGPD-compliant.
 
 ## Architecture
 
-**Modular Monolith with Pipeline Separation** — three logical modules in a TypeScript monorepo:
+**Modular Monolith** — TypeScript monorepo with three logical modules:
 
-| Module | Purpose | Database Role |
-|--------|---------|---------------|
-| `apps/web` | Next.js 15 frontend (SSG/ISR) | None (calls API) |
-| `apps/api` | Fastify 5 REST API | `api_reader` (SELECT on `public_data` only) |
-| `apps/pipeline` | Data ingestion & score calculation | `pipeline_admin` (full access) |
+| Module | Purpose | Role |
+|--------|---------|------|
+| `apps/web` | Next.js 15 frontend | None |
+| `apps/api` | Fastify 5 REST API | `api_reader` |
+| `apps/pipeline` | Ingestion & scoring | `pipeline_admin` |
 
-### Two-Schema Security Boundary
+### Database Boundary
 
-PostgreSQL enforces a hard isolation between public-facing data and internal anti-corruption records:
-
-```
-PostgreSQL 16
-├── public_data schema     ← API reads from here
-│   └── politicians, integrity_scores, bills, votes, expenses...
-└── internal_data schema   ← Pipeline writes here (API has ZERO access)
-    └── politician_identifiers (CPF encrypted), exclusion_records...
-```
-
-Even a SQL injection on the API cannot reach internal data — enforced at the database role level.
+PostgreSQL enforces isolation between public data and internal anti-corruption records. Even SQL injection on the API cannot reach internal data.
 
 ## Tech Stack
 
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| Language | TypeScript | 5.4+ |
-| Frontend | Next.js (App Router) | 15.x |
-| Backend API | Fastify | 5.x |
-| Database | PostgreSQL | 16.x |
-| ORM | Drizzle ORM | 0.36+ |
-| Job Queue | pg-boss | 10.x |
-| Validation | Zod | 3.x |
-| Hosting (BE) | Hetzner Cloud VPS (CX22) | ~$6/mo |
-| Hosting (FE) | Vercel | Free |
-| CDN/DNS | Cloudflare | Free |
-
-**Total infrastructure cost: ~$7/month**
+- **Language:** TypeScript 5.4+
+- **Frontend:** Next.js 15
+- **Backend:** Fastify 5
+- **Database:** PostgreSQL 16 (Drizzle ORM)
+- **Jobs:** pg-boss 10
+- **Cost:** ~$7/mo (Hetzner VPS + Vercel)
 
 ## Data Sources
 
-| Source | Type | Cadence | Data Provided |
-|--------|------|---------|---------------|
-| [Camara dos Deputados](https://dadosabertos.camara.leg.br/) | REST JSON | Daily | Bills, votes, expenses (CEAP), committees |
-| [Senado Federal](https://legis.senado.leg.br/dadosabertos/) | REST XML/JSON | Daily | Bills, votes, expenses (CEAPS), committees |
-| [Portal da Transparencia](https://portaldatransparencia.gov.br/api-de-dados) | REST JSON | Daily | Anti-corruption sanctions (CEIS, CNEP, CEAF, CEPIM) |
-| [TSE](https://dadosabertos.tse.jus.br/) | Bulk CSV | Weekly | Candidacies, declared assets, party affiliations |
-| [TCU CADIRREG](https://portal.tcu.gov.br/) | REST JSON | Weekly | Irregular accounts register |
-| [CGU-PAD](https://www.gov.br/cgu/pt-br/acesso-a-informacao/dados-abertos) | Bulk CSV | Monthly | Federal disciplinary proceedings |
+- [Camara](https://dadosabertos.camara.leg.br/) — Bills, votes, expenses, committees
+- [Senado](https://legis.senado.leg.br/dadosabertos/) — Bills, votes, expenses, committees
+- [Portal da Transparencia](https://portaldatransparencia.gov.br/api-de-dados) — Sanctions (CEIS, CNEP, CEAF, CEPIM)
+- [TSE](https://dadosabertos.tse.jus.br/) — Candidacies, assets, affiliations
+- [TCU](https://portal.tcu.gov.br/) — Irregular accounts
+- [CGU](https://www.gov.br/cgu/pt-br/acesso-a-informacao/dados-abertos) — Disciplinary proceedings
 
 ## Integrity Score
 
-Composite score (0-100) calculated from 4 equally-weighted dimensions:
+A composite score (0-100) from 4 equally-weighted (0.25) dimensions:
 
-| Component | Range | Description |
-|-----------|-------|-------------|
-| Transparency | 0-25 | Data availability across sources |
-| Legislative Activity | 0-25 | Bills authored, votes cast, committee participation |
-| Expense Transparency | 0-25 | Expense regularity and documentation |
-| Anti-corruption | 0-25 | Binary: 25 (no exclusion records) or 0 (any record exists) |
+- **Transparency** — Data availability.
+- **Legislative Activity** — Bills, votes, participation.
+- **Expense Transparency** — Regularity and documentation.
+- **Anti-corruption** — Binary (0 or 25).
 
-```
-final_score = transparency + legislative + financial + anticorruption
-```
+Methodology at `/metodologia`.
 
-Methodology documented at `/metodologia`. All weights are uniform (0.25 each) to ensure political neutrality.
-
-## Monorepo Structure
+## Structure
 
 ```
-political-authority-highlighter/
-├── apps/
-│   ├── web/              # Next.js 15 frontend
-│   ├── api/              # Fastify 5 backend API
-│   └── pipeline/         # Data ingestion pipeline
-├── packages/
-│   ├── shared/           # Domain types, constants, utilities
-│   └── db/               # Drizzle schemas, migrations, DB clients
-├── infrastructure/       # Docker Compose, Nginx, backups
-├── docs/prd/             # PRD, Architecture, ER diagram
-└── .claude/skills/       # AI development enforcement skills
+├── apps/         # web (Next.js), api (Fastify), pipeline (pg-boss)
+├── packages/     # shared (types), db (Drizzle)
+└── infrastructure/ # Docker, Nginx, backups
 ```
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 20+
-- pnpm 9+
-- Docker & Docker Compose
-- PostgreSQL 16 (via Docker)
+- Node.js 20+, pnpm 9+, Docker.
 
 ### Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/<org>/political-authority-highlighter.git
-cd political-authority-highlighter
-
-# Install dependencies
 pnpm install
-
-# Copy environment variables
 cp .env.example .env.local
-
-# Start PostgreSQL and infrastructure
-# PostgreSQL is exposed on host port 5433 (container port 5432)
-# This avoids conflicts with any local PostgreSQL installation on port 5432
-docker compose up -d
-
-# Run database migrations
+docker compose up -d # PostgreSQL on :5433
 pnpm --filter @pah/db migrate
-
-# Start development servers
 pnpm dev
 ```
 
 > **Port note:** Docker maps PostgreSQL to `localhost:5433` on the host (container still uses 5432 internally). If port 5433 is also unavailable on your machine, update `ports` in `docker-compose.yml` and the `DATABASE_URL*` variables in `.env.local` to use a free port.
 
-### Environment Variables
-
-| Variable | Used By | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | api, pipeline | PostgreSQL connection string |
-| `DATABASE_URL_READER` | api | Connection with `api_reader` role |
-| `DATABASE_URL_WRITER` | pipeline | Connection with `pipeline_admin` role |
-| `CPF_ENCRYPTION_KEY` | pipeline | AES-256-GCM key (32 bytes, hex) |
-| `TRANSPARENCIA_API_KEY` | pipeline | Portal da Transparencia API key |
-| `NEXT_PUBLIC_API_URL` | web | Backend API base URL |
-
-See `.env.example` for the full list with placeholder values.
-
 ## Development
 
-### Commands
-
 ```bash
-pnpm dev          # Start all apps in development mode
-pnpm build        # Build all packages and apps
-pnpm lint         # Run ESLint across all packages
-pnpm typecheck    # Run TypeScript type checking
-pnpm test         # Run all unit and integration tests
+pnpm dev          # Start apps
+pnpm build        # Build artifacts
+pnpm lint         # Run ESLint
+pnpm typecheck    # Run type checks
+pnpm test         # Run unit and integration tests
 pnpm test:e2e     # Run Playwright E2E tests
 ```
 
-### Code Quality
-
-- **TypeScript strict mode** — `any` is banned, use `unknown` + type guards
-- **Prettier** — auto-format on save (semi: false, singleQuote: true)
-- **ESLint** — `@typescript-eslint/recommended-type-checked` + import boundary enforcement
-- **Conventional Commits** — `feat(api): add cursor pagination`
-
-### Testing
-
-| Type | Tool | Coverage Target |
-|------|------|-----------------|
-| Unit | Vitest | 80-90% (scoring, transformers) |
-| Integration | Vitest + Testcontainers | API routes with real PostgreSQL |
-| E2E | Playwright | Critical user flows |
-
-## Deployment
-
-### Production
-
-- **Backend**: Docker Compose on Hetzner CX22 VPS (2 vCPU, 4GB RAM)
-- **Frontend**: Vercel Free tier with automatic deploys from `main`
-- **CDN**: Cloudflare Free (Brazilian PoPs in Sao Paulo, Rio de Janeiro)
-
-### Infrastructure Cost
-
-| Component | Cost |
-|-----------|------|
-| Hetzner CX22 VPS | ~$6/mo |
-| Vercel Free | $0 |
-| Cloudflare Free | $0 |
-| Domain + DNS | ~$1/mo |
-| **Total** | **~$7/mo** |
+- **Quality:** Strict TypeScript, Prettier, Conventional Commits.
+- **Testing:** Vitest (80%+ coverage), Testcontainers, Playwright.
 
 ## Compliance
 
-| Law | Scope |
-|-----|-------|
-| LGPD (Lei 13.709/2018) | Personal data protection — legal basis: Art. 7 IX (legitimate interest) |
-| LAI (Lei 12.527/2011) | Access to public information — all sources are public government data |
-| Marco Civil (Lei 12.965/2014) | Internet framework — no user data collected in MVP |
-| Lei da Ficha Limpa (LC 135/2010) | Referenced for exclusion filter inputs (not legal judgments) |
+- **LGPD** — Processing based on Legitimate Interest (Art. 7 IX).
+- **LAI** — Public data attribution.
+- **Marco Civil** — Log retention compliance.
 
 ## Documentation
 
-| Document | Path | Description |
-|----------|------|-------------|
-| **PRD** | [`docs/prd/PRD.md`](docs/prd/PRD.md) | Product Requirements (17 functional, 22 non-functional) |
-| **Architecture** | [`docs/prd/ARCHITECTURE.md`](docs/prd/ARCHITECTURE.md) | Stack decisions, ADRs, system diagrams |
-| **ER Diagram** | [`docs/prd/ER.md`](docs/prd/ER.md) | Entity-relationship model (15 tables) |
-| **Project Guide** | [`CLAUDE.md`](CLAUDE.md) | Development conventions and domain rules |
-| **API Docs** | [`apps/api/README.md`](apps/api/README.md) | Fastify 5 backend documentation |
-| **Web Docs** | [`apps/web/README.md`](apps/web/README.md) | Next.js 15 frontend documentation |
-| **DB Docs** | [`packages/db/README.md`](packages/db/README.md) | Drizzle schema and dual-role security |
-| **Shared Docs** | [`packages/shared/README.md`](packages/shared/README.md) | Domain types and utilities |
-| **Infra Docs** | [`infrastructure/README.md`](infrastructure/README.md) | Docker, Nginx, and Backup strategy |
-| **Stack Docs** | [`docs/stack/README.md`](docs/stack/README.md) | Local reference for library patterns |
+- [PRD](docs/prd/PRD.md)
+- [Architecture](docs/prd/ARCHITECTURE.md)
+- [ER Diagram](docs/prd/ER.md)
+- [CLAUDE.md](CLAUDE.md)
 
-## Project Status
+## Status
 
-- [x] **Phase 1: Database & API Foundation** — Dual-schema PostgreSQL setup, Fastify 5 server, Drizzle repositories.
-- [x] **Phase 2: Politician Catalog** — Listing with state/role filters and full-text search.
-- [x] **Phase 3: Politician Profile Overview** — 4-component integrity score visualization.
-- [x] **Phase 4: Legislative Activity** — Paginated authored bills and vote records.
-- [x] **Phase 5: Financial Transparency** — Paginated CEAP/CEAPS parliamentary expenses (RF-012).
-- [ ] **Phase 6: Data Ingestion Pipeline** — pg-boss scheduler and external API adapters.
-- [ ] **Phase 7: Production Deployment** — Hetzner VPS orchestration and Nginx reverse proxy.
+- [x] Phase 1: Database & API
+- [x] Phase 2: Politician Catalog
+- [x] Phase 3: Profile Overview
+- [x] Phase 4: Legislative Activity
+- [x] Phase 5: Financial Transparency
+- [ ] Phase 6: Ingestion Pipeline
+- [ ] Phase 7: Deployment
 
 ## License
 
-This project is not yet licensed. All rights reserved.
+All rights reserved.
+
