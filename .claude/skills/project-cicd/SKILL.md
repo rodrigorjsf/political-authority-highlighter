@@ -16,13 +16,14 @@ Maintains a **lean** GitHub Actions pipeline at `.github/workflows/ci.yml`. The 
 | Tool | Version | CI Step | Why It's Here |
 |------|---------|---------|---------------|
 | pnpm | 9 | Install | Workspace package manager |
-| Node.js | 20 | Setup | Fastify 5 requires ≥20 |
+| Node.js | 20 | Setup | Fastify 5 requires >=20 |
 | Turborepo | 2 (via pnpm) | All steps | Monorepo orchestration |
 | ESLint | (via root `.eslintrc.cjs`) | Lint | Catches import boundary violations |
 | TypeScript | 5.4 | Typecheck | `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess` |
 | Vitest | 2 | Unit tests | Fast unit tests, no external deps |
 | Next.js | 15 | Build | SSG/ISR build verification |
 | Fastify | 5 | Build | Included via `pnpm build` |
+| pnpm audit | (via pnpm) | Security audit | Catches high/critical dependency vulnerabilities |
 
 ---
 
@@ -30,11 +31,10 @@ Maintains a **lean** GitHub Actions pipeline at `.github/workflows/ci.yml`. The 
 
 | Tool/Task | Reason Excluded |
 |-----------|----------------|
-| Integration tests (`*.integration.test.ts`) | Require a live PostgreSQL instance — use Testcontainers. Not yet written; add when the first integration test exists and add a `services: postgres` job. |
+| Integration tests (`*.integration.test.ts`) | Require a live PostgreSQL instance -- use Testcontainers. Not yet written; add when the first integration test exists and add a `services: postgres` job. |
 | E2E tests (Playwright `e2e/*.spec.ts`) | No E2E tests written yet. Add when first spec exists, with a separate job that starts the dev server. |
 | Docker build | Production concern, not CI correctness. Add to a separate `deploy.yml` workflow. |
 | Coverage reporting | Adds 10-20s with no quality gate yet defined. Add when coverage targets are set. |
-| `npm audit` / `pnpm audit` | High false-positive rate in monorepos. Run manually when adding dependencies. |
 | Lighthouse CI | Requires a live URL. Add to `deploy.yml` after deployment. |
 | Database migrations | No live DB in CI. Validated by typecheck via Drizzle schema types. |
 
@@ -50,20 +50,21 @@ Ask: "What does this tool verify that isn't already covered?"
 
 | Category | Example | CI-worthy? |
 |----------|---------|------------|
-| Linter/formatter | Prettier, Biome | YES — catches style drift |
-| Type checker | tsc, pyright | YES — catches type errors at PR time |
-| Unit test runner | Vitest, Jest, pytest | YES — must run on every PR |
-| Build tool | Next.js build, tsc --build | YES — confirms production artifact |
-| Infrastructure provisioning | Terraform, Pulumi | NO — goes in deploy.yml, not CI |
-| Database migration | drizzle-kit migrate | NO — needs live DB; not in unit CI |
+| Linter/formatter | Prettier, Biome | YES -- catches style drift |
+| Type checker | tsc, pyright | YES -- catches type errors at PR time |
+| Unit test runner | Vitest, Jest, pytest | YES -- must run on every PR |
+| Build tool | Next.js build, tsc --build | YES -- confirms production artifact |
+| Infrastructure provisioning | Terraform, Pulumi | NO -- goes in deploy.yml, not CI |
+| Database migration | drizzle-kit migrate | NO -- needs live DB; not in unit CI |
 | E2E test runner | Playwright, Cypress | YES, but only after first spec exists |
-| Container build | Docker, kaniko | NO — build time cost; goes in deploy.yml |
-| Security scanner | Snyk, trivy | MAYBE — add only if required by team policy |
-| Coverage upload | codecov, coveralls | MAYBE — add only after coverage targets defined |
+| Container build | Docker, kaniko | NO -- build time cost; goes in deploy.yml |
+| Security scanner | Snyk, trivy | MAYBE -- add only if required by team policy |
+| Coverage upload | codecov, coveralls | MAYBE -- add only after coverage targets defined |
 
 ### Step 2: Check the cost
 
 Before adding, estimate:
+
 - Does this add more than 60s to the total CI time? If yes, consider a separate parallel job.
 - Does this require a service (database, Redis, network)? If yes, it cannot go in the simple job.
 - Does this require secrets? Add to `env:` block only if the step cannot run without them.
@@ -73,7 +74,7 @@ Before adding, estimate:
 Add the step in this order within the single job:
 
 ```
-checkout → setup tools → install → lint → typecheck → test → build
+checkout -> setup tools -> install -> lint -> typecheck -> test -> build -> security
 ```
 
 If the tool needs a separate job (e.g., integration tests with PostgreSQL service):
@@ -128,11 +129,13 @@ When the first `*.integration.test.ts` file is created:
 1. Add a `services: postgres:16-alpine` block to a new `integration` job
 2. Add `DATABASE_URL` env var pointing to the service
 3. Change the unit test step to explicitly exclude integration tests:
+
    ```yaml
    - name: Unit tests
      run: pnpm test --reporter=verbose
    ```
-   (Vitest already excludes `*.integration.test.ts` via `vitest.config.ts` `exclude` pattern — verify this is configured)
+
+   (Vitest already excludes `*.integration.test.ts` via `vitest.config.ts` `exclude` pattern -- verify this is configured)
 4. Update this skill's table
 
 ## When E2E Tests Are Added
@@ -147,6 +150,45 @@ When the first `e2e/*.spec.ts` file is created:
 
 ---
 
+## Security CI Steps
+
+These steps enforce the Frontend Security First principle (DR-008, RNF-SEC-017):
+
+### Step 1: Dependency Audit
+
+```yaml
+- name: Security audit
+  run: pnpm audit --audit-level=high
+  continue-on-error: false
+```
+
+Runs `pnpm audit` with `--audit-level=high` threshold. Fails the build on high or critical vulnerabilities.
+
+### Step 2: Client Bundle Leak Scan (post-build)
+
+After `pnpm build`, scan client chunks for forbidden patterns:
+
+```yaml
+- name: Client bundle security scan
+  run: |
+    FORBIDDEN="drizzle-orm|@pah/db|public-schema|internal-schema|DATABASE_URL|CPF_ENCRYPTION_KEY|TRANSPARENCIA_API_KEY|VERCEL_REVALIDATE_TOKEN"
+    if grep -rEl "$FORBIDDEN" apps/web/.next/static/chunks/ 2>/dev/null; then
+      echo "::error::Forbidden patterns found in client bundle!"
+      exit 1
+    fi
+```
+
+Detects server-only modules and secret variable names that should never appear in client JavaScript.
+
+### Step 3: Secret Pattern Pre-commit
+
+Enforced via lint-staged hook (not CI), but documented here:
+
+- Regex patterns: `/\d{3}\.?\d{3}\.?\d{3}-?\d{2}/` (CPF format), `/(password|secret|token)\s*[:=]\s*['"][^'"]+/i`
+- Scans only staged `.ts`, `.tsx`, `.js`, `.json`, `.env*` files
+
+---
+
 ## Leanness Checklist
 
 Before every `ci.yml` change, verify:
@@ -158,3 +200,12 @@ Before every `ci.yml` change, verify:
 - [ ] If it needs a service, it's in a separate job with `needs: ci`
 
 The default answer to "should I add this?" is **no**. Add only when the answer to "what real bug has this caught that we'd want to catch automatically?" has a clear answer.
+
+---
+
+## Changelog
+
+| Date | PRD Version | Summary |
+|------|-------------|---------|
+| 2026-02-28 | 1.0 | Initial CI/CD maintenance skill |
+| 2026-03-07 | 1.1 | Add pnpm audit to CI stack, add Security CI Steps section (DR-008, RNF-SEC-017), remove pnpm audit from exclusions |

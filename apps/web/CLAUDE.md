@@ -1,6 +1,8 @@
 # Frontend Development Guide -- Political Authority Highlighter
+
 # Stack: Next.js 15 (App Router) | React 19 | Tailwind CSS 4 | shadcn/ui
-# Last Updated: 2026-02-28 | PRD Version: 1.0
+
+# Last Updated: 2026-03-07 | PRD Version: 1.1
 
 ## Core Principles
 
@@ -21,7 +23,8 @@
 
 ## Architecture Boundaries
 
-### What the Frontend IS responsible for:
+### What the Frontend IS responsible for
+
 - Rendering politician profiles, scores, rankings, and parliamentary activity
 - SEO: metadata, Open Graph tags, JSON-LD structured data
 - Search and filter UI with URL-based state
@@ -30,14 +33,16 @@
 - Accessibility compliance (WCAG 2.1 AA)
 - Performance optimization (Core Web Vitals)
 
-### What the Frontend is NOT responsible for:
+### What the Frontend is NOT responsible for
+
 - Data fetching from government sources (that is the pipeline)
 - Score calculation or business logic (pre-computed by pipeline)
 - Database access (the frontend calls the REST API)
 - User authentication (no auth in MVP)
 - Data mutation (all data is read-only from the API)
 
-### Dependencies:
+### Dependencies
+
 - **Depends on**: Backend API (`/api/v1/*`), `packages/shared` (types, constants, utilities)
 - **Must NOT depend on**: `packages/db`, `apps/api`, `apps/pipeline`
 
@@ -210,6 +215,7 @@ async function fetchSourcesStatus(): Promise<SourceStatusResponse[]>
 ### Server Components vs Client Components
 
 **Rule**: Start with Server Components. Only add `'use client'` when the component needs:
+
 - `useState`, `useReducer`, `useEffect`, `useRef`
 - Event handlers (`onClick`, `onChange`, `onSubmit`)
 - Browser APIs (`window`, `document`, `localStorage`)
@@ -483,6 +489,7 @@ export async function fetchPoliticianBySlug(
 ```
 
 **Hard rules for color usage:**
+
 - NO red/green for "bad"/"good" politicians. Use the neutral blue scale for score visualization.
 - Score visualization uses a single-hue gradient (light blue to dark blue) or a neutral gray scale.
 - Party names displayed as text in neutral badges. Never in party-branded colors.
@@ -897,6 +904,12 @@ describe('ScoreBadge', () => {
 | Display exclusion record details (source, date, description) | Violates silent exclusion (DR-001). Only show the neutral notice text |
 | Use color to convey meaning without text alternative | WCAG 2.1 AA violation. Always pair color with text labels |
 | Skip `loading.tsx` skeleton for data-fetching pages | Causes poor UX and CLS. Every page with async data needs a skeleton |
+| Store auth tokens in localStorage/sessionStorage | Violates RNF-SEC-015. Use httpOnly Secure SameSite=Strict cookies when auth is implemented |
+| Add external `<script>` tags without SRI | Violates RNF-SEC-016. All external scripts must have `integrity` and `crossorigin` attributes |
+| Render unsanitized HTML from API with innerHTML | Violates RNF-SEC-013/DR-008. Government text rendered via JSX auto-escaping only |
+| Import `@pah/db`, `pg`, or `drizzle-orm` in frontend | Violates RNF-SEC-012/DR-008. Frontend accesses data through the API only |
+| Use `NEXT_PUBLIC_` prefix for secrets/tokens | Violates RNF-SEC-012. Only `NEXT_PUBLIC_API_URL` is permitted |
+| Expose server error details in UI | Violates RNF-SEC-014. Error boundaries show generic messages; use `digest` for correlation |
 
 ---
 
@@ -941,14 +954,46 @@ describe('ScoreBadge', () => {
 Configured via `next.config.ts` headers:
 
 ```typescript
-// next.config.ts
+// next.config.ts -- Security Headers (DR-008, RNF-SEC-011)
+const cspHeader = `
+  default-src 'self';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' blob: data: https:;
+  font-src 'self';
+  connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'};
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+  frame-ancestors 'none';
+  upgrade-insecure-requests;
+`
+
 const securityHeaders = [
+  {
+    key: 'Content-Security-Policy-Report-Only',
+    value: cspHeader.replace(/\s{2,}/g, ' ').trim(),
+  },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
 ]
 ```
+
+### Client Bundle Protection (RNF-SEC-012)
+
+1. **`server-only` guard**: Every file in `packages/db/src/` imports `'server-only'`. If any Client Component transitively imports these modules, `next build` fails.
+2. **ESLint restriction**: `apps/web/.eslintrc` forbids importing `@pah/db`, `pg`, `drizzle-orm`, `pg-boss` via `no-restricted-imports` rule.
+3. **CI post-build scan**: After `next build`, `.next/static/chunks/` is scanned for forbidden patterns: `drizzle-orm`, `@pah/db`, `DATABASE_URL`, `CPF_ENCRYPTION_KEY`.
+4. **Environment variable discipline**: Only `NEXT_PUBLIC_API_URL` may use the `NEXT_PUBLIC_` prefix. All other env vars are server-only.
+
+### Error Sanitization (RNF-SEC-014)
+
+- `error.tsx` boundaries display ONLY generic user-friendly messages
+- The `digest` property on Next.js errors is used for server-side correlation
+- `api-client.ts` catches `ApiError` and surfaces only the RFC 7807 `title` field to users
+- Never render: stack traces, database table names, SQL queries, internal URLs, or raw error messages from the API
 
 ---
 
@@ -957,3 +1002,4 @@ const securityHeaders = [
 | Date | PRD Version | Summary |
 |------|-------------|---------|
 | 2026-02-28 | 1.0 | Initial frontend development guide |
+| 2026-03-07 | 1.1 | Add Frontend Security First principle (DR-008), full CSP header, client bundle protection, error sanitization, SRI policy |
