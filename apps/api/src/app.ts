@@ -40,7 +40,9 @@ export function buildApp() {
   void app.register(rateLimit, { max: 60, timeWindow: '1 minute' })
 
   // Dependency injection
-  const db = createPublicDb(env.DATABASE_URL_READER)
+  // Use pooling (Transaction mode) if port 6543 is detected (Supabase/Supavisor)
+  const usePooling = env.DATABASE_URL_READER.includes(':6543')
+  const db = createPublicDb(env.DATABASE_URL_READER, usePooling)
   const politicianRepository = createPoliticianRepository(db)
   const politicianService = createPoliticianService(politicianRepository)
   const billRepository = createBillRepository(db)
