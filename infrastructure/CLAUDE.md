@@ -1,5 +1,7 @@
 # Infrastructure and DevOps Guide -- Political Authority Highlighter
+
 # Stack: Docker Compose | PostgreSQL 16 | Hetzner CX22 VPS | Vercel Free | GitHub Actions
+
 # Last Updated: 2026-02-28 | PRD Version: 1.0
 
 ## Core Principles
@@ -21,7 +23,8 @@
 
 ## Architecture Boundaries
 
-### What Infrastructure IS responsible for:
+### What Infrastructure IS responsible for
+
 - Docker Compose service orchestration on Hetzner VPS
 - PostgreSQL configuration, schema initialization, role management
 - Nginx reverse proxy with TLS termination
@@ -30,7 +33,8 @@
 - Monitoring and alerting
 - Secret management
 
-### What Infrastructure is NOT responsible for:
+### What Infrastructure is NOT responsible for
+
 - Application code logic (that is the API, pipeline, and frontend)
 - Vercel deployment configuration (managed by Next.js config and Vercel dashboard)
 - Cloudflare CDN configuration (managed via Cloudflare dashboard)
@@ -183,7 +187,7 @@ networks:
 services:
   postgres:
     ports:
-      - "5432:5432"  # Expose to host for local development tools
+      - "127.0.0.1:5433:5432"  # Expose to host for local development tools (5433 avoids conflict with local PostgreSQL)
     environment:
       POSTGRES_PASSWORD: dev_password
 
