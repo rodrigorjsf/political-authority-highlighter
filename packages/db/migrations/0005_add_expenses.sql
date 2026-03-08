@@ -19,5 +19,5 @@ CREATE TABLE IF NOT EXISTS public_data.expenses (
 );
 
 -- Indexes for efficient querying and pagination
-CREATE INDEX idx_expenses_politician ON public_data.expenses(politician_id);
-CREATE INDEX idx_expenses_pagination ON public_data.expenses(year DESC, month DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_expenses_politician ON public_data.expenses(politician_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_pagination ON public_data.expenses(year DESC, month DESC, id DESC);
