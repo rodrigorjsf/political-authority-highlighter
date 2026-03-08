@@ -14,7 +14,7 @@ This project uses two PostgreSQL schemas as security boundaries:
 // packages/db/src/public-schema.ts
 import { pgSchema, text, uuid, integer, boolean, timestamp, varchar, index } from 'drizzle-orm/pg-core'
 
-const publicData = pgSchema('public_data')
+const publicData = pgSchema('public')
 
 export const politicians = publicData.table(
   'politicians',
@@ -65,7 +65,7 @@ import type { Politician } from '@pah/db'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
 
-// API reader (public_data only, SELECT)
+// API reader (public only, SELECT)
 const readerPool = new Pool({ connectionString: process.env['DATABASE_URL_READER'] })
 export const publicDb = drizzle(readerPool, { schema: publicSchema })
 

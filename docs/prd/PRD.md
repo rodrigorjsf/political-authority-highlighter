@@ -145,17 +145,17 @@
 | RNF-PERF-005 | API response time (p50) | < 100ms | Connection pooling + in-memory LRU for hot profiles |
 | RNF-PERF-006 | Search response time | < 200ms | PostgreSQL GIN index on `tsvector` column |
 | RNF-PERF-007 | Time to First Byte (TTFB) | < 500ms | Vercel edge + stale-while-revalidate |
-| RNF-SCALE-001 | Launch capacity | 50k MAU / 500 concurrent | Hetzner CX22 + Vercel Free + Cloudflare CDN |
-| RNF-SCALE-002 | 12-month capacity | 500k MAU / 5000 concurrent | Vertical scaling (CX42) + Vercel Pro + PostgreSQL read replica |
+| RNF-SCALE-001 | Launch capacity | 50k MAU / 500 concurrent | Supabase Pro + Vercel Free + Cloudflare CDN |
+| RNF-SCALE-002 | 12-month capacity | 500k MAU / 5000 concurrent | Supabase Pro + Vercel Pro + Supavisor pooling |
 
 ### 3.2 Security
 
 | ID | Requirement | Implementation |
 |----|-------------|----------------|
 | RNF-SEC-001 | HTTPS everywhere | Cloudflare TLS 1.3 termination, Full (Strict) mode to origin |
-| RNF-SEC-002 | CPF encryption at rest | AES-256-GCM in application layer, key in Docker secret (ADR-007) |
+| RNF-SEC-002 | CPF encryption at rest | AES-256-GCM in application layer, key in environment secret (ADR-007) |
 | RNF-SEC-003 | CPF hash for matching | SHA-256 hash for cross-source matching without decryption |
-| RNF-SEC-004 | Exclusion data isolation | PostgreSQL schema RBAC: `api_reader` role has zero access to `internal_data` schema (ADR-001) |
+| RNF-SEC-004 | Exclusion data isolation | PostgreSQL schema RBAC: `api_reader` role (Supabase) has zero access to `internal_data` schema (ADR-001) |
 | RNF-SEC-005 | API rate limiting | `@fastify/rate-limit`: 100 req/min per IP |
 | RNF-SEC-006 | Input validation | Zod schemas on all API query parameters |
 | RNF-SEC-007 | SQL injection prevention | Drizzle ORM parameterized queries; no raw SQL in API layer |
@@ -174,11 +174,11 @@
 
 | Aspect | Target | Strategy |
 |--------|--------|----------|
-| SLA | 99.5% uptime (~3.6 hours downtime/month) | Docker restart policies, UptimeRobot monitoring |
-| RPO (Recovery Point Objective) | 24 hours | Daily `pg_dump` backups to Hetzner Object Storage at 01:00 UTC |
-| RTO (Recovery Time Objective) | 2 hours | Provision new VPS + restore from backup + re-run pipeline for missing days |
+| SLA | 99.5% uptime (~3.6 hours downtime/month) | Supabase managed platform, Vercel edge |
+| RPO (Recovery Point Objective) | 24 hours | Supabase automatic daily backups + PITR (Pro tier) |
+| RTO (Recovery Time Objective) | 1 hour | Point-in-Time Recovery via Supabase dashboard |
 | Data Reconstructability | Full | All source data is public and re-fetchable from government APIs |
-| Failover | Manual | Single VPS; failover requires manual VPS provisioning (acceptable for 99.5% SLA) |
+| Failover | Managed | Supabase internal failover mechanisms |
 | Monitoring | 5-minute checks | UptimeRobot free tier on `/health` endpoint; email/Telegram alerts |
 
 ### 3.4 Observability
@@ -238,8 +238,8 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 | ID | Constraint | Target |
 |----|-----------|--------|
 | RNF-COST-001 | Monthly infrastructure budget | < $100/month across all environments |
-| RNF-COST-002 | MVP monthly cost | ~$7/month (Hetzner CX22 + Vercel Free + Cloudflare Free) |
-| RNF-COST-003 | 12-month projected cost | ~$38/month at 500k MAU |
+| RNF-COST-002 | MVP monthly cost | ~$26/month (Supabase Pro + Vercel Free + Cloudflare Free) |
+| RNF-COST-003 | 12-month projected cost | ~$62/month at 500k MAU |
 
 ---
 
@@ -307,21 +307,21 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 
 | Environment | Purpose | Data | Access | Infrastructure |
 |-------------|---------|------|--------|----------------|
-| Production | Live user-facing platform | Real government data, daily sync | Public (no auth) | Hetzner CX22 + Vercel Free + Cloudflare |
+| Production | Live user-facing platform | Real government data, daily sync | Public (no auth) | Supabase Pro + Vercel Free + Cloudflare |
 | Development | Local development and testing | Seed data (subset of real data) | Developer only | Docker Compose on local machine |
 | CI | Automated testing in GitHub Actions | Test fixtures, Testcontainers PostgreSQL | GitHub Actions | Ephemeral containers |
-| Staging | Pre-production validation (post-MVP) | Copy of production data (anonymized CPFs) | Team only | Separate VPS or branch deploy on Vercel |
+| Staging | Pre-production validation (post-MVP) | Copy of production data (anonymized CPFs) | Team only | Separate Supabase Project + Vercel branch |
 
 ### 6.2 Data Residency & Geographic Constraints
 
 | Aspect | Detail |
 |--------|--------|
-| Backend hosting | Hetzner Cloud, Nuremberg/Helsinki (EU). Acceptable under LGPD as EU has adequate data protection. |
+| Backend hosting | Supabase (AWS region: us-east-1 or sa-east-1). LGPD compliant. |
 | Frontend hosting | Vercel Edge Network with Brazilian PoP (Sao Paulo). |
 | CDN | Cloudflare with Brazilian PoPs (Sao Paulo, Rio de Janeiro). |
-| Database | PostgreSQL on Hetzner VPS (EU). Contains only public government data in public schema. CPF data (internal schema) stored encrypted. |
-| Backups | Hetzner Object Storage (EU). Encrypted at rest. |
-| Latency to Brazil | ~180ms from EU data center. Mitigated by Cloudflare CDN caching and Vercel edge for frontend. |
+| Database | Supabase Managed Postgres. Contains only public government data in public schema. CPF data (internal schema) stored encrypted. |
+| Backups | Supabase Managed (S3-backed). Encrypted at rest. |
+| Latency to Brazil | Edge functions and CDN mitigate origin latency. |
 | Data sovereignty | All source data originates from Brazilian government. No cross-border data transfer of personal data (CPFs encrypted, never transmitted outside pipeline). |
 
 ---

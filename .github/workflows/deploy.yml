@@ -1,0 +1,33 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-db:
+    name: Apply Migrations to Supabase
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Push migrations
+        run: |
+          npx supabase db push --db-url "${{ secrets.DATABASE_URL }}"
+        # Note: DATABASE_URL should be the connection string for the Supabase instance
+        # (usually the pooling one on port 6543)
+
+  deploy-frontend:
+    name: Deploy Frontend to Vercel
+    runs-on: ubuntu-latest
+    needs: [deploy-db]
+    steps:
+      - uses: actions/checkout@v4
+      # Vercel deployment is usually automatic via GitHub integration,
+      # but we can add manual triggers here if needed.
+      - name: Deploy to Vercel
+        run: echo "Vercel auto-deploy triggered by push to main"

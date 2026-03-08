@@ -20,7 +20,7 @@ const tsvector = customType<{ data: string }>({
   },
 })
 
-export const publicData = pgSchema('public_data')
+export const publicData = pgSchema('public')
 
 /**
  * Central entity: a Brazilian federal legislator (deputado or senador).
