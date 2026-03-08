@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "postgres-local": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "DATABASE_URI",
+        "crystaldba/postgres-mcp",
+        "--access-mode=unrestricted"
+      ],
+      "env": {
+        "DATABASE_URI": "postgresql://postgres:postgres_dev_password@localhost:5433/authority_highlighter"
+      }
+    }
+  }
+}
