@@ -119,6 +119,8 @@ pnpm install
 cp .env.example .env.local
 
 # Start PostgreSQL and infrastructure
+# PostgreSQL is exposed on host port 5433 (container port 5432)
+# This avoids conflicts with any local PostgreSQL installation on port 5432
 docker compose up -d
 
 # Run database migrations
@@ -127,6 +129,8 @@ pnpm --filter @pah/db migrate
 # Start development servers
 pnpm dev
 ```
+
+> **Port note:** Docker maps PostgreSQL to `localhost:5433` on the host (container still uses 5432 internally). If port 5433 is also unavailable on your machine, update `ports` in `docker-compose.yml` and the `DATABASE_URL*` variables in `.env.local` to use a free port.
 
 ### Environment Variables
 
