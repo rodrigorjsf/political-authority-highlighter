@@ -204,10 +204,26 @@ pnpm test:e2e     # Run Playwright E2E tests
 
 | Document | Path | Description |
 |----------|------|-------------|
-| PRD | [`docs/prd/PRD.md`](docs/prd/PRD.md) | Product Requirements (17 functional, 22 non-functional) |
-| Architecture | [`docs/prd/ARCHITECTURE.md`](docs/prd/ARCHITECTURE.md) | Stack decisions, ADRs, system diagrams |
-| ER Diagram | [`docs/prd/ER.md`](docs/prd/ER.md) | Entity-relationship model (15 tables) |
-| Project Guide | [`CLAUDE.md`](CLAUDE.md) | Development conventions and domain rules |
+| **PRD** | [`docs/prd/PRD.md`](docs/prd/PRD.md) | Product Requirements (17 functional, 22 non-functional) |
+| **Architecture** | [`docs/prd/ARCHITECTURE.md`](docs/prd/ARCHITECTURE.md) | Stack decisions, ADRs, system diagrams |
+| **ER Diagram** | [`docs/prd/ER.md`](docs/prd/ER.md) | Entity-relationship model (15 tables) |
+| **Project Guide** | [`CLAUDE.md`](CLAUDE.md) | Development conventions and domain rules |
+| **API Docs** | [`apps/api/README.md`](apps/api/README.md) | Fastify 5 backend documentation |
+| **Web Docs** | [`apps/web/README.md`](apps/web/README.md) | Next.js 15 frontend documentation |
+| **DB Docs** | [`packages/db/README.md`](packages/db/README.md) | Drizzle schema and dual-role security |
+| **Shared Docs** | [`packages/shared/README.md`](packages/shared/README.md) | Domain types and utilities |
+| **Infra Docs** | [`infrastructure/README.md`](infrastructure/README.md) | Docker, Nginx, and Backup strategy |
+| **Stack Docs** | [`docs/stack/README.md`](docs/stack/README.md) | Local reference for library patterns |
+
+## Project Status
+
+- [x] **Phase 1: Database & API Foundation** — Dual-schema PostgreSQL setup, Fastify 5 server, Drizzle repositories.
+- [x] **Phase 2: Politician Catalog** — Listing with state/role filters and full-text search.
+- [x] **Phase 3: Politician Profile Overview** — 4-component integrity score visualization.
+- [x] **Phase 4: Legislative Activity** — Paginated authored bills and vote records.
+- [x] **Phase 5: Financial Transparency** — Paginated CEAP/CEAPS parliamentary expenses (RF-012).
+- [ ] **Phase 6: Data Ingestion Pipeline** — pg-boss scheduler and external API adapters.
+- [ ] **Phase 7: Production Deployment** — Hetzner VPS orchestration and Nginx reverse proxy.
 
 ## License
 
