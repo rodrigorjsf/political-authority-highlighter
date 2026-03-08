@@ -9,6 +9,9 @@ import type {
   Vote,
   VoteFilters,
   VoteListResponse,
+  Expense,
+  ExpenseFilters,
+  ExpenseListResponse,
 } from '@pah/shared'
 
 // Re-export from shared to avoid importing shared types directly in components
@@ -23,6 +26,9 @@ export type {
   Vote,
   VoteFilters,
   VoteListResponse,
+  Expense,
+  ExpenseFilters,
+  ExpenseListResponse,
 }
 
 export interface ProblemDetail {

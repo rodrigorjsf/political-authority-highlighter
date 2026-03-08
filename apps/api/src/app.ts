@@ -13,6 +13,9 @@ import { createBillsRoute } from './routes/bills.route.js'
 import { createVoteRepository } from './repositories/vote.repository.js'
 import { createVoteService } from './services/vote.service.js'
 import { createVotesRoute } from './routes/votes.route.js'
+import { createExpenseRepository } from './repositories/expense.repository.js'
+import { createExpenseService } from './services/expense.service.js'
+import { createExpensesRoute } from './routes/expenses.route.js'
 import { errorHandler } from './hooks/error-handler.js'
 import { env } from './config/env.js'
 
@@ -41,10 +44,13 @@ export function buildApp() {
   const politicianRepository = createPoliticianRepository(db)
   const politicianService = createPoliticianService(politicianRepository)
   const billRepository = createBillRepository(db)
+  const expenseRepository = createExpenseRepository(db)
+  const expenseService = createExpenseService(expenseRepository)
   const billService = createBillService(billRepository)
   const voteRepository = createVoteRepository(db)
   const voteService = createVoteService(voteRepository)
 
+  void app.register(createExpensesRoute({ expenseService }), { prefix: '/api/v1' })
   // Routes
   void app.register(createPoliticiansRoute({ politicianService }), { prefix: '/api/v1' })
   void app.register(createBillsRoute({ billService }), { prefix: '/api/v1' })
