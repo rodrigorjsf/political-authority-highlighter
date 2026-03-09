@@ -145,6 +145,58 @@ export const votes = publicData.table(
 )
 
 /**
+ * Parliamentary proposals authored or co-authored by a politician (RF-010).
+ * Covers all proposal types: PL, PEC, PLP, MP, PDL, etc.
+ * Populated by the pipeline from Camara and Senado sources.
+ */
+export const proposals = publicData.table(
+  'proposals',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    politicianId: uuid('politician_id').references(() => politicians.id).notNull(),
+    externalId: varchar('external_id', { length: 100 }).notNull(),
+    source: varchar('source', { length: 20 }).notNull(), // 'camara' | 'senado'
+    proposalType: varchar('proposal_type', { length: 20 }).notNull(), // 'PL', 'PEC', 'PLP', 'MP', etc.
+    proposalNumber: varchar('proposal_number', { length: 20 }).notNull(),
+    proposalYear: smallint('proposal_year').notNull(),
+    summary: text('summary').notNull(),
+    status: varchar('status', { length: 50 }).notNull(),
+    submissionDate: date('submission_date').notNull(),
+    sourceUrl: varchar('source_url', { length: 500 }), // nullable
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_proposals_politician').on(table.politicianId),
+    index('idx_proposals_pagination').on(table.politicianId, table.submissionDate, table.id),
+  ],
+)
+
+/**
+ * Committee memberships for a politician (RF-011).
+ * end_date null means current active membership.
+ * Populated by the pipeline from Camara and Senado sources.
+ */
+export const committees = publicData.table(
+  'committees',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    politicianId: uuid('politician_id').references(() => politicians.id).notNull(),
+    externalId: varchar('external_id', { length: 100 }).notNull(),
+    source: varchar('source', { length: 20 }).notNull(), // 'camara' | 'senado'
+    committeeName: text('committee_name').notNull(),
+    role: varchar('role', { length: 50 }).notNull(), // 'Titular', 'Suplente', 'Presidente', etc.
+    startDate: date('start_date').notNull(),
+    endDate: date('end_date'), // nullable — null = current
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_committees_politician').on(table.politicianId),
+  ],
+)
+
+/**
  * Parliamentary expenses (CEAP/CEAPS) for a politician (RF-012).
  * Populated by the pipeline from Portal da Transparencia (Camara/Senado sources).
  * Keyset pagination on (year DESC, month DESC, id DESC) for stable ordering.
