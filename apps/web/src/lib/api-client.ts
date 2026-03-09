@@ -9,6 +9,9 @@ import type {
   VoteListResponse,
   ExpenseFilters,
   ExpenseListResponse,
+  ProposalFilters,
+  ProposalListResponse,
+  CommitteeListResponse,
 } from './api-types'
 
 const API_BASE_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001/api/v1'
@@ -125,5 +128,37 @@ export async function fetchPoliticianExpenses(
   return apiFetch<ExpenseListResponse>(
     `/politicians/${encodeURIComponent(slug)}/expenses?${params.toString()}`,
     { next: { revalidate: 300, tags: [`politician-${slug}-expenses`] } },
+  )
+}
+
+/**
+ * Fetches paginated proposals for a politician with ISR caching.
+ * revalidate: 300 = 5 min
+ * tags: ['politician-{slug}-proposals'] = allows targeted on-demand revalidation
+ */
+export async function fetchPoliticianProposals(
+  slug: string,
+  filters: ProposalFilters = {},
+): Promise<ProposalListResponse> {
+  const params = new URLSearchParams()
+  if (filters.cursor !== undefined) params.set('cursor', filters.cursor)
+  if (filters.limit !== undefined) params.set('limit', String(filters.limit))
+  return apiFetch<ProposalListResponse>(
+    `/politicians/${encodeURIComponent(slug)}/proposals?${params.toString()}`,
+    { next: { revalidate: 300, tags: [`politician-${slug}-proposals`] } },
+  )
+}
+
+/**
+ * Fetches committee memberships for a politician with ISR caching.
+ * revalidate: 300 = 5 min
+ * tags: ['politician-{slug}-committees'] = allows targeted on-demand revalidation
+ */
+export async function fetchPoliticianCommittees(
+  slug: string,
+): Promise<CommitteeListResponse> {
+  return apiFetch<CommitteeListResponse>(
+    `/politicians/${encodeURIComponent(slug)}/committees`,
+    { next: { revalidate: 300, tags: [`politician-${slug}-committees`] } },
   )
 }
