@@ -1,6 +1,6 @@
 # Product Requirements Document — Political Authority Highlighter
 
-> **Version:** 1.1 | **Status:** Active | **Last Updated:** 2026-03-07
+> **Version:** 1.2 | **Status:** Active | **Last Updated:** 2026-03-09
 > **Stack reference:** [ARCHITECTURE.md](./ARCHITECTURE.md)
 > **ER model:** [ER.md](./ER.md)
 
@@ -145,7 +145,7 @@
 | RNF-PERF-005 | API response time (p50) | < 100ms | Connection pooling + in-memory LRU for hot profiles |
 | RNF-PERF-006 | Search response time | < 200ms | PostgreSQL GIN index on `tsvector` column |
 | RNF-PERF-007 | Time to First Byte (TTFB) | < 500ms | Vercel edge + stale-while-revalidate |
-| RNF-SCALE-001 | Launch capacity | 50k MAU / 500 concurrent | Supabase Pro + Vercel Free + Cloudflare CDN |
+| RNF-SCALE-001 | Launch capacity | 50k MAU / 500 concurrent | Supabase Free + Vercel Free + Cloudflare CDN |
 | RNF-SCALE-002 | 12-month capacity | 500k MAU / 5000 concurrent | Supabase Pro + Vercel Pro + Supavisor pooling |
 
 ### 3.2 Security
@@ -164,7 +164,7 @@
 | RNF-SEC-010 | Dependency auditing | `npm audit` in CI, Dependabot enabled |
 | RNF-SEC-011 | Content-Security-Policy on frontend | Static CSP via `next.config.ts` `headers()`: `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self'; connect-src 'self' {NEXT_PUBLIC_API_URL}; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests`. Deploy with `Content-Security-Policy-Report-Only` first, enforce after validation. Nonces NOT used (incompatible with ISR per ADR-002). |
 | RNF-SEC-012 | Client bundle sensitive data prevention | `import 'server-only'` in all `packages/db/src/` files. ESLint `no-restricted-imports` forbidding `@pah/db`, `pg`, `drizzle-orm` in `apps/web/`. CI post-build grep on `.next/static/chunks/` for forbidden patterns (`drizzle-orm`, `DATABASE_URL`, `CPF_ENCRYPTION_KEY`). Only `NEXT_PUBLIC_API_URL` may use `NEXT_PUBLIC_` prefix. |
-| RNF-SEC-013 | API response rendering safety | All government-sourced text fields rendered via React JSX auto-escaping only. No `innerHTML` or `dangerouslySetInnerHTML` except JSON-LD `<script>` tags with `JSON.stringify()` sanitized data. Pipeline transformers strip HTML tags from government source text before storing in `public_data`. |
+| RNF-SEC-013 | API response rendering safety | All government-sourced text fields rendered via React JSX auto-escaping only. No `innerHTML` or `dangerouslySetInnerHTML` except JSON-LD `<script>` tags with `JSON.stringify()` sanitized data. Pipeline transformers strip HTML tags from government source text before storing in `public`. |
 | RNF-SEC-014 | Error message sanitization | No server stack traces, database table names, internal URLs, or SQL query text in any user-facing error response. API returns RFC 7807 ProblemDetail with generic messages. Frontend `error.tsx` boundary shows user-friendly message only. Error `digest` property used for server-side correlation without exposing internals. |
 | RNF-SEC-015 | Future authentication token security | When authentication is implemented post-MVP: tokens stored in httpOnly Secure SameSite=Strict cookies only (never localStorage/sessionStorage). CSRF protection via double-submit cookie or Synchronizer Token pattern. JWT signed with RS256 minimum. Token rotation on privilege escalation. Session expiry <= 24 hours with sliding window. |
 | RNF-SEC-016 | Subresource Integrity for external scripts | Any external script added to the frontend must include `integrity` and `crossorigin` attributes. No external scripts permitted without SRI hashes. MVP has zero external scripts (no analytics, no third-party widgets). |
@@ -175,8 +175,8 @@
 | Aspect | Target | Strategy |
 |--------|--------|----------|
 | SLA | 99.5% uptime (~3.6 hours downtime/month) | Supabase managed platform, Vercel edge |
-| RPO (Recovery Point Objective) | 24 hours | Supabase automatic daily backups + PITR (Pro tier) |
-| RTO (Recovery Time Objective) | 1 hour | Point-in-Time Recovery via Supabase dashboard |
+| RPO (Recovery Point Objective) | 24 hours | Supabase automatic daily backups (Free tier). PITR available on Pro tier if needed. |
+| RTO (Recovery Time Objective) | 1 hour | Restore from daily backup via Supabase dashboard. Supplementary pg_dump via GitHub Actions for additional safety. |
 | Data Reconstructability | Full | All source data is public and re-fetchable from government APIs |
 | Failover | Managed | Supabase internal failover mechanisms |
 | Monitoring | 5-minute checks | UptimeRobot free tier on `/health` endpoint; email/Telegram alerts |
@@ -238,8 +238,8 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 | ID | Constraint | Target |
 |----|-----------|--------|
 | RNF-COST-001 | Monthly infrastructure budget | < $100/month across all environments |
-| RNF-COST-002 | MVP monthly cost | ~$26/month (Supabase Pro + Vercel Free + Cloudflare Free) |
-| RNF-COST-003 | 12-month projected cost | ~$62/month at 500k MAU |
+| RNF-COST-002 | MVP monthly cost | ~$1.50/month (Supabase Free $0 + Vercel Free $0 + domain ~$1.50) |
+| RNF-COST-003 | 12-month projected cost | ~$47/month at 500k MAU (Supabase Pro $25 + Vercel Pro $20 + domain $1.50) |
 
 ---
 
@@ -249,9 +249,9 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 
 | ID | Name | Rule | Enforcement |
 |----|------|------|-------------|
-| DR-001 | SilentExclusionInvariant | Anti-corruption exclusion data (source, type, dates, details) MUST never be exposed through any public interface. Only a boolean `exclusion_flag` may cross from `internal_data` to `public_data` schema. | PostgreSQL RBAC: `api_reader` role has zero grants on `internal_data` schema. API layer has no import path to internal schema types. Code-level: ESLint import boundary rules. |
+| DR-001 | SilentExclusionInvariant | Anti-corruption exclusion data (source, type, dates, details) MUST never be exposed through any public interface. Only a boolean `exclusion_flag` may cross from `internal_data` to `public` schema. | PostgreSQL RBAC: `api_reader` role has zero grants on `internal_data` schema. API layer has no import path to internal schema types. Code-level: ESLint import boundary rules. |
 | DR-002 | PoliticalNeutralityInvariant | All scoring dimensions MUST use uniform weights (0.25 each). No manual adjustment, editorial override, or politician-specific weighting is permitted. The algorithm treats all politicians identically regardless of party, state, or role. | Score calculator enforces equal weights. No admin interface exists to modify weights. Weight values defined as constants, not configuration. |
-| DR-003 | PublicDataOnlyRule | All data displayed on the platform MUST originate from verifiable government data sources. No crowd-sourced, editorial, or unverified data is permitted. | Every record in `public_data` schema has a `source_url` pointing to the official government source. Ingestion pipeline only accepts data from the 6 registered sources. |
+| DR-003 | PublicDataOnlyRule | All data displayed on the platform MUST originate from verifiable government data sources. No crowd-sourced, editorial, or unverified data is permitted. | Every record in `public` schema has a `source_url` pointing to the official government source. Ingestion pipeline only accepts data from the 6 registered sources. |
 | DR-004 | DataAvailabilityScoreCorrelation | A politician's maximum achievable score is proportional to the data available about them. Politicians with data from more sources can achieve higher transparency scores. Politicians with sparse data receive lower scores in the transparency component, not penalties in other components. | Transparency score component (0-25) calculated as: (sources with data / total possible sources) * 25. Other components use available data without penalizing missing sources. |
 | DR-005 | CPFNonExposureRule | CPF numbers MUST never appear in any public-facing interface, API response, log file, error message, or URL. CPFs exist only in `internal_data.politician_identifiers` as encrypted bytes and SHA-256 hashes. | CPF stored as AES-256-GCM encrypted `bytea` and SHA-256 hash in `internal_data` schema only. Pipeline code handles CPF in memory only during ingestion. Structured logging configured to redact any 11-digit numeric patterns. |
 | DR-006 | NoRetaliationDesignRule | The platform MUST highlight positive integrity indicators. It MUST NOT expose negative details that could enable targeted retaliation against specific politicians. A low score is permissible; exposing the specific reasons from anti-corruption databases is not. | Silent exclusion pattern (ADR-004): anti-corruption component is 0 or 25, with no details. UI displays only "Information from anti-corruption databases affected this score." No drill-down into exclusion records. |
@@ -270,7 +270,7 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 | Silent Exclusion | The design pattern where anti-corruption data affects the score but its details are never exposed through any public interface | Hidden flag, secret filter |
 | Data Source | One of 6 official Brazilian government data providers: Camara API, Senado API, Portal da Transparencia, TSE, TCU CADIRREG, CGU-PAD | Feed, API (too generic), provider |
 | Ingestion Pipeline | The batch processing system that fetches, transforms, matches, scores, and publishes data from all 6 sources on scheduled cadences | ETL, sync job, cron job (too generic) |
-| Public Schema | The PostgreSQL schema (`public_data`) accessible by the API. Contains only non-sensitive, publicly verifiable data. | Main schema, API schema |
+| Public Schema | The PostgreSQL schema (`public`) accessible by the API. Contains only non-sensitive, publicly verifiable data. | Main schema, API schema |
 | Internal Schema | The PostgreSQL schema (`internal_data`) accessible only by the pipeline. Contains CPFs, exclusion records, and raw source data. | Private schema, secret schema (implies wrongdoing) |
 | Tenure | The period during which a politician holds their current elected position | Mandate (Portuguese calque), term |
 | CEAP/CEAPS | Cota para Exercicio da Atividade Parlamentar — the parliamentary expense allowance system for deputados (CEAP) and senadores (CEAPS) | Parliamentary expenses, quota |
@@ -307,7 +307,7 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 
 | Environment | Purpose | Data | Access | Infrastructure |
 |-------------|---------|------|--------|----------------|
-| Production | Live user-facing platform | Real government data, daily sync | Public (no auth) | Supabase Pro + Vercel Free + Cloudflare |
+| Production | Live user-facing platform | Real government data, daily sync | Public (no auth) | Supabase Free (upgrade to Pro when needed) + Vercel Free + Cloudflare |
 | Development | Local development and testing | Seed data (subset of real data) | Developer only | Docker Compose on local machine |
 | CI | Automated testing in GitHub Actions | Test fixtures, Testcontainers PostgreSQL | GitHub Actions | Ephemeral containers |
 | Staging | Pre-production validation (post-MVP) | Copy of production data (anonymized CPFs) | Team only | Separate Supabase Project + Vercel branch |
@@ -316,7 +316,7 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 
 | Aspect | Detail |
 |--------|--------|
-| Backend hosting | Supabase (AWS region: us-east-1 or sa-east-1). LGPD compliant. |
+| Backend hosting | Supabase Free tier (AWS region: us-east-1 or sa-east-1). Upgrade to Pro when scaling demands. LGPD compliant. |
 | Frontend hosting | Vercel Edge Network with Brazilian PoP (Sao Paulo). |
 | CDN | Cloudflare with Brazilian PoPs (Sao Paulo, Rio de Janeiro). |
 | Database | Supabase Managed Postgres. Contains only public government data in public schema. CPF data (internal schema) stored encrypted. |
@@ -349,3 +349,4 @@ The platform does not determine electoral eligibility. The anti-corruption exclu
 |---------|------|--------|-------------------|
 | 1.0 | 2026-02-28 | Initial PRD — 17 functional requirements, 6 data sources, domain model, compliance framework | PRD.md, ARCHITECTURE.md, ER.md |
 | 1.1 | 2026-03-07 | Frontend security-first principle — 7 new security NFRs (RNF-SEC-011 to RNF-SEC-017), new domain rule DR-008 (FrontendSecurityFirstInvariant) | PRD.md, project-guardian, project-domain-rules, project-compliance, project-cicd, apps/web/CLAUDE.md |
+| 1.2 | 2026-03-09 | Supabase migration update — default to Free tier ($0/month), schema rename `public_data` to `public`, updated cost estimates and backup strategy (daily automatic backups instead of PITR) | PRD.md, ARCHITECTURE.md |

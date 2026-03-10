@@ -14,6 +14,14 @@
       "env": {
         "DATABASE_URI": "postgresql://postgres:postgres_dev_password@localhost:5433/authority_highlighter"
       }
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com"
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=xvtxbvakzoezzjnpbiyv"
     }
   }
 }

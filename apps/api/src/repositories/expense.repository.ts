@@ -21,7 +21,7 @@ export interface ExpenseListFilters {
 }
 
 /**
- * Repository for public_data.expenses queries.
+ * Repository for public.expenses queries.
  * Cursor pagination on (year DESC, month DESC, id DESC) for stable ordering.
  */
 export function createExpenseRepository(db: PublicDb): {

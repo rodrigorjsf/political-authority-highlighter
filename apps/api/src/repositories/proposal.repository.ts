@@ -21,7 +21,7 @@ export interface ProposalListFilters {
 }
 
 /**
- * Repository for public_data.proposals queries.
+ * Repository for public.proposals queries.
  * Cursor pagination on (submission_date DESC, id DESC) matching the keyset pattern.
  */
 export function createProposalRepository(db: PublicDb): {

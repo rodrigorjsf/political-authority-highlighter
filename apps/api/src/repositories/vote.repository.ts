@@ -19,7 +19,7 @@ export interface VoteListFilters {
 }
 
 /**
- * Repository for public_data.votes queries.
+ * Repository for public.votes queries.
  * Cursor pagination on (session_date DESC, id DESC) matching the keyset pattern.
  */
 export function createVoteRepository(db: PublicDb): {

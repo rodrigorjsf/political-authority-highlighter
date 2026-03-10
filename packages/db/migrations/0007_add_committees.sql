@@ -1,8 +1,8 @@
--- 0007_add_committees.sql — public_data schema: committees (RF-011)
+-- 0007_add_committees.sql — public schema: committees (RF-011)
 
-CREATE TABLE IF NOT EXISTS public_data.committees (
+CREATE TABLE IF NOT EXISTS public.committees (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  politician_id     UUID NOT NULL REFERENCES public_data.politicians(id),
+  politician_id     UUID NOT NULL REFERENCES public.politicians(id),
   external_id       VARCHAR(100) NOT NULL,
   source            VARCHAR(20) NOT NULL,
   committee_name    TEXT NOT NULL,
@@ -16,4 +16,4 @@ CREATE TABLE IF NOT EXISTS public_data.committees (
 
 -- Index for politician lookup
 CREATE INDEX IF NOT EXISTS idx_committees_politician
-  ON public_data.committees(politician_id);
+  ON public.committees(politician_id);

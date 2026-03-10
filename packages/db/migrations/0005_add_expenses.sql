@@ -1,9 +1,9 @@
 -- RF-012: Add expenses table for parliamentary expense tracking (CEAP/CEAPS)
 -- Supports cursor-based pagination on (year DESC, month DESC, id DESC)
 
-CREATE TABLE IF NOT EXISTS public_data.expenses (
+CREATE TABLE IF NOT EXISTS public.expenses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  politician_id UUID NOT NULL REFERENCES public_data.politicians(id),
+  politician_id UUID NOT NULL REFERENCES public.politicians(id),
   external_id VARCHAR(100) NOT NULL,
   source VARCHAR(20) NOT NULL,
   year SMALLINT NOT NULL,
@@ -19,5 +19,5 @@ CREATE TABLE IF NOT EXISTS public_data.expenses (
 );
 
 -- Indexes for efficient querying and pagination
-CREATE INDEX IF NOT EXISTS idx_expenses_politician ON public_data.expenses(politician_id);
-CREATE INDEX IF NOT EXISTS idx_expenses_pagination ON public_data.expenses(year DESC, month DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_expenses_politician ON public.expenses(politician_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_pagination ON public.expenses(year DESC, month DESC, id DESC);

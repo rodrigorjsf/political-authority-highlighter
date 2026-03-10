@@ -6,7 +6,7 @@ Backend REST API for the Political Authority Highlighter. Built with **Fastify 5
 
 - **Performance** — Fastify 5 with TypeBox for validation and serialization.
 - **Clean Architecture** — Route → Service → Repository.
-- **Security** — Reads `public_data` schema via `api_reader` role. No access to `internal_data`.
+- **Security** — Reads `public` schema via `api_reader` role. No access to `internal_data`.
 - **Standards** — RFC 7807 Problem Details and keyset (cursor) pagination.
 - **OpenAPI** — Auto-documentation at `/docs`.
 

@@ -1,8 +1,8 @@
--- 0006_add_proposals.sql — public_data schema: proposals (RF-010)
+-- 0006_add_proposals.sql — public schema: proposals (RF-010)
 
-CREATE TABLE IF NOT EXISTS public_data.proposals (
+CREATE TABLE IF NOT EXISTS public.proposals (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  politician_id     UUID NOT NULL REFERENCES public_data.politicians(id),
+  politician_id     UUID NOT NULL REFERENCES public.politicians(id),
   external_id       VARCHAR(100) NOT NULL,
   source            VARCHAR(20) NOT NULL,
   proposal_type     VARCHAR(20) NOT NULL,
@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS public_data.proposals (
 
 -- Index for politician lookup
 CREATE INDEX IF NOT EXISTS idx_proposals_politician
-  ON public_data.proposals(politician_id);
+  ON public.proposals(politician_id);
 
 -- Composite index for stable DESC cursor pagination (politician_id, date DESC, id DESC)
 CREATE INDEX IF NOT EXISTS idx_proposals_pagination
-  ON public_data.proposals(politician_id, submission_date DESC, id DESC);
+  ON public.proposals(politician_id, submission_date DESC, id DESC);

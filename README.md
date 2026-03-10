@@ -47,7 +47,7 @@ PostgreSQL enforces isolation between public data and internal anti-corruption r
 - **Backend:** Fastify 5
 - **Database:** PostgreSQL 16 (Drizzle ORM)
 - **Jobs:** pg-boss 10
-- **Cost:** ~$7/mo (Hetzner VPS + Vercel)
+- **Cost:** ~$1.50/mo (Supabase Free + Vercel Free + domain)
 
 ## Data Sources
 
@@ -135,4 +135,3 @@ pnpm test:e2e     # Run Playwright E2E tests
 ## License
 
 All rights reserved.
-

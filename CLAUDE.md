@@ -1,7 +1,10 @@
 # Political Authority Highlighter -- Project Development Guide
+
 # Architecture: Managed Infrastructure with Supabase
+
 # Stack: TypeScript 5.4+ | Next.js 15 | Fastify 5 | Supabase (PostgreSQL 16) | Drizzle ORM | pg-boss 10
-# Last Updated: 2026-03-08 | PRD Version: 1.1
+
+# Last Updated: 2026-03-09 | PRD Version: 1.2
 
 ## Core Principles
 
@@ -139,6 +142,7 @@ All packages use `tsconfig.base.json` as the base with these strict settings:
 ```
 
 **Rules:**
+
 - The `any` type is banned. Use `unknown` and narrow with type guards.
 - Prefer `interface` for object shapes that may be extended, `type` for unions, intersections, and mapped types.
 - All public function signatures must have explicit return types.
@@ -191,6 +195,7 @@ All packages use `tsconfig.base.json` as the base with these strict settings:
 ## Code Formatting and Linting
 
 **Prettier** (runs on save and pre-commit):
+
 ```json
 {
   "semi": false,
@@ -203,6 +208,7 @@ All packages use `tsconfig.base.json` as the base with these strict settings:
 ```
 
 **ESLint** extends:
+
 - `@typescript-eslint/recommended-type-checked`
 - `eslint-plugin-import` with `import/no-restricted-paths` for boundary enforcement
 - `eslint-plugin-drizzle` for safe query patterns (in db package)
@@ -252,6 +258,7 @@ Examples:
 ## Environment Variable Management
 
 **Rules:**
+
 - Never commit `.env` files. Add `.env*` to `.gitignore` (except `.env.example`).
 - Every environment variable must have an entry in `.env.example` with a placeholder value.
 - Validate all environment variables at application startup using Zod schemas. Fail fast on missing variables.
@@ -352,7 +359,7 @@ Internal data (exclusion records, CPF matches, audit logs) must never be publicl
 | ADR-003 | pg-boss (no Redis) | Single data store, $5/month saved, <100 jobs/day does not need Redis throughput |
 | ADR-004 | Silent exclusion via boolean flag | LGPD data minimization, no retaliation risk, political neutrality |
 | ADR-005 | Drizzle ORM dual-schema type safety | Compile-time prevention of cross-schema access from API module |
-| ADR-006 | Managed infrastructure with Supabase | Zero maintenance, PITR, Supavisor pooling, solo developer ops simplicity |
+| ADR-006 | Managed infrastructure with Supabase | Zero maintenance, Free tier ($0/month), Supavisor pooling, solo developer ops simplicity |
 | ADR-007 | Application-layer CPF encryption | Encryption key never reaches database process memory |
 
 ---
@@ -392,3 +399,4 @@ Before opening a pull request, verify:
 | Date | PRD Version | Summary |
 |------|-------------|---------|
 | 2026-02-28 | 1.0 | Initial project-wide development guide |
+| 2026-03-09 | 1.2 | Supabase Free tier, schema rename public_data->public |

@@ -7,7 +7,7 @@ description: Guardian skill that enforces PRD compliance during development. Use
 
 ## Purpose
 
-This skill ensures all development work aligns with the PRD (v1.1) for **Political Authority Highlighter**. It prevents scope creep, enforces domain rules, and maintains architectural integrity.
+This skill ensures all development work aligns with the PRD (v1.2) for **Political Authority Highlighter**. It prevents scope creep, enforces domain rules, and maintains architectural integrity.
 
 ## When to Trigger
 
@@ -86,7 +86,7 @@ For every code change, verify against ALL domain rules:
 
 For any new API endpoint:
 
-- [ ] Does it only query the `public_data` schema?
+- [ ] Does it only query the `public` schema?
 - [ ] Does it use the `api_reader` database role?
 - [ ] Does it have a TypeBox response schema (no field leakage)?
 - [ ] Does it set appropriate Cache-Control headers?
@@ -150,3 +150,4 @@ If any check fails:
 |------|-------------|---------|
 | 2026-02-28 | 1.0 | Initial guardian skill |
 | 2026-03-07 | 1.1 | Add Frontend Security Check (section 7) for DR-008 enforcement |
+| 2026-03-09 | 1.2 | Schema rename public_data→public, Supabase Free tier |

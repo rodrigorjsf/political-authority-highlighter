@@ -1,7 +1,7 @@
 -- Seed data for development and integration testing
 -- Creates 25 sample politicians with integrity scores
 
-INSERT INTO public_data.politicians (id, external_id, source, name, slug, state, party, role, photo_url, active, tenure_start_date, exclusion_flag)
+INSERT INTO public.politicians (id, external_id, source, name, slug, state, party, role, photo_url, active, tenure_start_date, exclusion_flag)
 VALUES
   ('a1b2c3d4-0001-0001-0001-000000000001', 'camara-1001', 'camara', 'Ana Lima', 'ana-lima-sp', 'SP', 'PT', 'deputado', NULL, TRUE, '2023-02-01', FALSE),
   ('a1b2c3d4-0001-0001-0001-000000000002', 'camara-1002', 'camara', 'Bruno Costa', 'bruno-costa-rj', 'RJ', 'PL', 'deputado', NULL, TRUE, '2019-02-01', FALSE),
@@ -30,7 +30,7 @@ VALUES
   ('a1b2c3d4-0001-0001-0001-000000000025', 'senado-2010', 'senado', 'Yara Lima', 'yara-lima-pa', 'PA', 'MDB', 'senador', NULL, TRUE, '2019-02-01', FALSE)
 ON CONFLICT (external_id) DO NOTHING;
 
-INSERT INTO public_data.integrity_scores (politician_id, overall_score, transparency_score, legislative_score, financial_score, anticorruption_score, exclusion_flag, methodology_version)
+INSERT INTO public.integrity_scores (politician_id, overall_score, transparency_score, legislative_score, financial_score, anticorruption_score, exclusion_flag, methodology_version)
 VALUES
   ('a1b2c3d4-0001-0001-0001-000000000001', 92, 24, 23, 22, 25, FALSE, '1.0'),
   ('a1b2c3d4-0001-0001-0001-000000000002', 85, 22, 20, 18, 25, FALSE, '1.0'),
