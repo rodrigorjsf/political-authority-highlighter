@@ -42,7 +42,7 @@ export interface PoliticianProfileRow {
 }
 
 /**
- * Repository for public_data.politicians queries.
+ * Repository for public.politicians queries.
  * All Drizzle access is isolated here — never inline queries in services or routes.
  */
 export function createPoliticianRepository(db: PublicDb): {

@@ -21,7 +21,7 @@ export interface BillListFilters {
 }
 
 /**
- * Repository for public_data.bills queries.
+ * Repository for public.bills queries.
  * Cursor pagination on (submission_date DESC, id DESC) matching the keyset pattern.
  */
 export function createBillRepository(db: PublicDb): {

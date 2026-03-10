@@ -6,7 +6,7 @@ Database persistence for the Political Authority Highlighter. Built with **Drizz
 
 PostgreSQL enforces isolation between schemas:
 
-- **`public_data`** — `politicians`, `integrity_scores`, `bills`, `votes`, `expenses`.
+- **`public`** — `politicians`, `integrity_scores`, `bills`, `votes`, `expenses`.
 - **`internal_data`** — `politician_identifiers` (CPF encrypted/hashed), `exclusion_records`, `ingestion_logs`.
 
 ## Features
@@ -20,7 +20,7 @@ PostgreSQL enforces isolation between schemas:
 
 | Role | Access Level | App |
 |------|--------------|-----|
-| `api_reader` | SELECT on `public_data` | `apps/api` |
+| `api_reader` | SELECT on `public` | `apps/api` |
 | `pipeline_admin` | ALL on both schemas | `apps/pipeline` |
 
 ## Structure
@@ -29,7 +29,7 @@ PostgreSQL enforces isolation between schemas:
 src/
 ├── clients.ts            # Public (reader) vs Pipeline (admin) clients
 ├── internal-schema.ts    # internal_data schema
-├── public-schema.ts      # public_data schema
+├── public-schema.ts      # public schema
 └── migrate.ts            # Migration runner
 ```
 

@@ -32,7 +32,7 @@ The Political Authority Highlighter is a public web platform that surfaces Brazi
 - **Offline-first scoring**: All integrity scores are pre-computed during batch ingestion, so the public API serves static-like data with sub-300ms latency.
 - **SEO performance**: Server-side generated pages via Next.js ensure organic discoverability.
 - **Managed Security**: Uses Supabase Row Level Security (RLS) as a second defensive layer on top of schema isolation.
-- **Budget efficiency**: The entire stack runs on approximately $25/month infrastructure using Supabase and Vercel.
+- **Budget efficiency**: The entire stack runs on approximately $1.50/month infrastructure using Supabase Free and Vercel Free.
 
 ---
 
@@ -45,17 +45,17 @@ The Political Authority Highlighter is a public web platform that surfaces Brazi
 | Language         | TypeScript          | 5.4+     | -            |
 | Frontend         | Next.js (App Router)| 15.x     | $0 (Vercel)  |
 | Backend API      | Fastify             | 5.x      | (Serverless/Supabase Edge) |
-| Database         | PostgreSQL (Supabase)| 16.x     | $25 (Pro)    |
+| Database         | PostgreSQL (Supabase)| 16.x     | $0 (Free)    |
 | ORM              | Drizzle ORM         | 0.36+    | -            |
 | Job Queue        | pg-boss             | 10.x     | -            |
 | Validation       | Zod                 | 3.x      | -            |
-| Hosting (BE/DB)  | Supabase            | Pro      | $25          |
+| Hosting (BE/DB)  | Supabase            | Free     | $0           |
 | Hosting (FE)     | Vercel              | Hobby    | $0           |
 | CDN/DNS          | Cloudflare          | Free     | $0           |
 | CI/CD            | GitHub Actions      | Free     | $0           |
 | Monitoring       | UptimeRobot         | Free     | $0           |
 
-**Estimated total: ~$25/month**
+**Estimated total: ~$1.50/month** (domain only)
 
 ### 2.2 Justification Per Layer
 
@@ -80,7 +80,7 @@ The Political Authority Highlighter is a public web platform that surfaces Brazi
 #### PostgreSQL 16 (Supabase)
 
 - **Why this product**: Managed database-as-a-service eliminates operational overhead (backups, patches, scaling). Native schema support (`CREATE SCHEMA`) enables the two-schema isolation requirement. Built-in pooling via Supavisor handles serverless connections. JSONB columns handle heterogeneous raw source data. Full-text search via `tsvector` handles politician name search.
-- **Trade-offs**: Higher cost than self-hosting. Fixed monthly cost for Pro tier.
+- **Trade-offs**: Free tier has 500MB database limit and no PITR. Upgrade to Pro ($25/month) when scaling demands.
 - **Version**: 16.x for improved logical replication and SIMD-accelerated JSON processing.
 
 #### Drizzle ORM 0.36+
@@ -94,10 +94,10 @@ The Political Authority Highlighter is a public web platform that surfaces Brazi
 - **Trade-offs**: Lower throughput than BullMQ+Redis (hundreds vs thousands of jobs/second). Irrelevant here: the pipeline processes ~700 politicians across 6 sources daily, well under 100 jobs/day.
 - **Version**: 10.x (stable, PostgreSQL 16 support).
 
-#### Supabase Pro (Backend/Database Hosting)
+#### Supabase (Free tier, upgrade to Pro when needed)
 
-- **Why this product**: Managed PostgreSQL, Auth, and Edge Functions in one platform. $25/month Pro tier includes automatic backups, PITR (Point-in-Time Recovery), and generous limits for a solo developer project. Eliminates VPS maintenance.
-- **Trade-offs**: More expensive than a raw VPS. Vendor lock-in (partially mitigated by using standard PostgreSQL features).
+- **Why this product**: Managed PostgreSQL, Auth, and Edge Functions in one platform. Free tier includes automatic daily backups and generous limits for a solo developer project. Upgrade to Pro ($25/month) when database exceeds 500MB, MAU exceeds 50k, or PITR is needed. Eliminates VPS maintenance.
+- **Trade-offs**: Vendor lock-in (partially mitigated by using standard PostgreSQL features). Free tier limited to 500MB database, no PITR.
 
 #### Vercel Hobby (Frontend Hosting)
 
@@ -152,7 +152,7 @@ flowchart TB
         NextJS["Next.js 15<br/>App Router<br/>SSG/ISR Pages"]
     end
 
-    subgraph Supabase["Supabase (Pro Tier)"]
+    subgraph Supabase["Supabase (Free Tier)"]
         subgraph Edge_Functions["Edge Functions / Fastify"]
             Fastify["Fastify 5 API<br/>/api/v1/*"]
         end
@@ -229,7 +229,7 @@ flowchart TB
                       [Cloudflare CDN]
                          /        \
                         /          \
-              [Vercel/Next.js]    [Hetzner VPS]
+              [Vercel/Next.js]    [Supabase Edge]
               (SSG/ISR pages)         |
                     |           [Fastify API]---SELECT--->[public schema]
                     |                                      - politicians
@@ -321,7 +321,7 @@ Browser -> Cloudflare CDN
          |
          |--> ISR page: Vercel regenerates from API, serves stale while revalidating
          |
-         |--> API call: Cloudflare proxies to Hetzner VPS
+         |--> API call: Cloudflare proxies to Supabase Edge (Fastify)
                 |
                 Fastify (api_reader role) -> SELECT from public schema
                 |
@@ -604,17 +604,20 @@ The system must enforce a hard boundary between public-facing politician data an
 
 **Decision:**
 Use a single PostgreSQL 16 instance with two schemas (`public` and `internal_data`) and two database roles:
+
 - `api_reader`: `GRANT SELECT ON ALL TABLES IN SCHEMA public`. No grants on `internal_data`.
 - `pipeline_admin`: `GRANT ALL ON ALL TABLES IN SCHEMA public, internal_data`.
 
 The Fastify API connects using `api_reader`. The pipeline worker connects using `pipeline_admin`.
 
 **Alternatives Considered:**
+
 1. **Two separate databases**: Stronger isolation but doubles infrastructure cost and complicates the pipeline (cross-database joins impossible in PostgreSQL). The pipeline would need two connections and manual coordination.
 2. **Application-level isolation only**: Using a single role but restricting queries in code. Rejected because a single code bug could leak internal data.
 3. **Row-Level Security (RLS)**: Adds complexity without clear benefit over schema-level RBAC for this use case.
 
 **Consequences:**
+
 - Positive: Database-level enforcement means even SQL injection on the API cannot reach internal data.
 - Positive: Single database instance keeps infrastructure cost minimal.
 - Positive: The pipeline can use cross-schema joins for score calculation.
@@ -635,6 +638,7 @@ The platform's primary discovery channel is organic search (Google). Brazilian u
 
 **Decision:**
 Use Next.js 15 App Router with:
+
 - **Static Site Generation (SSG)** for the politician listing page and top-100 politician profiles at build time.
 - **Incremental Static Regeneration (ISR)** with on-demand revalidation for all politician profile pages. The pipeline triggers revalidation after publishing new data.
 - **Server Components** by default (zero client JS for data display pages).
@@ -643,12 +647,14 @@ Use Next.js 15 App Router with:
 Deploy on Vercel Hobby tier (free).
 
 **Alternatives Considered:**
+
 1. **Full SSR (server-side rendering)**: Every request hits the API. Unnecessary latency and load for data that changes daily.
 2. **Pure SPA (React/Vite)**: No SSR means no SEO. Disqualified by requirement.
 3. **Astro**: Excellent for static content but smaller ecosystem and fewer AI training examples than Next.js, reducing development velocity for a solo developer.
 4. **Self-hosted Next.js on VPS**: Saves Vercel dependency but requires managing Node.js process, SSL, and edge caching manually. Not worth the ops burden.
 
 **Consequences:**
+
 - Positive: Sub-second page loads from Vercel's edge CDN (Brazilian PoP in Sao Paulo).
 - Positive: Zero hosting cost for frontend.
 - Positive: Excellent Core Web Vitals scores for SEO ranking.
@@ -671,6 +677,7 @@ The data ingestion pipeline must orchestrate 6+ source adapters with different c
 Use pg-boss 10.x, which stores job queues in PostgreSQL tables. This eliminates Redis from the infrastructure entirely.
 
 Configuration:
+
 - Each source adapter is a named queue: `camara-sync`, `senado-sync`, `transparencia-sync`, `tse-sync`, `tcu-sync`, `cgu-sync`.
 - Cron schedules defined in pg-boss configuration.
 - Retry policy: 3 attempts with exponential backoff (1m, 5m, 15m).
@@ -678,11 +685,13 @@ Configuration:
 - Job completion triggers score recalculation job.
 
 **Alternatives Considered:**
+
 1. **BullMQ + Redis**: Industry standard, higher throughput. Rejected because it adds Redis infrastructure ($3-5/month additional), and throughput is irrelevant for <100 jobs/day.
 2. **node-cron + custom state management**: Simpler but no built-in retry, dead letter, or job history. Fragile for a production system.
 3. **GitHub Actions scheduled workflows**: Free, but cannot access the VPS database directly. Would require an HTTP trigger endpoint, adding attack surface.
 
 **Consequences:**
+
 - Positive: Single data store (PostgreSQL) for application data AND job queues.
 - Positive: ~$5/month saved by eliminating Redis.
 - Positive: Job history stored in PostgreSQL, queryable for monitoring.
@@ -703,6 +712,7 @@ Brazilian anti-corruption databases (CEIS, CNEP, CEAF, CEPIM) contain sensitive 
 
 **Decision:**
 Implement a "silent exclusion" pattern:
+
 1. The pipeline reads exclusion records from internal sources and stores them in `internal_data.exclusion_records`.
 2. During score calculation, if ANY exclusion record exists for a politician, the `anticorruption_score` component is set to 0 (out of 25).
 3. A boolean `exclusion_flag` is set to `true` in `public.integrity_scores`.
@@ -710,11 +720,13 @@ Implement a "silent exclusion" pattern:
 5. The frontend displays this as "Information from anti-corruption databases affected this score" without specifics.
 
 **Alternatives Considered:**
+
 1. **Expose exclusion details publicly**: Provides transparency but risks LGPD violation and retaliation. Rejected per DR-001 and DR-006.
 2. **No exclusion data at all**: Safer legally but defeats the product's purpose. Rejected.
 3. **Graduated scoring (partial penalty)**: More nuanced but requires subjective weighting of corruption severity. Rejected per DR-002 (political neutrality).
 
 **Consequences:**
+
 - Positive: LGPD data minimization: only a boolean crosses the schema boundary.
 - Positive: No retaliation risk: impossible to determine which specific database flagged a politician.
 - Positive: Political neutrality: binary flag applied uniformly to all politicians.
@@ -735,17 +747,20 @@ The codebase must interact with two PostgreSQL schemas (`public`, `internal_data
 
 **Decision:**
 Use Drizzle ORM with:
+
 - `pgSchema('public')` and `pgSchema('internal_data')` for schema-qualified table definitions.
 - Two separate Drizzle client instances: `publicDb` (using `api_reader` connection) and `pipelineDb` (using `pipeline_admin` connection).
 - The API module imports ONLY from `src/db/public-schema.ts`. The pipeline module can import from both.
 - ESLint rule or import boundary enforcement to prevent API code from importing internal schema types.
 
 **Alternatives Considered:**
+
 1. **Prisma**: Mature, but multi-schema support is limited (requires raw SQL for cross-schema). `prisma generate` creates a single client.
 2. **Kysely**: Excellent type safety but less community/AI training data than Drizzle.
 3. **Raw SQL with typed helpers**: Maximum control but loses migration tooling and increases development time.
 
 **Consequences:**
+
 - Positive: Compile-time prevention of cross-schema access from the API module.
 - Positive: SQL-like query builder produces predictable, optimizable queries.
 - Positive: Lightweight (no query engine runtime like Prisma).
@@ -762,26 +777,29 @@ Use Drizzle ORM with:
 **Date:** 2026-03-08
 
 **Context:**
-The initial plan for self-hosting on a VPS required manual management of PostgreSQL, backups, and security patches. As a solo developer, operational simplicity and data reliability (PITR) are higher priorities than absolute minimum cost. Supabase provides a managed PostgreSQL environment with built-in pooling and scaling.
+The initial plan for self-hosting on a VPS required manual management of PostgreSQL, backups, and security patches. As a solo developer, operational simplicity and data reliability are higher priorities than absolute minimum cost. Supabase provides a managed PostgreSQL environment with built-in pooling and scaling.
 
 **Decision:**
-Migrate all backend infrastructure to Supabase (Pro Tier):
+Start on Supabase Free Tier ($0/month). Upgrade to Pro ($25/month) only when database exceeds 500MB, MAU exceeds 50k, or PITR is needed:
+
 - **Database**: Managed PostgreSQL 16.
 - **Pooling**: Supavisor for serverless connection management.
-- **Backups**: Automatic daily backups with Point-in-Time Recovery (PITR).
+- **Backups**: Automatic daily backups (Free tier). PITR available on Pro tier.
 - **Security**: Supabase handles OS hardening and database patches.
 - **Pipeline**: Ingestion jobs will run via GitHub Actions or locally, connecting directly to Supabase.
 
 **Alternatives Considered:**
+
 1. **Hetzner VPS (Original Plan)**: Cheapest (~$6/mo) but requires highest operational effort.
 2. **AWS RDS**: Very expensive (~$50+/mo) for similar managed features.
 3. **Railway/Render**: Good developer experience but database management is less specialized than Supabase.
 
 **Consequences:**
+
 - Positive: Zero database maintenance (managed backups, patches).
-- Positive: PITR for high data reliability.
+- Positive: $0 initial cost; daily automatic backups included on Free tier.
 - Positive: Built-in connection pooling for serverless environments (Vercel/Edge).
-- Negative: Fixed monthly cost increase (~$25 vs ~$6).
+- Negative: $0 initially, $25/month when scaling demands Pro tier.
 - Negative: Vendor lock-in (partially mitigated by sticking to standard PostgreSQL features and Drizzle ORM).
 
 **Review Trigger:** Monthly active users exceed 500k, or database storage costs grow exponentially.
@@ -798,11 +816,13 @@ CPF (Cadastro de Pessoas Fisicas) is the Brazilian national ID number, classifie
 
 **Decision:**
 Implement a two-layer CPF storage strategy:
+
 1. **Encrypted CPF**: AES-256-GCM encryption using a key stored as an environment variable (Docker secret). Stored as `bytea` in `internal_data.politician_identifiers.cpf_encrypted`.
 2. **CPF Hash**: SHA-256 hash of the normalized CPF (digits only). Stored as `varchar` in `internal_data.politician_identifiers.cpf_hash`. Used for cross-source matching without decryption.
 3. **Encryption in application layer** (not `pgcrypto`): Ensures the encryption key never reaches the database process memory. The pipeline encrypts/decrypts in Node.js using `crypto.createCipheriv`.
 
 **Consequences:**
+
 - Positive: CPF matching works via hash comparison (fast, no decryption needed).
 - Positive: Even database compromise does not expose CPFs without the application-layer key.
 - Positive: Key rotation possible by re-encrypting (hash remains unchanged).
@@ -935,46 +955,38 @@ Future (post-MVP):
         [Vercel Edge]        [Supabase Cloud]
         Next.js 15           Managed Postgres 16
         SSG/ISR pages        Edge Functions
-        Free Tier            Pro Tier
+        Free Tier            Free Tier
 ```
 
-### 9.2 Development Environment (Docker Compose)
+### 9.2 Development Environment (Supabase CLI)
 
-Local development continues to use Docker Compose to provide an environment as close as possible to the Supabase PostgreSQL standard.
+Local development uses the Supabase CLI to provide an environment identical to the Supabase cloud platform.
 
-```yaml
-# docker-compose.yml (simplified)
-services:
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: authority_highlighter
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./infrastructure/init-schemas.sql:/docker-entrypoint-initdb.d/01-schemas.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-    restart: unless-stopped
+```bash
+# Start local Supabase stack (PostgreSQL, Auth, Edge Functions, Studio)
+supabase start
 
-  api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
-    environment:
-      DATABASE_URL: postgresql://api_reader:***@postgres/authority_highlighter?schema=public
-    depends_on:
-      postgres: { condition: service_healthy }
-    restart: unless-stopped
+# Apply migrations
+supabase db push
 
-volumes:
-  pgdata:
+# Reset local database (re-applies all migrations)
+supabase db reset
+
+# Generate TypeScript types from schema
+supabase gen types typescript --local > packages/db/src/database.types.ts
+
+# Stop local Supabase stack
+supabase stop
 ```
+
+The Supabase CLI starts a full local stack including PostgreSQL 16, PostgREST, GoTrue (Auth), and Supabase Studio for database inspection. Connection strings are provided automatically via `supabase status`.
 
 ### 9.3 CI/CD Pipeline (GitHub Actions)
 
 Trigger: push to main branch
 
 Steps:
+
   1. Lint + Type Check (TypeScript)
   2. Unit Tests (Vitest)
   3. Integration Tests (Testcontainers + PostgreSQL)
@@ -984,16 +996,21 @@ Steps:
 ### 9.4 Backup Strategy
 
 ```
-Daily at 01:00 UTC (before pipeline runs):
-  1. pg_dump --format=custom --compress=9 > backup-$(date +%Y%m%d).dump
-  2. Upload to Hetzner Object Storage (S3-compatible)
-  3. Retain last 7 daily + 4 weekly backups
-  4. Estimated size: <100MB (600 politicians, limited history)
-  5. Cost: ~$0.02/month
+Primary (Supabase Free tier):
+  - Automatic daily backups managed by Supabase
+  - No PITR on Free tier (available on Pro)
+  - Restore via Supabase dashboard
+
+Supplementary (GitHub Actions pg_dump):
+  1. GitHub Actions scheduled workflow at 01:00 UTC (before pipeline runs)
+  2. pg_dump --format=custom --compress=9 > backup-$(date +%Y%m%d).dump
+  3. Upload to GitHub Artifacts or S3-compatible storage
+  4. Retain last 7 daily + 4 weekly backups
+  5. Estimated size: <100MB (600 politicians, limited history)
 
 Recovery:
-  1. Provision new VPS (if needed)
-  2. pg_restore from latest backup
+  1. Restore from Supabase daily backup (primary)
+  2. Or pg_restore from supplementary pg_dump backup
   3. Re-run pipeline for missing days
   4. All source data is public and re-fetchable
 ```
@@ -1006,23 +1023,24 @@ Recovery:
 
 | Phase | MAU | Concurrent | Infrastructure | Monthly Cost |
 |-------|-----|-----------|----------------|-------------|
-| Launch | 50k | 500 | Current (CX22 + Vercel Free) | ~$7 |
-| 6 months | 200k | 2000 | Upgrade to CX32 (3vCPU/8GB), Vercel Pro | ~$30 |
-| 12 months | 500k | 5000 | CX42 (4vCPU/16GB), Vercel Pro, read replica | ~$60 |
-| 18 months | 1M+ | 10000+ | Evaluate Kubernetes or managed services | ~$100+ |
+| Launch | 50k | 500 | Supabase Free + Vercel Free + Cloudflare | ~$1.50 |
+| 6 months | 200k | 2000 | Supabase Pro + Vercel Free + Cloudflare | ~$26.50 |
+| 12 months | 500k | 5000 | Supabase Pro + Vercel Pro + Cloudflare | ~$47 |
+| 18 months | 1M+ | 10000+ | Supabase Pro (Large) + Vercel Pro + Cloudflare | ~$100+ |
 
 ### 10.2 Scaling Levers (in order of effort)
 
 1. **CDN caching** (zero effort): Increase Cloudflare cache TTLs. Pre-computed data is inherently cacheable.
-2. **VPS vertical scaling** (5 minutes): Hetzner allows live resize. CX22 -> CX32 -> CX42.
+2. **Supabase upgrade** (5 minutes): Upgrade to Pro ($25/month) for PITR, higher limits, dedicated compute.
 3. **Vercel upgrade** (instant): Hobby -> Pro ($20/month) for 1TB bandwidth.
-4. **PostgreSQL read replica** (1 hour): Add a streaming replica for API reads. Pipeline writes to primary.
+4. **PostgreSQL read replica** (1 hour): Supabase Pro includes read replicas for high-traffic scenarios.
 5. **API response caching** (2 hours): Add in-memory cache (Node.js LRU) for hot politician profiles.
-6. **Separate API VPS** (4 hours): Move API to dedicated VPS, keep pipeline + DB on another.
+6. **Supabase compute upgrade** (5 minutes): Upgrade Supabase compute tier for higher connection limits.
 
 ### 10.3 Why This Scales
 
 The architecture's key insight is that **pre-computed scores make the API essentially a static data server**. A politician's profile changes at most once per day. This means:
+
 - Every response is cacheable for at least 5 minutes.
 - No computation at request time (unlike score-on-read).
 - PostgreSQL serves simple key-value-like lookups on indexed columns.
@@ -1042,7 +1060,7 @@ political-authority-highlighter/
 +-- .github/
 |   +-- workflows/
 |       +-- ci.yml                  # Lint, test, build
-|       +-- deploy.yml              # Deploy to Hetzner + Vercel
+|       +-- deploy.yml              # Deploy to Supabase + Vercel
 +-- packages/
 |   +-- shared/                     # Shared types, utilities, constants
 |   |   +-- src/

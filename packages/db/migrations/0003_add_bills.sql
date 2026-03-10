@@ -1,8 +1,8 @@
--- 0003_add_bills.sql — public_data schema: bills (RF-008)
+-- 0003_add_bills.sql — public schema: bills (RF-008)
 
-CREATE TABLE IF NOT EXISTS public_data.bills (
+CREATE TABLE IF NOT EXISTS public.bills (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  politician_id   UUID NOT NULL REFERENCES public_data.politicians(id),
+  politician_id   UUID NOT NULL REFERENCES public.politicians(id),
   external_id     VARCHAR(100) NOT NULL,
   source          VARCHAR(20) NOT NULL,
   title           TEXT NOT NULL,
@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS public_data.bills (
 
 -- Index for politician lookup
 CREATE INDEX IF NOT EXISTS idx_bills_politician
-  ON public_data.bills(politician_id);
+  ON public.bills(politician_id);
 
 -- Composite index for stable DESC cursor pagination (politician_id, date DESC, id DESC)
 CREATE INDEX IF NOT EXISTS idx_bills_pagination
-  ON public_data.bills(politician_id, submission_date DESC, id DESC);
+  ON public.bills(politician_id, submission_date DESC, id DESC);

@@ -21,7 +21,7 @@ Enforces the 8 domain rules (DR-001 through DR-008) that define the core busines
 - [ ] No API error message mentions exclusion (e.g., "politician excluded due to...")
 - [ ] No UI element shows "X politicians excluded" or similar counts
 - [ ] No log at INFO level or below contains exclusion reasons (DEBUG only, in pipeline)
-- [ ] All public queries include `WHERE exclusion_flag = FALSE` (or equivalent)
+- [ ] All public queries on the `public` schema include `WHERE exclusion_flag = FALSE` (or equivalent)
 - [ ] The `internal_data` schema is not imported in any `apps/api/` file
 - [ ] Search results respect exclusion (excluded politicians never appear)
 
@@ -248,3 +248,4 @@ catch (error) { return <p>{error.message}: {error.stack}</p> }
 |------|-------------|---------|
 | 2026-02-28 | 1.0 | Initial domain rules enforcement skill |
 | 2026-03-07 | 1.1 | Add DR-008 FrontendSecurityFirstInvariant |
+| 2026-03-09 | 1.2 | Schema rename public_data→public |

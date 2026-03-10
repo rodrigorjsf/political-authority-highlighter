@@ -13,7 +13,7 @@ export interface CommitteeRow {
 }
 
 /**
- * Repository for public_data.committees queries.
+ * Repository for public.committees queries.
  * No pagination — committee memberships are small (< 20 per politician).
  */
 export function createCommitteeRepository(db: PublicDb): {

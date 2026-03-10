@@ -130,7 +130,7 @@ If user registration is added post-MVP:
 ### Transport Security
 
 - [ ] All traffic over HTTPS (TLS 1.2+)
-- [ ] Automatic certificate renewal (Caddy/Let's Encrypt)
+- [ ] Automatic certificate renewal (Supabase managed TLS + Vercel managed TLS)
 - [ ] HSTS header enabled (max-age: 31536000, includeSubDomains)
 - [ ] SSL Labs grade A or above
 
@@ -154,11 +154,11 @@ If user registration is added post-MVP:
 ### Database Security
 
 - [ ] Two PostgreSQL roles enforced:
-  - `api_reader`: SELECT only on `public_data` schema
+  - `api_reader`: SELECT only on `public` schema
   - `pipeline_admin`: ALL on both schemas
-- [ ] No superuser credentials in application code
-- [ ] Database not exposed to public internet (Docker internal network)
-- [ ] Encrypted connections to database (sslmode=require)
+- [ ] No superuser credentials in application code (note: Supabase service role key restricted to pipeline)
+- [ ] Database access controlled via Supabase platform security + RLS policies
+- [ ] Encrypted connections to database (sslmode=require, enforced by Supabase)
 
 ### Frontend Security Baseline
 
@@ -170,17 +170,17 @@ If user registration is added post-MVP:
 - [ ] CI post-build scan: grep `.next/static/chunks/` for forbidden patterns
 - [ ] Only `NEXT_PUBLIC_API_URL` uses `NEXT_PUBLIC_` prefix
 - [ ] All `error.tsx` boundaries show generic messages only
-- [ ] Pipeline transformers strip HTML tags from government source text before storing in `public_data`
+- [ ] Pipeline transformers strip HTML tags from government source text before storing in `public` schema
 - [ ] No external scripts without SRI attributes
 - [ ] Future auth implementation: httpOnly Secure SameSite=Strict cookies, CSRF protection, RS256 JWT, <=24h session
 
 ### Backup and Recovery
 
-- [ ] Daily `pg_dump` automated
-- [ ] Backups stored separately from VPS
+- [ ] Supabase automatic daily backups (Free tier) + supplementary GitHub Actions pg_dump
+- [ ] Supabase managed backup storage + GitHub Actions backup to external storage
 - [ ] 7-day retention minimum
 - [ ] Restore procedure documented and tested
-- [ ] RPO: 24 hours, RTO: 4 hours
+- [ ] RPO: 24 hours (Supabase daily backup). RTO: 1 hour (Supabase restore).
 
 ---
 
@@ -194,7 +194,7 @@ If user registration is added post-MVP:
 | Dependency audit (`npm audit`) | Weekly |
 | CPF leakage check | Every PR (automated) |
 | Backup restore test | Monthly |
-| SSL certificate validity | Automated (Caddy) |
+| SSL certificate validity | Managed by Supabase/Vercel |
 | Frontend CSP validation | Every deploy (CI) |
 | Client bundle leak scan | Every build (CI) |
 
@@ -206,3 +206,4 @@ If user registration is added post-MVP:
 |------|-------------|---------|
 | 2026-02-28 | 1.0 | Initial compliance enforcement skill |
 | 2026-03-07 | 1.1 | Add Frontend Security Baseline section |
+| 2026-03-09 | 1.2 | Migrate from VPS/Caddy to Supabase, schema rename public_data→public |

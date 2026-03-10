@@ -15,7 +15,7 @@ Enforces the architectural decisions documented in ARCHITECTURE.md and the 7 ADR
 
 ```
 PostgreSQL 16
-├── public_data schema (10 tables) — API reads from here
+├── public schema (10 tables) — API reads from here
 │   ├── politicians, integrity_scores, bills, votes, expenses...
 │   └── data_source_status
 └── internal_data schema (5 tables) — Pipeline writes here
@@ -26,15 +26,17 @@ PostgreSQL 16
 ```
 
 **Enforcement:**
+
 - [ ] Files in `apps/api/` NEVER import from `internal-schema.ts`
 - [ ] API routes NEVER reference `internal_data` tables
-- [ ] Database client in API uses `api_reader` role (SELECT only on `public_data`)
+- [ ] Database client in API uses `api_reader` role (SELECT only on `public`)
 - [ ] Database client in pipeline uses `pipeline_admin` role (ALL on both schemas)
 - [ ] The ONLY data crossing schemas is `exclusion_flag` boolean on `politicians` table
 
 ### 2. TypeScript Strict Mode
 
 All `tsconfig.json` files must include:
+
 ```json
 {
   "compilerOptions": {
@@ -47,6 +49,7 @@ All `tsconfig.json` files must include:
 ```
 
 **Best Practices (CLAUDE.md):**
+
 - [ ] Interfaces over types for object shapes
 - [ ] Use Enums for constant values (e.g., `PoliticalRole`, `DataSource`)
 - [ ] Export all types by default
@@ -55,6 +58,7 @@ All `tsconfig.json` files must include:
 - [ ] Use `ms` package for time-related configuration
 
 **Forbidden patterns:**
+
 - `any` type (use `unknown` + type guards)
 - `as` type assertions (except `as const` and test factories)
 - `@ts-ignore` or `@ts-expect-error` without issue link
@@ -86,12 +90,12 @@ All `tsconfig.json` files must include:
 - No client-side state management library (use URL search params + Server Components)
 - Tailwind CSS + shadcn/ui for UI components
 
-### 6. Docker Compose on Hetzner (ADR-006)
+### 6. Managed Infrastructure on Supabase (ADR-006)
 
-- Backend API + PostgreSQL in Docker Compose on Hetzner CX22
-- Frontend on Vercel Free tier (separate deployment)
-- No Kubernetes, no managed databases (budget constraint)
-- Caddy reverse proxy for HTTPS with automatic Let's Encrypt
+- Database on Supabase (Free tier, upgrade to Pro when needed)
+- Frontend on Vercel Free tier
+- Local dev via Supabase CLI (`supabase start`) or Docker Compose with PostgreSQL 16
+- Migrations applied via `supabase db push` in CI/CD
 
 ### 7. Monorepo Structure
 
@@ -124,10 +128,10 @@ Before any infrastructure change:
 
 | Component | Current Cost | Budget |
 |-----------|-------------|--------|
-| Hetzner CX22 VPS | ~$6/month | — |
-| Vercel Free | $0 | — |
-| Domain + DNS | ~$1/month | — |
-| **Total** | **~$7/month** | **< $100/month** |
+| Supabase Free | $0/month | — |
+| Vercel Free | $0/month | — |
+| Domain + DNS | ~$1.50/month | — |
+| **Total** | **~$1.50/month** | **< $100/month** |
 
 Any change that pushes total above $100/month requires explicit approval.
 
@@ -136,3 +140,4 @@ Any change that pushes total above $100/month requires explicit approval.
 | Date | PRD Version | Summary |
 |------|-------------|---------|
 | 2026-02-28 | 1.0 | Initial architecture enforcement skill |
+| 2026-03-09 | 1.2 | Migrate from Hetzner/Docker to Supabase, schema rename public_data→public |

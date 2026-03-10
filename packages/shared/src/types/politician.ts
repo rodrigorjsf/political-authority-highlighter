@@ -1,6 +1,6 @@
 /**
  * Summary representation of a politician as displayed on the listing page (RF-001).
- * Contains only public_data fields — no internal data, no CPF, no exclusion details.
+ * Contains only public schema fields — no internal data, no CPF, no exclusion details.
  */
 export interface PoliticianCard {
   id: string

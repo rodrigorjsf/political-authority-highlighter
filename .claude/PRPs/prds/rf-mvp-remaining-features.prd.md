@@ -82,7 +82,7 @@ We'll know we're right when average session depth reaches ≥ 3 pages within 30 
 | RF | What Exists | What's Missing |
 |----|-------------|----------------|
 | RF-004 | `integrity_scores` table with 4 components + binary anticorruption constraint in DB schema | Scoring engine, pipeline adapters, transformer code |
-| RF-006 | `exclusion_flag` boolean in `public_data.politicians` and `integrity_scores` | `internal_data.exclusion_records` table, pipeline exclusion detection, UI notice component on profile |
+| RF-006 | `exclusion_flag` boolean in `public.politicians` and `integrity_scores` | `internal_data.exclusion_records` table, pipeline exclusion detection, UI notice component on profile |
 | RF-016 | Responsive grid in `/politicos` listing, role/state filter components use mobile-friendly widths | All profile pages (don't exist yet), full 320px–2560px audit, 44px tap targets verification |
 | RF-017 | Root `layout.tsx` metadata, listing page canonical URL | Dynamic `generateMetadata()` per profile slug, JSON-LD Person schema, `sitemap.xml`, `robots.txt` |
 
@@ -198,21 +198,21 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 **Phase 3: Profile Section — Bills (RF-008)**
 
 - **Goal:** Display legislative projects authored/co-authored by politician
-- **Scope:** Tab route `/politicos/[slug]/projetos`. New DB table: `public_data.bills`. New API endpoint: `GET /api/v1/politicians/:slug/bills?cursor=&limit=20`. Card/row shows: title, type, number, year, status, date, source URL. Pagination 20/page DESC by date. Empty state for no bills.
+- **Scope:** Tab route `/politicos/[slug]/projetos`. New DB table: `public.bills`. New API endpoint: `GET /api/v1/politicians/:slug/bills?cursor=&limit=20`. Card/row shows: title, type, number, year, status, date, source URL. Pagination 20/page DESC by date. Empty state for no bills.
 - **DB changes:** New migration `0003_add_bills.sql`
 - **Parallel with:** Phases 4, 5 (same pattern, different table)
 
 **Phase 4: Profile Section — Voting Record (RF-009)**
 
 - **Goal:** Display voting history with participation rate
-- **Scope:** Tab route `/politicos/[slug]/votacoes`. New DB table: `public_data.votes`. New API endpoint. Shows: session date, matter description, vote cast (sim/não/abstenção/ausente), session result, source URL. Summary statistic: participation rate. Pagination 20/page DESC by session date.
+- **Scope:** Tab route `/politicos/[slug]/votacoes`. New DB table: `public.votes`. New API endpoint. Shows: session date, matter description, vote cast (sim/não/abstenção/ausente), session result, source URL. Summary statistic: participation rate. Pagination 20/page DESC by session date.
 - **DB changes:** New migration `0004_add_votes.sql`
 - **Parallel with:** Phases 3, 5
 
 **Phase 5: Profile Section — Expenses (RF-012)**
 
 - **Goal:** Display CEAP/CEAPS parliamentary expenses
-- **Scope:** Tab route `/politicos/[slug]/despesas`. New DB table: `public_data.expenses`. New API endpoint. Grouped by year/month. Shows: category, supplier, amount in BRL (R$ X.XXX,XX via `formatCurrency` from `@pah/shared`), document number, source URL. Yearly totals.
+- **Scope:** Tab route `/politicos/[slug]/despesas`. New DB table: `public.expenses`. New API endpoint. Grouped by year/month. Shows: category, supplier, amount in BRL (R$ X.XXX,XX via `formatCurrency` from `@pah/shared`), document number, source URL. Yearly totals.
 - **DB changes:** New migration `0005_add_expenses.sql`
 - **Parallel with:** Phases 3, 4
 
@@ -226,7 +226,7 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 **Phase 7: Data Ingestion Pipeline (RF-013)**
 
 - **Goal:** Ingest real government data from all 6 sources on schedule
-- **Scope:** Bootstrap `apps/pipeline/` app. Internal schema tables: `raw_source_data`, `exclusion_records`, `politician_identifiers`, `ingestion_logs`, `data_source_status`. 6 source adapters: Camara (REST/JSON), Senado (REST/XML→JSON fallback), Portal da Transparencia (REST/JSON, API key, 90 req/min), TSE (CSV bulk), TCU CADIRREG (REST/JSON), CGU-PAD (CSV bulk). Transformers: normalize each source to shared types. CPF matcher: AES-256-GCM encryption + SHA-256 hash for cross-source identity. Publisher: upsert to `public_data` tables. pg-boss scheduler: 6 cron definitions per RF-013 AC #1-6.
+- **Scope:** Bootstrap `apps/pipeline/` app. Internal schema tables: `raw_source_data`, `exclusion_records`, `politician_identifiers`, `ingestion_logs`, `data_source_status`. 6 source adapters: Camara (REST/JSON), Senado (REST/XML→JSON fallback), Portal da Transparencia (REST/JSON, API key, 90 req/min), TSE (CSV bulk), TCU CADIRREG (REST/JSON), CGU-PAD (CSV bulk). Transformers: normalize each source to shared types. CPF matcher: AES-256-GCM encryption + SHA-256 hash for cross-source identity. Publisher: upsert to `public` schema tables. pg-boss scheduler: 6 cron definitions per RF-013 AC #1-6.
 - **DB changes:** New migrations in `packages/db/migrations/internal/`
 - **Technical note:** This is the largest single phase — plan to break into sub-PRPs per adapter if needed
 - **Depends on:** None (can be built independently of profile UI phases)
@@ -235,8 +235,8 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 
 - **Goal:** Make scores real and make the trust chain visible
 - **Scope:**
-  - RF-004: Scoring engine (pure function) in `apps/pipeline/src/scoring/`. Formula: `transparency + legislative + financial + anticorruption`. Each component 0-25. Uses data from pipeline. Writes to `public_data.integrity_scores`.
-  - RF-006: Exclusion detection in pipeline: query Portal da Transparencia, TCU, CGU per politician CPF/name. Write boolean-only `exclusion_flag` to `public_data.politicians`. UI notice component on RF-007 profile page.
+  - RF-004: Scoring engine (pure function) in `apps/pipeline/src/scoring/`. Formula: `transparency + legislative + financial + anticorruption`. Each component 0-25. Uses data from pipeline. Writes to `public.integrity_scores`.
+  - RF-006: Exclusion detection in pipeline: query Portal da Transparencia, TCU, CGU per politician CPF/name. Write boolean-only `exclusion_flag` to `public.politicians`. UI notice component on RF-007 profile page.
   - RF-014: `data_source_status` table populated by pipeline. New page `/fontes` (SSG, revalidate=3600): table of all 6 sources with last sync time, records processed, status. Profile page data freshness badge reads from this table.
 - **Depends on:** Phase 7 (pipeline must run and produce data)
 
@@ -303,11 +303,11 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 
 | Table | Schema | RF | Migration |
 |-------|--------|----|-----------|
-| `public_data.bills` | public | RF-008 | 0003_add_bills.sql |
-| `public_data.votes` | public | RF-009 | 0004_add_votes.sql |
-| `public_data.expenses` | public | RF-012 | 0005_add_expenses.sql |
-| `public_data.proposals` | public | RF-010 | 0006_add_proposals.sql |
-| `public_data.committees` | public | RF-011 | 0007_add_committees.sql |
+| `public.bills` | public | RF-008 | 0003_add_bills.sql |
+| `public.votes` | public | RF-009 | 0004_add_votes.sql |
+| `public.expenses` | public | RF-012 | 0005_add_expenses.sql |
+| `public.proposals` | public | RF-010 | 0006_add_proposals.sql |
+| `public.committees` | public | RF-011 | 0007_add_committees.sql |
 | `internal_data.raw_source_data` | internal | RF-013 | internal/0001_initial.sql |
 | `internal_data.exclusion_records` | internal | RF-013 | internal/0001_initial.sql |
 | `internal_data.politician_identifiers` | internal | RF-013 | internal/0001_initial.sql |
@@ -336,7 +336,7 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 - `apps/pipeline/src/adapters/` — one file per source
 - `apps/pipeline/src/transformers/` — one file per source
 - `apps/pipeline/src/scoring/` — score calculator
-- `apps/pipeline/src/publisher/` — upsert to public_data
+- `apps/pipeline/src/publisher/` — upsert to public schema
 - `apps/pipeline/Dockerfile.pipeline` — already referenced in docker-compose.yml but doesn't exist
 
 ---

@@ -1,5 +1,7 @@
 # Backend Development Guide -- Political Authority Highlighter
+
 # Stack: Fastify 5.x | TypeBox | Drizzle ORM 0.36+ | PostgreSQL 16 | pg-boss 10
+
 # Last Updated: 2026-02-28 | PRD Version: 1.0
 
 ## Core Principles
@@ -15,37 +17,41 @@
 
 4. **Idempotent Upserts (Pragmatic Programmer)**: Every pipeline write operation uses `ON CONFLICT DO UPDATE` via Drizzle's `onConflictDoUpdate()`. Running the same ingestion twice produces the same result.
 
-5. **Schema-Enforced Isolation (DDD Bounded Contexts)**: The API app connects with `api_reader` role (SELECT on `public_data` only). The pipeline app connects with `pipeline_admin` role (ALL on both schemas). This is not just a convention -- it is a database-enforced boundary.
+5. **Schema-Enforced Isolation (DDD Bounded Contexts)**: The API app connects with `api_reader` role (SELECT on `public` only). The pipeline app connects with `pipeline_admin` role (ALL on both schemas). This is not just a convention -- it is a database-enforced boundary.
 
 ---
 
 ## Architecture Boundaries
 
-### What the API IS responsible for:
-- Serving pre-computed politician data from `public_data` schema
+### What the API IS responsible for
+
+- Serving pre-computed politician data from `public` schema
 - Request validation using TypeBox schemas
 - Response serialization with `fast-json-stringify`
 - Rate limiting, CORS, security headers
 - Cache-Control headers for Cloudflare CDN
 - Health check endpoint
 
-### What the API is NOT responsible for:
+### What the API is NOT responsible for
+
 - Data ingestion or transformation (that is the pipeline)
 - Score calculation (pre-computed by pipeline)
 - Writing to the database (api_reader has SELECT only)
 - User authentication (no auth in MVP)
 - Accessing `internal_data` schema (database role prevents it)
 
-### What the Pipeline IS responsible for:
+### What the Pipeline IS responsible for
+
 - Fetching data from 6 external government sources
 - Transforming and normalizing raw data
 - Cross-source identity matching via CPF hash
 - Score calculation across 4 dimensions
-- Publishing computed data to `public_data` schema
+- Publishing computed data to `public` schema
 - Triggering Vercel ISR revalidation after publish
 - CPF encryption/decryption
 
-### What the Pipeline is NOT responsible for:
+### What the Pipeline is NOT responsible for
+
 - Serving HTTP requests (that is the API)
 - Frontend rendering decisions
 - User-facing error messages
@@ -72,11 +78,11 @@ apps/api/
 |   |   +-- score.service.ts        # Business logic for score/ranking queries
 |   |   +-- source.service.ts       # Business logic for data source status
 |   +-- repositories/
-|   |   +-- politician.repository.ts    # Drizzle queries against public_data.politicians
-|   |   +-- score.repository.ts         # Drizzle queries against public_data.integrity_scores
-|   |   +-- bill.repository.ts          # Drizzle queries against public_data.bills
-|   |   +-- expense.repository.ts       # Drizzle queries against public_data.expenses
-|   |   +-- source.repository.ts        # Drizzle queries against public_data.data_source_status
+|   |   +-- politician.repository.ts    # Drizzle queries against public.politicians
+|   |   +-- score.repository.ts         # Drizzle queries against public.integrity_scores
+|   |   +-- bill.repository.ts          # Drizzle queries against public.bills
+|   |   +-- expense.repository.ts       # Drizzle queries against public.expenses
+|   |   +-- source.repository.ts        # Drizzle queries against public.data_source_status
 |   +-- schemas/
 |   |   +-- politician.schema.ts    # TypeBox schemas for politician request/response
 |   |   +-- score.schema.ts         # TypeBox schemas for score request/response
@@ -126,7 +132,7 @@ apps/pipeline/
 |   |       +-- financial.ts        # Expense/asset regularity scoring (0-25)
 |   |       +-- anticorruption.ts   # Binary exclusion check (0 or 25)
 |   +-- publisher/
-|   |   +-- publisher.ts            # Upserts computed data to public_data schema
+|   |   +-- publisher.ts            # Upserts computed data to public schema
 |   |   +-- revalidator.ts          # Triggers Vercel ISR revalidation
 |   +-- crypto/
 |   |   +-- cpf.ts                  # AES-256-GCM encrypt/decrypt + SHA-256 hash
@@ -134,7 +140,7 @@ apps/pipeline/
 |   |   +-- ingestion.repository.ts     # Writes to internal_data tables
 |   |   +-- identity.repository.ts      # Manages politician_identifiers
 |   |   +-- exclusion.repository.ts     # Reads/writes exclusion_records
-|   |   +-- publish.repository.ts       # Upserts to public_data tables
+|   |   +-- publish.repository.ts       # Upserts to public tables
 |   +-- config/
 |       +-- env.ts                  # Pipeline-specific env validation
 |       +-- schedules.ts            # Cron expressions for each source
@@ -347,7 +353,7 @@ const data = await response.json() as PoliticianResponse
  * exclusion record exists. This is a binary determination.
  *
  * The exclusion_flag boolean is the ONLY data that crosses from
- * internal_data to public_data schema.
+ * internal_data to public schema.
  */
 export function calculateAnticorruptionScore(
   exclusionRecords: ExclusionRecord[],
@@ -505,7 +511,7 @@ export async function rateLimitPlugin(app: FastifyInstance): Promise<void> {
 // packages/db/src/public-schema.ts
 import { pgSchema, uuid, varchar, boolean, smallint, timestamp, text, numeric, date } from 'drizzle-orm/pg-core'
 
-export const publicData = pgSchema('public_data')
+export const publicData = pgSchema('public')
 
 export const politicians = publicData.table('politicians', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -545,7 +551,7 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import * as publicSchema from './public-schema'
 import * as internalSchema from './internal-schema'
 
-// API uses this client -- connects with api_reader role (SELECT only on public_data)
+// API uses this client -- connects with api_reader role (SELECT only on public)
 export function createPublicDb(connectionString: string) {
   return drizzle(connectionString, { schema: publicSchema })
 }
@@ -860,6 +866,7 @@ export class CamaraAdapter extends BaseAdapter<RawDeputado> {
 ### Retry Policy
 
 All adapters use exponential backoff:
+
 - Attempt 1: immediate
 - Attempt 2: 1 minute delay
 - Attempt 3: 5 minutes delay
@@ -987,6 +994,7 @@ describe('GET /api/v1/politicians', () => {
 ## Documentation in Code
 
 JSDoc is required for:
+
 - All exported functions and types
 - All TypeBox schema definitions (describe the API contract)
 - All scoring component functions (document the formula and domain rules)

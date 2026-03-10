@@ -48,7 +48,7 @@ export const politicians = publicData.table(
     exclusionFlag: boolean('exclusion_flag').notNull().default(false),
     // RF-015: FTS generated column — kept in sync with name by PostgreSQL automatically
     searchVector: tsvector('search_vector').generatedAlwaysAs(
-      sql`to_tsvector('simple', public_data.unaccent_immutable(coalesce(name, '')))`,
+      sql`to_tsvector('simple', public.unaccent_immutable(coalesce(name, '')))`,
     ),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),

@@ -1,8 +1,8 @@
--- 0004_add_votes.sql — public_data schema: votes (RF-009)
+-- 0004_add_votes.sql — public schema: votes (RF-009)
 
-CREATE TABLE IF NOT EXISTS public_data.votes (
+CREATE TABLE IF NOT EXISTS public.votes (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  politician_id       UUID NOT NULL REFERENCES public_data.politicians(id),
+  politician_id       UUID NOT NULL REFERENCES public.politicians(id),
   external_id         VARCHAR(100) NOT NULL,
   source              VARCHAR(20) NOT NULL,
   session_date        DATE NOT NULL,
@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS public_data.votes (
 
 -- Index for politician lookup
 CREATE INDEX IF NOT EXISTS idx_votes_politician
-  ON public_data.votes(politician_id);
+  ON public.votes(politician_id);
 
 -- Composite index for stable DESC cursor pagination (politician_id, date DESC, id DESC)
 CREATE INDEX IF NOT EXISTS idx_votes_pagination
-  ON public_data.votes(politician_id, session_date DESC, id DESC);
+  ON public.votes(politician_id, session_date DESC, id DESC);

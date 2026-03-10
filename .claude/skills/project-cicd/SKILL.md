@@ -24,6 +24,7 @@ Maintains a **lean** GitHub Actions pipeline at `.github/workflows/ci.yml`. The 
 | Next.js | 15 | Build | SSG/ISR build verification |
 | Fastify | 5 | Build | Included via `pnpm build` |
 | pnpm audit | (via pnpm) | Security audit | Catches high/critical dependency vulnerabilities |
+| supabase/setup-cli | latest | Deploy (deploy.yml) | Supabase CLI for migrations and edge function deploys |
 
 ---
 
@@ -209,3 +210,4 @@ The default answer to "should I add this?" is **no**. Add only when the answer t
 |------|-------------|---------|
 | 2026-02-28 | 1.0 | Initial CI/CD maintenance skill |
 | 2026-03-07 | 1.1 | Add pnpm audit to CI stack, add Security CI Steps section (DR-008, RNF-SEC-017), remove pnpm audit from exclusions |
+| 2026-03-09 | 1.2 | Document Supabase CLI in deploy workflow |
