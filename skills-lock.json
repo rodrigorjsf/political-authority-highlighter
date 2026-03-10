@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "browser-testing-with-devtools": {
+      "source": "addyosmani/agent-skills",
+      "sourceType": "github",
+      "computedHash": "9962c07c13402019d2e3e4b9462caa65de60b6d328be050a2dcf9862643442fb"
+    },
+    "playwright-mcp": {
+      "source": "darraghh1/my-claude-setup",
+      "sourceType": "github",
+      "computedHash": "afcddc67e43a4946a06f7d3ecfde65137db8c9f8ab8d4f1ee9b60bdcb19ef5bc"
+    },
+    "web-testing": {
+      "source": "mrgoonie/claudekit-skills",
+      "sourceType": "github",
+      "computedHash": "d659544b8a7325352b994e21c749503910d02631e2d031d2dfd073d7d2bbd0c0"
+    }
+  }
+}
