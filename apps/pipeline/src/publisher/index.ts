@@ -1,11 +1,13 @@
 import { sql } from 'drizzle-orm'
-import { politicians, integrityScores, bills, votes, expenses } from '@pah/db/public-schema'
+import { politicians, integrityScores, bills, votes, expenses, dataSourceStatus } from '@pah/db/public-schema'
+import { exclusionRecords } from '@pah/db/internal-schema'
 import type { PipelineDb } from '@pah/db/clients'
 import type { PoliticianUpsert, BillUpsert, VoteUpsert, ExpenseUpsert } from '../types.js'
+import type { ExclusionRecordUpsert } from '../transformers/tcu.js'
 import { logger } from '../config/logger.js'
 
 export interface Publisher {
-  upsertPolitician(data: PoliticianUpsert): Promise<void>
+  upsertPolitician(data: PoliticianUpsert): Promise<{ id: string }>
   upsertBills(data: BillUpsert[]): Promise<void>
   upsertVotes(data: VoteUpsert[]): Promise<void>
   upsertExpenses(data: ExpenseUpsert[]): Promise<void>
@@ -20,14 +22,16 @@ export interface Publisher {
     methodologyVersion: string
   }): Promise<void>
   updateExclusionFlag(politicianId: string, exclusionFlag: boolean): Promise<void>
+  upsertExclusionRecord(data: ExclusionRecordUpsert): Promise<void>
+  upsertDataSourceStatus(source: string, recordCount: number): Promise<void>
 }
 
 /** Publisher factory — creates idempotent upsert functions for all public schema tables. */
 export function createPublisher(db: PipelineDb): Publisher {
   return {
-    /** Upserts a single politician by external_id. */
-    async upsertPolitician(data: PoliticianUpsert): Promise<void> {
-      await db
+    /** Upserts a single politician by external_id. Returns the politician's UUID. */
+    async upsertPolitician(data: PoliticianUpsert): Promise<{ id: string }> {
+      const [result] = await db
         .insert(politicians)
         .values(data)
         .onConflictDoUpdate({
@@ -43,7 +47,10 @@ export function createPublisher(db: PipelineDb): Publisher {
             updatedAt: sql`now()`,
           },
         })
+        .returning({ id: politicians.id })
+      if (result === undefined) throw new Error(`Failed to upsert politician: ${data.externalId}`)
       logger.debug({ externalId: data.externalId }, 'Upserted politician')
+      return result
     },
 
     /** Upserts bills in chunks to avoid parameter limit. */
@@ -142,6 +149,39 @@ export function createPublisher(db: PipelineDb): Publisher {
         .set({ exclusionFlag, updatedAt: sql`now()` })
         .where(sql`${politicians.id} = ${politicianId}`)
       logger.debug({ politicianId, exclusionFlag }, 'Updated exclusion flag')
+    },
+
+    /** Upserts an exclusion record into internal_data.exclusion_records (idempotent). */
+    async upsertExclusionRecord(data: ExclusionRecordUpsert): Promise<void> {
+      await db
+        .insert(exclusionRecords)
+        .values({
+          politicianId: data.politicianId,
+          source: data.source,
+          cpfHash: data.cpfHash,
+          exclusionType: data.exclusionType,
+          recordDate: data.recordDate,
+          recordUrl: data.recordUrl,
+        })
+        .onConflictDoNothing()
+      logger.debug({ politicianId: data.politicianId, source: data.source }, 'Upserted exclusion record')
+    },
+
+    /** Upserts data source sync status into public.data_source_status. */
+    async upsertDataSourceStatus(source: string, recordCount: number): Promise<void> {
+      await db
+        .insert(dataSourceStatus)
+        .values({ source, recordCount, status: 'synced', lastSyncAt: sql`now()` })
+        .onConflictDoUpdate({
+          target: dataSourceStatus.source,
+          set: {
+            recordCount,
+            status: 'synced',
+            lastSyncAt: sql`now()`,
+            updatedAt: sql`now()`,
+          },
+        })
+      logger.debug({ source, recordCount }, 'Updated data source status')
     },
   }
 }
