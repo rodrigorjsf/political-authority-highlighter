@@ -1,0 +1,6 @@
+export { fetchCamaraDeputies, fetchCamaraDeputyBills, fetchCamaraDeputyVotes } from './camara.js'
+export { fetchSenadores } from './senado.js'
+export { fetchExpensesByDeputy, fetchAllExpenses } from './transparencia.js'
+export { fetchTSECandidates } from './tse.js'
+export { fetchTCUExclusions, fetchTCUExclusionsBatch } from './tcu.js'
+export { fetchCGUExclusions } from './cgu.js'
