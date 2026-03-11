@@ -1,19 +1,29 @@
 import { sql } from 'drizzle-orm'
-import {
-  politicians,
-  integrityScores,
-  bills,
-  votes,
-  expenses,
-  proposals,
-  committees,
-} from '@pah/db/public-schema'
+import { politicians, integrityScores, bills, votes, expenses } from '@pah/db/public-schema'
 import type { PipelineDb } from '@pah/db/clients'
 import type { PoliticianUpsert, BillUpsert, VoteUpsert, ExpenseUpsert } from '../types.js'
 import { logger } from '../config/logger.js'
 
+export interface Publisher {
+  upsertPolitician(data: PoliticianUpsert): Promise<void>
+  upsertBills(data: BillUpsert[]): Promise<void>
+  upsertVotes(data: VoteUpsert[]): Promise<void>
+  upsertExpenses(data: ExpenseUpsert[]): Promise<void>
+  upsertIntegrityScore(data: {
+    politicianId: string
+    overallScore: number
+    transparencyScore: number
+    legislativeScore: number
+    financialScore: number
+    anticorruptionScore: number
+    exclusionFlag: boolean
+    methodologyVersion: string
+  }): Promise<void>
+  updateExclusionFlag(politicianId: string, exclusionFlag: boolean): Promise<void>
+}
+
 /** Publisher factory — creates idempotent upsert functions for all public schema tables. */
-export function createPublisher(db: PipelineDb) {
+export function createPublisher(db: PipelineDb): Publisher {
   return {
     /** Upserts a single politician by external_id. */
     async upsertPolitician(data: PoliticianUpsert): Promise<void> {
@@ -135,8 +145,6 @@ export function createPublisher(db: PipelineDb) {
     },
   }
 }
-
-export type Publisher = ReturnType<typeof createPublisher>
 
 /** Splits an array into chunks of given size. */
 function chunk<T>(array: T[], size: number): T[][] {

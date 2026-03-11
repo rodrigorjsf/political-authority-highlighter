@@ -4,6 +4,11 @@ import type { CamaraDeputy, CamaraBill, CamaraVote } from '../types.js'
 
 const BASE_URL = 'https://dadosabertos.camara.leg.br/api/v2'
 
+interface CamaraPageResponse<T> {
+  dados: T[]
+  links: Array<{ rel: string; href: string }>
+}
+
 const camaraClient = axios.create({
   baseURL: BASE_URL,
   headers: { Accept: 'application/json' },
@@ -21,16 +26,14 @@ export async function fetchCamaraDeputies(): Promise<CamaraDeputy[]> {
 
   while (hasMore) {
     logger.debug({ page }, 'Fetching Camara deputies page')
-    const { data: body } = await camaraClient.get('/deputados', {
+    const { data: body } = await camaraClient.get<CamaraPageResponse<CamaraDeputy>>('/deputados', {
       params: { ordem: 'ASC', ordenarPor: 'nome', pagina: page, itens: 100 },
     })
 
-    const batch = body.dados as CamaraDeputy[]
-    deputies.push(...batch)
+    deputies.push(...body.dados)
 
     // Camara API returns `links` array with rel 'next' when more pages exist
-    const links = body.links as Array<{ rel: string; href: string }>
-    hasMore = links.some((link) => link.rel === 'next')
+    hasMore = body.links.some((link) => link.rel === 'next')
     page++
   }
 
@@ -48,15 +51,13 @@ export async function fetchCamaraDeputyBills(deputyId: string): Promise<CamaraBi
   let hasMore = true
 
   while (hasMore) {
-    const { data: body } = await camaraClient.get(`/deputados/${deputyId}/autores`, {
-      params: { pagina: page, itens: 100, ordem: 'DESC', ordenarPor: 'ano' },
-    })
+    const { data: body } = await camaraClient.get<CamaraPageResponse<CamaraBill>>(
+      `/deputados/${deputyId}/autores`,
+      { params: { pagina: page, itens: 100, ordem: 'DESC', ordenarPor: 'ano' } },
+    )
 
-    const batch = body.dados as CamaraBill[]
-    allBills.push(...batch)
-
-    const links = body.links as Array<{ rel: string; href: string }>
-    hasMore = links.some((link) => link.rel === 'next')
+    allBills.push(...body.dados)
+    hasMore = body.links.some((link) => link.rel === 'next')
     page++
   }
 
@@ -68,9 +69,10 @@ export async function fetchCamaraDeputyBills(deputyId: string): Promise<CamaraBi
  * Note: Camara API provides votes per session, not per deputy directly.
  */
 export async function fetchCamaraDeputyVotes(deputyId: string): Promise<CamaraVote[]> {
-  const { data: body } = await camaraClient.get(`/deputados/${deputyId}/mesa`, {
-    params: { pagina: 1, itens: 100, ordem: 'DESC', ordenarPor: 'dataHoraInicio' },
-  })
+  const { data: body } = await camaraClient.get<CamaraPageResponse<CamaraVote>>(
+    `/deputados/${deputyId}/mesa`,
+    { params: { pagina: 1, itens: 100, ordem: 'DESC', ordenarPor: 'dataHoraInicio' } },
+  )
 
-  return body.dados as CamaraVote[]
+  return body.dados
 }

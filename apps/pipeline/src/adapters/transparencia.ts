@@ -27,10 +27,10 @@ export async function fetchExpensesByDeputy(
 ): Promise<TransparenciaExpense[]> {
   return limiter(async () => {
     await delay(700) // 90 req/min = ~667ms between requests; 700ms for safety margin
-    const { data } = await transparenciaClient.get('/ceap', {
+    const { data } = await transparenciaClient.get<TransparenciaExpense[]>('/ceap', {
       params: { codigoParlamentar: deputyId, ano: year, pagina: 1 },
     })
-    return data as TransparenciaExpense[]
+    return data
   })
 }
 

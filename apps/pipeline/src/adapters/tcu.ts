@@ -11,13 +11,13 @@ import type { TCUExclusion } from '../types.js'
  */
 export async function fetchTCUExclusions(cpfHash: string): Promise<TCUExclusion[]> {
   try {
-    const { data } = await axios.get('https://api-cadirreg.apps.tcu.gov.br/pesquisa', {
-      params: { cpf: cpfHash },
-      timeout: 10_000,
-    })
+    const { data } = await axios.get<{ registros?: TCUExclusion[] }>(
+      'https://api-cadirreg.apps.tcu.gov.br/pesquisa',
+      { params: { cpf: cpfHash }, timeout: 10_000 },
+    )
 
-    const registros = data?.registros
-    if (Array.isArray(registros)) return registros as TCUExclusion[]
+    const { registros } = data
+    if (Array.isArray(registros)) return registros
     return []
   } catch (error) {
     logger.warn({ cpfHash, error }, 'TCU API call failed — non-blocking')
