@@ -9,6 +9,7 @@ export type { Vote, VoteFilters, VoteListResponse } from './types/vote.js'
 export type { Expense, ExpenseFilters, ExpenseListResponse } from './types/expense.js'
 export type { Proposal, ProposalFilters, ProposalListResponse } from './types/proposal.js'
 export type { Committee, CommitteeListResponse } from './types/committee.js'
+export type { DataSourceStatus, SourceListResponse } from './types/source.js'
 
 /**
  * Formats a number as Brazilian Real currency (BRL).

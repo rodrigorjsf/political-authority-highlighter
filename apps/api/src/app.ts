@@ -22,6 +22,9 @@ import { createProposalsRoute } from './routes/proposals.route.js'
 import { createCommitteeRepository } from './repositories/committee.repository.js'
 import { createCommitteeService } from './services/committee.service.js'
 import { createCommitteesRoute } from './routes/committees.route.js'
+import { createSourceRepository } from './repositories/source.repository.js'
+import { createSourceService } from './services/source.service.js'
+import { createSourcesRoute } from './routes/sources.route.js'
 import { errorHandler } from './hooks/error-handler.js'
 import { env } from './config/env.js'
 
@@ -61,6 +64,8 @@ export function buildApp() {
   const proposalService = createProposalService(proposalRepository)
   const committeeRepository = createCommitteeRepository(db)
   const committeeService = createCommitteeService(committeeRepository)
+  const sourceRepository = createSourceRepository(db)
+  const sourceService = createSourceService(sourceRepository)
 
   void app.register(createExpensesRoute({ expenseService }), { prefix: '/api/v1' })
   // Routes
@@ -69,6 +74,7 @@ export function buildApp() {
   void app.register(createVotesRoute({ voteService }), { prefix: '/api/v1' })
   void app.register(createProposalsRoute({ proposalService }), { prefix: '/api/v1' })
   void app.register(createCommitteesRoute({ committeeService }), { prefix: '/api/v1' })
+  void app.register(createSourcesRoute({ sourceService }), { prefix: '/api/v1' })
 
   // Health check (no prefix)
   void app.get(

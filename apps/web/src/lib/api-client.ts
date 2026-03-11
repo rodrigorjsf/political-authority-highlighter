@@ -13,6 +13,7 @@ import type {
   ProposalListResponse,
   CommitteeListResponse,
 } from './api-types'
+import type { SourceListResponse } from '@pah/shared'
 
 const API_BASE_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001/api/v1'
 
@@ -161,4 +162,15 @@ export async function fetchPoliticianCommittees(
     `/politicians/${encodeURIComponent(slug)}/committees`,
     { next: { revalidate: 300, tags: [`politician-${slug}-committees`] } },
   )
+}
+
+/**
+ * Fetches the sync status of all 6 government data sources with ISR caching.
+ * revalidate: 3600 = 1 hour (data freshness changes infrequently)
+ * tags: ['sources'] = allows on-demand revalidation after pipeline runs
+ */
+export async function fetchSources(): Promise<SourceListResponse> {
+  return apiFetch<SourceListResponse>('/sources', {
+    next: { revalidate: 3600, tags: ['sources'] },
+  })
 }

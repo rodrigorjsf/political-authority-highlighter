@@ -98,19 +98,3 @@ export const ingestionLogs = internalData.table(
   ],
 )
 
-/**
- * Data freshness metadata per government source.
- * Tracks when each source was last successfully synced.
- */
-export const dataSourceStatus = internalData.table(
-  'data_source_status',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    source: varchar('source', { length: 50 }).unique().notNull(),
-    lastSyncAt: timestamp('last_sync_at'),
-    recordCount: integer('record_count').notNull().default(0),
-    status: varchar('status', { length: 20 }).notNull().default('pending'), // 'pending' | 'syncing' | 'synced' | 'failed'
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  },
-)

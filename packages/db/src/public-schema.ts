@@ -8,6 +8,7 @@ import {
   text,
   date,
   numeric,
+  integer,
   index,
   customType,
 } from 'drizzle-orm/pg-core'
@@ -226,3 +227,20 @@ export const expenses = publicData.table(
     { unique: 'uq_expenses_external' },
   ],
 )
+
+/**
+ * Data freshness metadata per government source (RF-014).
+ * Moved to public schema so api_reader can serve it via GET /api/v1/sources.
+ * Non-sensitive: only source names, sync timestamps, record counts, status.
+ * LAI compliant — no personal data.
+ */
+export const dataSourceStatus = publicData.table('data_source_status', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  source: varchar('source', { length: 50 }).unique().notNull(),
+  lastSyncAt: timestamp('last_sync_at'),
+  recordCount: integer('record_count').notNull().default(0),
+  status: varchar('status', { length: 20 }).notNull().default('pending'),
+  // 'pending' | 'syncing' | 'synced' | 'failed'
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
