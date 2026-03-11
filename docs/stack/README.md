@@ -10,6 +10,7 @@ Local reference for library patterns.
 | [fastify-5.md](./fastify-5.md) | Fastify | ^5.0.0 | 2026-03-01 |
 | [drizzle-orm.md](./drizzle-orm.md) | Drizzle ORM | ^0.36.0 | 2026-03-01 |
 | [ceap-expenses-rf012.md](./ceap-expenses-rf012.md) | Expenses | — | 2026-03-08 |
+| [pipeline-rf013.md](./pipeline-rf013.md) | Pipeline stack (pg-boss, csv-parse, fast-xml-parser, crypto, p-limit, axios-retry) | Multiple | 2026-03-10 |
 
 ## Scope
 
@@ -18,6 +19,7 @@ Local reference for library patterns.
 - **Drizzle:** Dual-schema, cursor pagination, migrations, upserts.
 - **Security:** CSP headers, `server-only` guards, CI bundle scans.
 - **Domain:** CEAP/CEAPS ingestion, BRL normalization.
+- **Pipeline:** pg-boss v10 scheduling/concurrency, CSV streaming, XML security, CPF encryption, rate limiting.
 
 ## Policy
 

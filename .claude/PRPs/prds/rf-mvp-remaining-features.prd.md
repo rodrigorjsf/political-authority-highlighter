@@ -1,7 +1,7 @@
 # RF-MVP — Remaining MVP Core Features (RF-004 to RF-017)
 
 > **PRD Reference:** `docs/prd/PRD.md` § 2.1 RF-004 through RF-017
-> **Status:** DRAFT — Implementation Tracker (2 complete, 7 pending)
+> **Status:** DRAFT — Implementation Tracker (8 complete, 3 pending)
 > **Generated:** 2026-03-03
 > **Prerequisite:** All Phases from `rf-001-politician-catalog-listing.prd.md` are COMPLETE
 
@@ -172,7 +172,7 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 | 4 | Profile Section — Voting Record (RF-009) | Paginated votes table on profile, API endpoint, DB schema | complete | with 3,5 | 2 | `.claude/PRPs/plans/completed/rf-009-profile-votes-section.plan.md` |
 | 5 | Profile Section — Expenses (RF-012) | Paginated expenses table with BRL formatting, API endpoint, DB schema | complete | with 3,4 | 2 | `.claude/PRPs/plans/completed/rf-012-profile-expenses-section.plan.md` |
 | 6 | Profile Sections — Proposals + Agenda (RF-010, RF-011) | Proposals list + committee memberships, API endpoints, DB schema | complete | - | 2 | `.claude/PRPs/plans/completed/rf-010-011-profile-proposals-agenda.plan.md` |
-| 7 | Data Ingestion Pipeline (RF-013) | Bootstrap pipeline app, 6 source adapters, pg-boss scheduler, internal schema | pending | - | - | - |
+| 7 | Data Ingestion Pipeline (RF-013) | Bootstrap pipeline app, 6 source adapters, pg-boss scheduler, internal schema | complete | - | - | `.claude/PRPs/plans/completed/rf-013-data-ingestion-pipeline.plan.md` |
 | 8 | Scoring + Anti-Corruption + Freshness (RF-004, RF-006, RF-014) | Scoring engine, exclusion detection, data_source_status, /fontes page | pending | - | 7 | - |
 | 9 | SEO + Responsive Polish (RF-017, RF-016) | generateMetadata() per profile, JSON-LD, sitemap.xml, robots.txt, mobile audit | pending | - | 2,6 | - |
 | 10 | Frontend Security Hardening (DR-008) | CSP header, server-only guards, ESLint restrictions, CI bundle scan, pnpm audit (RNF-SEC-011,012,014,017) | pending | with 5 | - | - |
