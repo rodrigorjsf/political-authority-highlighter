@@ -1,14 +1,15 @@
 name: Deploy staging CI
 
 on:
-  push:
+  pull_request:
     branches: [ development ]
+    types: [ closed ]
 
 jobs:
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.title, '[skip ci]')
     steps:
       - uses: actions/setup-node@v4
         with:
