@@ -68,3 +68,4 @@ tmp/
 .vercel
 .env*.local
 .env*.staging
+.agents/
