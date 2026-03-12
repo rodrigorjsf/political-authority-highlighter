@@ -1,36 +1,24 @@
-name: Deploy
+name: Deploy staging CI
 
 on:
   push:
-    branches: [main]
+    branches: [ development ]
 
 jobs:
-  deploy-db:
-    name: Apply Migrations to Supabase
+  deploy:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: supabase/setup-cli@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Deploy to Vercel Action
+        uses: BetaHuhn/deploy-to-vercel-action@v1
         with:
-          version: latest
-
-      - name: Link Supabase project
-        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
-      # Push runs against the linked remote project. For local: supabase db push --local
-      - name: Push migrations
-        run: supabase db push
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-
-  deploy-frontend:
-    name: Deploy Frontend to Vercel
-    runs-on: ubuntu-latest
-    needs: [deploy-db]
-    steps:
-      - name: Vercel auto-deploy
-        run: echo "Vercel deploys automatically via GitHub integration on push to main"
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          ALIAS_DOMAINS: |
+            quemsedestaca.vercel.app
+            {BRANCH}.quemsedestaca.vercel.app
+          PRODUCTION: false # Don't deploy to production environment
