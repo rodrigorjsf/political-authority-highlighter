@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
       - name: Checkout
         uses: actions/checkout@v5
 
@@ -19,11 +23,5 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          ALIAS_DOMAINS: |
-            quemsedestaca.vercel.app
-            {BRANCH}.quemsedestaca.vercel.app
           PRODUCTION: false # Don't deploy to production environment
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
+          CREATE_COMMENT: false
