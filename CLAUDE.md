@@ -24,26 +24,26 @@
 
 ## Product Domain
 
-Political Authority Highlighter is a Brazilian political transparency platform that cross-references 6+ government data sources (Camara, Senado, Portal da Transparencia, TSE, TCU, CGU) to surface public integrity data about politicians. All data is public government data accessed under LAI (Lei de Acesso a Informacao).
+Political Authority Highlighter is a Brazilian political transparency platform that cross-references 6+ government data sources (Camara, Senado, Portal da Transparencia, TSE, TCU, CGU) to surface public integrity data about politicians. All data is public government data accessed under LAI (Lei de Acesso a Informacao). The Product Requirement Document (PRD) is available at `docs/prd.md`.
 
 ### Ubiquitous Language
 
-| Term | Definition | Code Reference |
-|------|-----------|---------------|
-| Politician | A Brazilian federal legislator (deputado or senador) | `Politician` type |
-| Integrity Score | Pre-computed 0-100 composite score across 4 dimensions | `IntegrityScore` type |
-| Transparency Score | 0-25 sub-score measuring data availability across sources | `transparency_score` field |
-| Legislative Score | 0-25 sub-score measuring parliamentary activity | `legislative_score` field |
-| Financial Score | 0-25 sub-score measuring expense/asset regularity | `financial_score` field |
-| Anticorruption Score | 0-25 binary sub-score (25 if clean, 0 if any exclusion) | `anticorruption_score` field |
-| Exclusion Flag | Boolean-only bridge from internal to public schema | `exclusion_flag` field |
-| Silent Exclusion | Pattern where anticorruption impact is visible but details are hidden | ADR-004 |
-| Source Adapter | Module that fetches and parses data from one government API | `*.adapter.ts` files |
-| Ingestion Pipeline | Batch process that fetches, transforms, scores, and publishes data | `apps/pipeline/` |
-| Public Schema | `public` PostgreSQL schema serving the API (SELECT only) | `packages/db/public-schema.ts` |
-| Internal Schema | `internal_data` PostgreSQL schema for pipeline processing | `packages/db/internal-schema.ts` |
-| Slug | URL-friendly politician identifier (e.g., `joao-silva-sp`) | `slug` field |
-| Idempotency Key | `source + external_id` composite ensuring no duplicate records | `idempotency_key` field |
+| Term                 | Definition                                                            | Code Reference                   |
+| -------------------- | --------------------------------------------------------------------- | -------------------------------- |
+| Politician           | A Brazilian federal legislator (deputado or senador)                  | `Politician` type                |
+| Integrity Score      | Pre-computed 0-100 composite score across 4 dimensions                | `IntegrityScore` type            |
+| Transparency Score   | 0-25 sub-score measuring data availability across sources             | `transparency_score` field       |
+| Legislative Score    | 0-25 sub-score measuring parliamentary activity                       | `legislative_score` field        |
+| Financial Score      | 0-25 sub-score measuring expense/asset regularity                     | `financial_score` field          |
+| Anticorruption Score | 0-25 binary sub-score (25 if clean, 0 if any exclusion)               | `anticorruption_score` field     |
+| Exclusion Flag       | Boolean-only bridge from internal to public schema                    | `exclusion_flag` field           |
+| Silent Exclusion     | Pattern where anticorruption impact is visible but details are hidden | ADR-004                          |
+| Source Adapter       | Module that fetches and parses data from one government API           | `*.adapter.ts` files             |
+| Ingestion Pipeline   | Batch process that fetches, transforms, scores, and publishes data    | `apps/pipeline/`                 |
+| Public Schema        | `public` PostgreSQL schema serving the API (SELECT only)              | `packages/db/public-schema.ts`   |
+| Internal Schema      | `internal_data` PostgreSQL schema for pipeline processing             | `packages/db/internal-schema.ts` |
+| Slug                 | URL-friendly politician identifier (e.g., `joao-silva-sp`)            | `slug` field                     |
+| Idempotency Key      | `source + external_id` composite ensuring no duplicate records        | `idempotency_key` field          |
 
 ---
 
@@ -57,7 +57,8 @@ political-authority-highlighter/
 +-- tsconfig.base.json              # Shared TypeScript strict config
 +-- .eslintrc.cjs                   # Root ESLint config
 +-- .prettierrc                     # Prettier config
-+-- docker-compose.yml
++-- docker-compose.yml              # Optional: legacy Postgres; default local dev = supabase start
++-- supabase/                       # Supabase CLI: config.toml, roles.sql, migrations/, seed.sql
 +-- CLAUDE.md                       # THIS FILE - project-wide guide
 +-- ARCHITECTURE.md                 # Full architecture document
 +-- .github/
@@ -76,7 +77,6 @@ political-authority-highlighter/
 |       |   +-- public-schema.ts    # Drizzle pgSchema('public') tables
 |       |   +-- internal-schema.ts  # Drizzle pgSchema('internal_data') tables
 |       |   +-- clients.ts          # publicDb (api_reader) + pipelineDb (pipeline_admin)
-|       |   +-- migrate.ts          # Migration runner
 |       +-- migrations/
 |       |   +-- public/             # public schema migrations
 |       |   +-- internal/           # internal_data schema migrations
@@ -98,19 +98,19 @@ political-authority-highlighter/
         +-- package.json
 +-- infrastructure/
     +-- CLAUDE.md                   # Infrastructure and DevOps guide
-    +-- docker-compose.yml          # Local development environment
-    +-- init-schemas.sql
+    +-- docker-compose.yml          # Optional local Postgres (default: supabase start)
+    +-- init-schemas.sql            # Roles/grants for Docker; Supabase local uses supabase/roles.sql
 ```
 
 ### Import Boundaries (Enforced via ESLint)
 
-| Source | May Import From | Must NOT Import From |
-|--------|----------------|---------------------|
-| `apps/web/` | `packages/shared/` | `packages/db/`, `apps/api/`, `apps/pipeline/` |
-| `apps/api/` | `packages/shared/`, `packages/db/public-schema.ts` | `packages/db/internal-schema.ts`, `apps/pipeline/` |
-| `apps/pipeline/` | `packages/shared/`, `packages/db/*` (all) | `apps/web/`, `apps/api/` |
-| `packages/shared/` | Nothing (zero dependencies) | Everything |
-| `packages/db/` | `packages/shared/` | `apps/*` |
+| Source             | May Import From                                    | Must NOT Import From                               |
+| ------------------ | -------------------------------------------------- | -------------------------------------------------- |
+| `apps/web/`        | `packages/shared/`                                 | `packages/db/`, `apps/api/`, `apps/pipeline/`      |
+| `apps/api/`        | `packages/shared/`, `packages/db/public-schema.ts` | `packages/db/internal-schema.ts`, `apps/pipeline/` |
+| `apps/pipeline/`   | `packages/shared/`, `packages/db/*` (all)          | `apps/web/`, `apps/api/`                           |
+| `packages/shared/` | Nothing (zero dependencies)                        | Everything                                         |
+| `packages/db/`     | `packages/shared/`                                 | `apps/*`                                           |
 
 ---
 
@@ -266,27 +266,29 @@ Examples:
 
 ### Required Variables
 
-| Variable | Used By | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | api, pipeline | PostgreSQL connection string |
-| `DATABASE_URL_READER` | api | Connection string with `api_reader` role |
-| `DATABASE_URL_WRITER` | pipeline | Connection string with `pipeline_admin` role |
-| `CPF_ENCRYPTION_KEY` | pipeline | AES-256-GCM key for CPF encryption (32 bytes, hex-encoded) |
-| `TRANSPARENCIA_API_KEY` | pipeline | Portal da Transparencia API key |
-| `VERCEL_REVALIDATE_TOKEN` | pipeline | Secret for triggering ISR revalidation |
-| `NEXT_PUBLIC_API_URL` | web | Backend API base URL |
-| `NODE_ENV` | all | `development`, `production`, `test` |
+| Variable                  | Used By       | Description                                                |
+| ------------------------- | ------------- | ---------------------------------------------------------- |
+| `DATABASE_URL`            | api, pipeline | PostgreSQL connection string                               |
+| `DATABASE_URL_READER`     | api           | Connection string with `api_reader` role                   |
+| `DATABASE_URL_WRITER`     | pipeline      | Connection string with `pipeline_admin` role               |
+| `CPF_ENCRYPTION_KEY`      | pipeline      | AES-256-GCM key for CPF encryption (32 bytes, hex-encoded) |
+| `TRANSPARENCIA_API_KEY`   | pipeline      | Portal da Transparencia API key                            |
+| `VERCEL_REVALIDATE_TOKEN` | pipeline      | Secret for triggering ISR revalidation                     |
+| `NEXT_PUBLIC_API_URL`     | web           | Backend API base URL                                       |
+| `NODE_ENV`                | all           | `development`, `production`, `test`                        |
+
+For **local development** use the Supabase CLI (`supabase start`). The local DB runs on port **54322**; set `DATABASE_URL`, `DATABASE_URL_READER`, and `DATABASE_URL_WRITER` to `postgresql://postgres:postgres@127.0.0.1:54322/postgres` in `.env.local`. For remote/staging use the pooler URLs from the Supabase Dashboard.
 
 ---
 
 ## Testing Strategy
 
-| Type | Tool | Location | What to Test |
-|------|------|----------|-------------|
-| Unit | Vitest | `*.test.ts` co-located with source | Pure functions, transformers, score calculators, utilities |
-| Integration | Vitest + Testcontainers | `__tests__/integration/` | Database queries, API routes with real PostgreSQL |
-| E2E | Playwright | `apps/web/e2e/` | Critical user flows: search, profile view, ranking |
-| Schema | Vitest | `packages/db/__tests__/` | Migration up/down, schema constraints |
+| Type        | Tool                    | Location                           | What to Test                                               |
+| ----------- | ----------------------- | ---------------------------------- | ---------------------------------------------------------- |
+| Unit        | Vitest                  | `*.test.ts` co-located with source | Pure functions, transformers, score calculators, utilities |
+| Integration | Vitest + Testcontainers | `__tests__/integration/`           | Database queries, API routes with real PostgreSQL          |
+| E2E         | Playwright              | `apps/web/e2e/`                    | Critical user flows: search, profile view, ranking         |
+| Schema      | Vitest                  | `packages/db/__tests__/`           | Migration up/down, schema constraints                      |
 
 ### Test Naming Convention
 
@@ -306,14 +308,14 @@ describe('calculateIntegrityScore', () => {
 
 ### Coverage Targets
 
-| Package | Minimum Coverage |
-|---------|-----------------|
-| `packages/shared/` | 90% |
-| `apps/api/services/` | 80% |
-| `apps/pipeline/scoring/` | 90% |
-| `apps/pipeline/transformers/` | 85% |
-| `apps/pipeline/adapters/` | 70% (external API mocking) |
-| `apps/web/` | 60% (focus on E2E) |
+| Package                       | Minimum Coverage           |
+| ----------------------------- | -------------------------- |
+| `packages/shared/`            | 90%                        |
+| `apps/api/services/`          | 80%                        |
+| `apps/pipeline/scoring/`      | 90%                        |
+| `apps/pipeline/transformers/` | 85%                        |
+| `apps/pipeline/adapters/`     | 70% (external API mocking) |
+| `apps/web/`                   | 60% (focus on E2E)         |
 
 ---
 
@@ -352,15 +354,15 @@ Internal data (exclusion records, CPF matches, audit logs) must never be publicl
 
 ## Key Architectural Decisions Summary
 
-| ADR | Decision | Rationale |
-|-----|----------|-----------|
-| ADR-001 | Two-schema PostgreSQL with RBAC | Database-level isolation; even SQL injection on API cannot reach internal data |
-| ADR-002 | ISR on Vercel for SEO | Sub-second page loads, zero frontend hosting cost, daily data update cadence |
-| ADR-003 | pg-boss (no Redis) | Single data store, $5/month saved, <100 jobs/day does not need Redis throughput |
-| ADR-004 | Silent exclusion via boolean flag | LGPD data minimization, no retaliation risk, political neutrality |
-| ADR-005 | Drizzle ORM dual-schema type safety | Compile-time prevention of cross-schema access from API module |
+| ADR     | Decision                             | Rationale                                                                                |
+| ------- | ------------------------------------ | ---------------------------------------------------------------------------------------- |
+| ADR-001 | Two-schema PostgreSQL with RBAC      | Database-level isolation; even SQL injection on API cannot reach internal data           |
+| ADR-002 | ISR on Vercel for SEO                | Sub-second page loads, zero frontend hosting cost, daily data update cadence             |
+| ADR-003 | pg-boss (no Redis)                   | Single data store, $5/month saved, <100 jobs/day does not need Redis throughput          |
+| ADR-004 | Silent exclusion via boolean flag    | LGPD data minimization, no retaliation risk, political neutrality                        |
+| ADR-005 | Drizzle ORM dual-schema type safety  | Compile-time prevention of cross-schema access from API module                           |
 | ADR-006 | Managed infrastructure with Supabase | Zero maintenance, Free tier ($0/month), Supavisor pooling, solo developer ops simplicity |
-| ADR-007 | Application-layer CPF encryption | Encryption key never reaches database process memory |
+| ADR-007 | Application-layer CPF encryption     | Encryption key never reaches database process memory                                     |
 
 ---
 
@@ -386,17 +388,17 @@ Before opening a pull request, verify:
 
 ## Layer-Specific Guides
 
-| Layer | Guide Location | Scope |
-|-------|---------------|-------|
-| Backend (API + Pipeline) | `apps/api/CLAUDE.md` | Fastify routes, services, Drizzle queries, pipeline adapters, scoring |
-| Frontend | `apps/web/CLAUDE.md` | Next.js pages, components, ISR, SEO, accessibility |
-| Infrastructure | `infrastructure/CLAUDE.md` | Docker Compose, PostgreSQL, backups, CI/CD, monitoring |
+| Layer                    | Guide Location             | Scope                                                                 |
+| ------------------------ | -------------------------- | --------------------------------------------------------------------- |
+| Backend (API + Pipeline) | `apps/api/CLAUDE.md`       | Fastify routes, services, Drizzle queries, pipeline adapters, scoring |
+| Frontend                 | `apps/web/CLAUDE.md`       | Next.js pages, components, ISR, SEO, accessibility                    |
+| Infrastructure           | `infrastructure/CLAUDE.md` | Supabase CLI local, Docker optional, CI/CD, monitoring                 |
 
 ---
 
 ## Changelog
 
-| Date | PRD Version | Summary |
-|------|-------------|---------|
-| 2026-02-28 | 1.0 | Initial project-wide development guide |
-| 2026-03-09 | 1.2 | Supabase Free tier, schema rename public_data->public |
+| Date       | PRD Version | Summary                                               |
+| ---------- | ----------- | ----------------------------------------------------- |
+| 2026-02-28 | 1.0         | Initial project-wide development guide                |
+| 2026-03-09 | 1.2         | Supabase Free tier, schema rename public_data->public |

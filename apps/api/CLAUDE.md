@@ -151,17 +151,17 @@ apps/pipeline/
 
 ### File Naming Conventions
 
-| File Type | Pattern | Example |
-|-----------|---------|---------|
-| Route | `<resource>.route.ts` | `politicians.route.ts` |
-| Service | `<resource>.service.ts` | `politician.service.ts` |
-| Repository | `<resource>.repository.ts` | `politician.repository.ts` |
-| Schema (TypeBox) | `<resource>.schema.ts` | `politician.schema.ts` |
-| Adapter | `<source>.adapter.ts` | `camara.adapter.ts` |
-| Transformer | `<entity>.transformer.ts` | `expense.transformer.ts` |
-| Scorer | `<component>.ts` (in `scoring/components/`) | `transparency.ts` |
-| Test | `<module>.test.ts` (co-located) | `politician.service.test.ts` |
-| Integration Test | `<module>.integration.test.ts` | `politicians.route.integration.test.ts` |
+| File Type        | Pattern                                     | Example                                 |
+| ---------------- | ------------------------------------------- | --------------------------------------- |
+| Route            | `<resource>.route.ts`                       | `politicians.route.ts`                  |
+| Service          | `<resource>.service.ts`                     | `politician.service.ts`                 |
+| Repository       | `<resource>.repository.ts`                  | `politician.repository.ts`              |
+| Schema (TypeBox) | `<resource>.schema.ts`                      | `politician.schema.ts`                  |
+| Adapter          | `<source>.adapter.ts`                       | `camara.adapter.ts`                     |
+| Transformer      | `<entity>.transformer.ts`                   | `expense.transformer.ts`                |
+| Scorer           | `<component>.ts` (in `scoring/components/`) | `transparency.ts`                       |
+| Test             | `<module>.test.ts` (co-located)             | `politician.service.test.ts`            |
+| Integration Test | `<module>.integration.test.ts`              | `politicians.route.integration.test.ts` |
 
 ---
 
@@ -688,14 +688,14 @@ GET /api/v1/politicians?limit=20&cursor=eyJpZCI6IjEyMzQifQ==
 
 Every response sets appropriate caching headers for Cloudflare:
 
-| Endpoint | Cache-Control |
-|----------|--------------|
-| `/politicians` | `public, max-age=300, s-maxage=3600` |
-| `/politicians/:slug` | `public, max-age=300, s-maxage=3600` |
-| `/scores/ranking` | `public, max-age=300, s-maxage=3600` |
-| `/sources/status` | `public, max-age=60, s-maxage=300` |
-| `/methodology` | `public, max-age=86400, s-maxage=604800` |
-| `/health` | `no-store` |
+| Endpoint             | Cache-Control                            |
+| -------------------- | ---------------------------------------- |
+| `/politicians`       | `public, max-age=300, s-maxage=3600`     |
+| `/politicians/:slug` | `public, max-age=300, s-maxage=3600`     |
+| `/scores/ranking`    | `public, max-age=300, s-maxage=3600`     |
+| `/sources/status`    | `public, max-age=60, s-maxage=300`       |
+| `/methodology`       | `public, max-age=86400, s-maxage=604800` |
+| `/health`            | `no-store`                               |
 
 ---
 
@@ -854,14 +854,14 @@ export class CamaraAdapter extends BaseAdapter<RawDeputado> {
 
 ### Source Configuration
 
-| Source | Base URL | Auth | Format | Rate Limit | Cadence |
-|--------|---------|------|--------|-----------|---------|
-| Camara | `dadosabertos.camara.leg.br/api/v2` | None | JSON | 120/min | Daily |
-| Senado | `legis.senado.leg.br/dadosabertos` | None | XML/JSON | None documented | Daily |
-| Transparencia | `api.portaltransparencia.gov.br/api-de-dados` | API Key (header) | JSON | 90/min | Daily |
-| TSE | `dadosabertos.tse.jus.br` | None | CSV (bulk) | N/A | Weekly |
-| TCU | `api-cadirreg.apps.tcu.gov.br` | None | JSON | None documented | Weekly |
-| CGU | `portaldatransparencia.gov.br/download-de-dados` | None | CSV (bulk) | N/A | Monthly |
+| Source        | Base URL                                         | Auth             | Format     | Rate Limit      | Cadence |
+| ------------- | ------------------------------------------------ | ---------------- | ---------- | --------------- | ------- |
+| Camara        | `dadosabertos.camara.leg.br/api/v2`              | None             | JSON       | 120/min         | Daily   |
+| Senado        | `legis.senado.leg.br/dadosabertos`               | None             | XML/JSON   | None documented | Daily   |
+| Transparencia | `api.portaltransparencia.gov.br/api-de-dados`    | API Key (header) | JSON       | 90/min          | Daily   |
+| TSE           | `dadosabertos.tse.jus.br`                        | None             | CSV (bulk) | N/A             | Weekly  |
+| TCU           | `api-cadirreg.apps.tcu.gov.br`                   | None             | JSON       | None documented | Weekly  |
+| CGU           | `portaldatransparencia.gov.br/download-de-dados` | None             | CSV (bulk) | N/A             | Monthly |
 
 ### Retry Policy
 
@@ -1005,21 +1005,21 @@ JSDoc is required for:
 
 ## What NEVER to Do
 
-| Anti-Pattern | Why It Is Prohibited |
-|-------------|---------------------|
-| Use `@Res()` or `reply.raw` to bypass Fastify serialization | Skips TypeBox response validation and `fast-json-stringify`, defeats type safety and leaks unknown fields |
-| Import `internal-schema.ts` in any `apps/api/` file | Violates schema isolation (ADR-001). Even if the DB role prevents queries, the import creates a false dependency |
-| Inline Drizzle queries in route handlers | Breaks the repository pattern and makes unit testing impossible. All DB access goes through repositories |
-| Use `OFFSET` for pagination | Performance degrades on large tables. Use cursor-based (keyset) pagination |
-| Log, return, or expose CPF values anywhere | LGPD violation. CPFs are encrypted/hashed and exist only in internal_data (DR-005) |
-| Use `any` type | Use `unknown` and narrow with type guards or Zod/TypeBox parsing |
-| Use `as` type assertions (except `as const` or test factories) | Hides type errors. Parse with Zod/TypeBox for runtime data, use type guards for narrowing |
-| Skip response schema in route definitions | Without response schema, Fastify falls back to JSON.stringify (slow) and may leak sensitive fields |
-| Hardcode API URLs, keys, or feature flags | All configuration from environment variables (12-Factor). Use `config/env.ts` validated at startup |
-| Use `raw SQL` in the API layer | Always use Drizzle query builder for parameterized queries. Raw SQL is allowed only in pipeline for complex cross-schema operations |
-| Create write endpoints in the API | The API is read-only (api_reader role). All writes happen in the pipeline |
-| Use `setTimeout`/`setInterval` for scheduling | Use pg-boss for all scheduled tasks. It provides retry, dead letter queues, and persistence |
-| Decrypt CPFs outside the pipeline crypto module | CPF decryption is confined to `apps/pipeline/src/crypto/cpf.ts` and should only be used for admin debugging |
+| Anti-Pattern                                                   | Why It Is Prohibited                                                                                                                |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Use `@Res()` or `reply.raw` to bypass Fastify serialization    | Skips TypeBox response validation and `fast-json-stringify`, defeats type safety and leaks unknown fields                           |
+| Import `internal-schema.ts` in any `apps/api/` file            | Violates schema isolation (ADR-001). Even if the DB role prevents queries, the import creates a false dependency                    |
+| Inline Drizzle queries in route handlers                       | Breaks the repository pattern and makes unit testing impossible. All DB access goes through repositories                            |
+| Use `OFFSET` for pagination                                    | Performance degrades on large tables. Use cursor-based (keyset) pagination                                                          |
+| Log, return, or expose CPF values anywhere                     | LGPD violation. CPFs are encrypted/hashed and exist only in internal_data (DR-005)                                                  |
+| Use `any` type                                                 | Use `unknown` and narrow with type guards or Zod/TypeBox parsing                                                                    |
+| Use `as` type assertions (except `as const` or test factories) | Hides type errors. Parse with Zod/TypeBox for runtime data, use type guards for narrowing                                           |
+| Skip response schema in route definitions                      | Without response schema, Fastify falls back to JSON.stringify (slow) and may leak sensitive fields                                  |
+| Hardcode API URLs, keys, or feature flags                      | All configuration from environment variables (12-Factor). Use `config/env.ts` validated at startup                                  |
+| Use `raw SQL` in the API layer                                 | Always use Drizzle query builder for parameterized queries. Raw SQL is allowed only in pipeline for complex cross-schema operations |
+| Create write endpoints in the API                              | The API is read-only (api_reader role). All writes happen in the pipeline                                                           |
+| Use `setTimeout`/`setInterval` for scheduling                  | Use pg-boss for all scheduled tasks. It provides retry, dead letter queues, and persistence                                         |
+| Decrypt CPFs outside the pipeline crypto module                | CPF decryption is confined to `apps/pipeline/src/crypto/cpf.ts` and should only be used for admin debugging                         |
 
 ---
 
@@ -1027,25 +1027,25 @@ JSDoc is required for:
 
 ### Allowed External Packages (API)
 
-| Category | Allowed Packages |
-|----------|-----------------|
-| Framework | `fastify`, `@fastify/*` (cors, rate-limit, helmet, swagger) |
-| Validation | `@sinclair/typebox`, `@fastify/type-provider-typebox` |
-| Database | `drizzle-orm`, `postgres` (driver) |
-| Logging | `pino` (bundled with Fastify) |
-| Utilities | `packages/shared` (internal) |
+| Category   | Allowed Packages                                            |
+| ---------- | ----------------------------------------------------------- |
+| Framework  | `fastify`, `@fastify/*` (cors, rate-limit, helmet, swagger) |
+| Validation | `@sinclair/typebox`, `@fastify/type-provider-typebox`       |
+| Database   | `drizzle-orm`, `postgres` (driver)                          |
+| Logging    | `pino` (bundled with Fastify)                               |
+| Utilities  | `packages/shared` (internal)                                |
 
 ### Allowed External Packages (Pipeline)
 
-| Category | Allowed Packages |
-|----------|-----------------|
-| Job Queue | `pg-boss` |
-| Database | `drizzle-orm`, `postgres` |
-| CSV Parsing | `papaparse` or `csv-parse` |
-| XML Parsing | `fast-xml-parser` |
-| Validation | `zod` (for raw source data validation) |
-| HTTP | `node:fetch` (built-in) |
-| Crypto | `node:crypto` (built-in) |
+| Category    | Allowed Packages                       |
+| ----------- | -------------------------------------- |
+| Job Queue   | `pg-boss`                              |
+| Database    | `drizzle-orm`, `postgres`              |
+| CSV Parsing | `papaparse` or `csv-parse`             |
+| XML Parsing | `fast-xml-parser`                      |
+| Validation  | `zod` (for raw source data validation) |
+| HTTP        | `node:fetch` (built-in)                |
+| Crypto      | `node:crypto` (built-in)               |
 
 ### Adding New Dependencies
 
@@ -1105,6 +1105,6 @@ JSDoc is required for:
 
 ## Changelog
 
-| Date | PRD Version | Summary |
-|------|-------------|---------|
-| 2026-02-28 | 1.0 | Initial backend development guide |
+| Date       | PRD Version | Summary                           |
+| ---------- | ----------- | --------------------------------- |
+| 2026-02-28 | 1.0         | Initial backend development guide |

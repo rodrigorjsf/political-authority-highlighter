@@ -33,10 +33,10 @@ Highlights Brazilian politicians who serve with integrity.
 
 **Modular Monolith** — TypeScript monorepo with three logical modules:
 
-| Module | Purpose | Role |
-|--------|---------|------|
-| `apps/web` | Next.js 15 frontend | None |
-| `apps/api` | Fastify 5 REST API | `api_reader` |
+| Module          | Purpose             | Role             |
+| --------------- | ------------------- | ---------------- |
+| `apps/web`      | Next.js 15 frontend | None             |
+| `apps/api`      | Fastify 5 REST API  | `api_reader`     |
 | `apps/pipeline` | Ingestion & scoring | `pipeline_admin` |
 
 ### Database Boundary
@@ -84,19 +84,20 @@ Methodology at `/metodologia`.
 
 ### Prerequisites
 
-- Node.js 20+, pnpm 9+, Docker.
+- Node.js 20+, pnpm 9+, [Supabase CLI](https://supabase.com/docs/guides/cli) (for local DB). Optional: Docker if you prefer the legacy compose-based Postgres.
 
 ### Setup
 
 ```bash
 pnpm install
 cp .env.example .env.local
-docker compose up -d # PostgreSQL on :5433
-pnpm --filter @pah/db migrate
+supabase start
 pnpm dev
 ```
 
-> **Port note:** Docker maps PostgreSQL to `localhost:5433` on the host (container still uses 5432 internally). If port 5433 is also unavailable on your machine, update `ports` in `docker-compose.yml` and the `DATABASE_URL*` variables in `.env.local` to use a free port.
+Local Postgres runs on port **54322** (Supabase default). To reset the DB and re-apply migrations and seed: `supabase db reset`.
+
+> **Optional (Docker):** To use Docker Compose instead of Supabase local, run `docker compose up -d` and set `DATABASE_URL*` in `.env.local` to `postgresql://postgres:postgres_dev_password@127.0.0.1:5433/authority_highlighter`, then run `pnpm --filter @pah/db migrate`.
 
 ## Development
 

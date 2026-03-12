@@ -20,6 +20,7 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
+      # Push runs against the linked remote project. For local: supabase db push --local
       - name: Push migrations
         run: supabase db push
         env:
