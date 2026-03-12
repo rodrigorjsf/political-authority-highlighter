@@ -133,17 +133,17 @@ apps/web/
 
 ### File Naming Conventions
 
-| File Type | Pattern | Example |
-|-----------|---------|---------|
-| Page | `page.tsx` (Next.js convention) | `app/politicos/page.tsx` |
-| Layout | `layout.tsx` | `app/layout.tsx` |
-| Loading | `loading.tsx` | `app/politicos/loading.tsx` |
-| Error | `error.tsx` | `app/error.tsx` |
-| Server Component | `kebab-case.tsx` (no prefix) | `politician-card.tsx` |
-| Client Component | `kebab-case.tsx` (with `'use client'` directive) | `search-bar.tsx` |
-| Utility module | `kebab-case.ts` | `api-client.ts` |
-| Test | `*.test.tsx` (co-located) or `e2e/*.spec.ts` | `score-breakdown.test.tsx` |
-| CSS module | Not used -- Tailwind only | -- |
+| File Type        | Pattern                                          | Example                     |
+| ---------------- | ------------------------------------------------ | --------------------------- |
+| Page             | `page.tsx` (Next.js convention)                  | `app/politicos/page.tsx`    |
+| Layout           | `layout.tsx`                                     | `app/layout.tsx`            |
+| Loading          | `loading.tsx`                                    | `app/politicos/loading.tsx` |
+| Error            | `error.tsx`                                      | `app/error.tsx`             |
+| Server Component | `kebab-case.tsx` (no prefix)                     | `politician-card.tsx`       |
+| Client Component | `kebab-case.tsx` (with `'use client'` directive) | `search-bar.tsx`            |
+| Utility module   | `kebab-case.ts`                                  | `api-client.ts`             |
+| Test             | `*.test.tsx` (co-located) or `e2e/*.spec.ts`     | `score-breakdown.test.tsx`  |
+| CSS module       | Not used -- Tailwind only                        | --                          |
 
 ---
 
@@ -781,16 +781,16 @@ export function PoliticianJsonLd({ politician }: { politician: PoliticianRespons
 
 ### Requirements
 
-| Criterion | Implementation |
-|-----------|---------------|
-| Color contrast | Minimum 4.5:1 for body text, 3:1 for large text. Verified with Tailwind defaults |
-| Keyboard navigation | All interactive elements reachable via Tab. Focus ring visible (`ring-2 ring-primary`) |
-| Screen readers | Semantic HTML (`<main>`, `<nav>`, `<article>`, `<section>`, `<h1>`-`<h6>`), `aria-label` on icon buttons |
-| Alt text | All `<img>` tags have descriptive `alt` text. Politician photos: `alt="${name}, ${party}-${state}"` |
-| Form labels | All `<input>` elements have associated `<label>` (visible or `sr-only`) |
-| Focus management | After filter change, focus moves to results area. After navigation, focus on main content |
-| Motion | Respect `prefers-reduced-motion` media query. Disable transitions when set |
-| Language | `<html lang="pt-BR">` on root layout |
+| Criterion           | Implementation                                                                                           |
+| ------------------- | -------------------------------------------------------------------------------------------------------- |
+| Color contrast      | Minimum 4.5:1 for body text, 3:1 for large text. Verified with Tailwind defaults                         |
+| Keyboard navigation | All interactive elements reachable via Tab. Focus ring visible (`ring-2 ring-primary`)                   |
+| Screen readers      | Semantic HTML (`<main>`, `<nav>`, `<article>`, `<section>`, `<h1>`-`<h6>`), `aria-label` on icon buttons |
+| Alt text            | All `<img>` tags have descriptive `alt` text. Politician photos: `alt="${name}, ${party}-${state}"`      |
+| Form labels         | All `<input>` elements have associated `<label>` (visible or `sr-only`)                                  |
+| Focus management    | After filter change, focus moves to results area. After navigation, focus on main content                |
+| Motion              | Respect `prefers-reduced-motion` media query. Disable transitions when set                               |
+| Language            | `<html lang="pt-BR">` on root layout                                                                     |
 
 ### Automated Testing
 
@@ -816,13 +816,13 @@ test('politician profile page has no accessibility violations', async ({ page })
 
 ## Performance Targets
 
-| Metric | Target | Strategy |
-|--------|--------|----------|
-| LCP | < 2.0s | Server Components (zero client JS for data), ISR, Cloudflare CDN |
-| FID/INP | < 100ms | Minimal client-side JavaScript, no heavy hydration |
-| CLS | < 0.1 | Fixed dimensions on images/cards, skeleton loaders match final layout |
-| TTFB | < 500ms | Vercel edge, stale-while-revalidate ISR |
-| Bundle size | < 100KB first load JS | Server Components, dynamic imports for charts |
+| Metric      | Target                | Strategy                                                              |
+| ----------- | --------------------- | --------------------------------------------------------------------- |
+| LCP         | < 2.0s                | Server Components (zero client JS for data), ISR, Cloudflare CDN      |
+| FID/INP     | < 100ms               | Minimal client-side JavaScript, no heavy hydration                    |
+| CLS         | < 0.1                 | Fixed dimensions on images/cards, skeleton loaders match final layout |
+| TTFB        | < 500ms               | Vercel edge, stale-while-revalidate ISR                               |
+| Bundle size | < 100KB first load JS | Server Components, dynamic imports for charts                         |
 
 ### Performance Rules
 
@@ -853,13 +853,13 @@ export const fetchPoliticianBySlug = cache(async (slug: string) => {
 
 ### Breakpoints (Tailwind defaults)
 
-| Name | Min Width | Use Case |
-|------|-----------|----------|
-| (default) | 320px | Mobile phones |
-| `sm` | 640px | Large phones, small tablets |
-| `md` | 768px | Tablets |
-| `lg` | 1024px | Laptops |
-| `xl` | 1280px | Desktops |
+| Name      | Min Width | Use Case                    |
+| --------- | --------- | --------------------------- |
+| (default) | 320px     | Mobile phones               |
+| `sm`      | 640px     | Large phones, small tablets |
+| `md`      | 768px     | Tablets                     |
+| `lg`      | 1024px    | Laptops                     |
+| `xl`      | 1280px    | Desktops                    |
 
 ### Layout Patterns
 
@@ -884,11 +884,11 @@ export const fetchPoliticianBySlug = cache(async (slug: string) => {
 
 ## Testing Standards
 
-| Type | Tool | Location | What to Test |
-|------|------|----------|-------------|
-| Unit | Vitest + React Testing Library | `*.test.tsx` co-located | Component rendering, utility functions |
-| E2E | Playwright | `e2e/*.spec.ts` | Critical user flows, accessibility |
-| Visual | Playwright screenshots | `e2e/*.spec.ts` | Responsive layout, CLS verification |
+| Type   | Tool                           | Location                | What to Test                           |
+| ------ | ------------------------------ | ----------------------- | -------------------------------------- |
+| Unit   | Vitest + React Testing Library | `*.test.tsx` co-located | Component rendering, utility functions |
+| E2E    | Playwright                     | `e2e/*.spec.ts`         | Critical user flows, accessibility     |
+| Visual | Playwright screenshots         | `e2e/*.spec.ts`         | Responsive layout, CLS verification    |
 
 ### Unit Test Example
 
@@ -920,29 +920,29 @@ describe('ScoreBadge', () => {
 
 ## What NEVER to Do
 
-| Anti-Pattern | Why It Is Prohibited |
-|-------------|---------------------|
-| Use `useEffect` to fetch data that can be a Server Component | Slower initial load, no SEO, unnecessary client JS. Fetch in Server Components |
-| Use party colors (PT red, PSDB blue, etc.) in the UI | Violates political neutrality (DR-002). Use only the neutral palette |
-| Display qualitative score labels ("good," "bad," "corrupt") | Violates political neutrality (DR-002). Display numbers only |
-| Import from `packages/db/` in any frontend code | Frontend accesses data through the API only. No database dependency |
-| Use `'use client'` on components that do not need interactivity | Increases bundle size and disables server-side rendering benefits |
-| Use `any` type | Use proper TypeScript types. Parse API responses with type assertions backed by runtime validation |
-| Create barrel exports (`index.ts` re-exporting all) | Prevents tree-shaking, bloats bundles |
-| Use `<img>` instead of `next/image` | Misses optimization (WebP, lazy loading, responsive sizes) and causes CLS |
-| Hardcode API URLs | Use `NEXT_PUBLIC_API_URL` environment variable |
-| Skip `alt` text on images | WCAG 2.1 AA violation. All images must have descriptive alt text |
-| Use inline styles instead of Tailwind | Breaks consistency and increases bundle size |
-| Add client-side state management libraries (Redux, Zustand) | URL search params are the state management solution. No additional library needed |
-| Display exclusion record details (source, date, description) | Violates silent exclusion (DR-001). Only show the neutral notice text |
-| Use color to convey meaning without text alternative | WCAG 2.1 AA violation. Always pair color with text labels |
-| Skip `loading.tsx` skeleton for data-fetching pages | Causes poor UX and CLS. Every page with async data needs a skeleton |
-| Store auth tokens in localStorage/sessionStorage | Violates RNF-SEC-015. Use httpOnly Secure SameSite=Strict cookies when auth is implemented |
-| Add external `<script>` tags without SRI | Violates RNF-SEC-016. All external scripts must have `integrity` and `crossorigin` attributes |
-| Render unsanitized HTML from API with innerHTML | Violates RNF-SEC-013/DR-008. Government text rendered via JSX auto-escaping only |
-| Import `@pah/db`, `pg`, or `drizzle-orm` in frontend | Violates RNF-SEC-012/DR-008. Frontend accesses data through the API only |
-| Use `NEXT_PUBLIC_` prefix for secrets/tokens | Violates RNF-SEC-012. Only `NEXT_PUBLIC_API_URL` is permitted |
-| Expose server error details in UI | Violates RNF-SEC-014. Error boundaries show generic messages; use `digest` for correlation |
+| Anti-Pattern                                                    | Why It Is Prohibited                                                                               |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Use `useEffect` to fetch data that can be a Server Component    | Slower initial load, no SEO, unnecessary client JS. Fetch in Server Components                     |
+| Use party colors (PT red, PSDB blue, etc.) in the UI            | Violates political neutrality (DR-002). Use only the neutral palette                               |
+| Display qualitative score labels ("good," "bad," "corrupt")     | Violates political neutrality (DR-002). Display numbers only                                       |
+| Import from `packages/db/` in any frontend code                 | Frontend accesses data through the API only. No database dependency                                |
+| Use `'use client'` on components that do not need interactivity | Increases bundle size and disables server-side rendering benefits                                  |
+| Use `any` type                                                  | Use proper TypeScript types. Parse API responses with type assertions backed by runtime validation |
+| Create barrel exports (`index.ts` re-exporting all)             | Prevents tree-shaking, bloats bundles                                                              |
+| Use `<img>` instead of `next/image`                             | Misses optimization (WebP, lazy loading, responsive sizes) and causes CLS                          |
+| Hardcode API URLs                                               | Use `NEXT_PUBLIC_API_URL` environment variable                                                     |
+| Skip `alt` text on images                                       | WCAG 2.1 AA violation. All images must have descriptive alt text                                   |
+| Use inline styles instead of Tailwind                           | Breaks consistency and increases bundle size                                                       |
+| Add client-side state management libraries (Redux, Zustand)     | URL search params are the state management solution. No additional library needed                  |
+| Display exclusion record details (source, date, description)    | Violates silent exclusion (DR-001). Only show the neutral notice text                              |
+| Use color to convey meaning without text alternative            | WCAG 2.1 AA violation. Always pair color with text labels                                          |
+| Skip `loading.tsx` skeleton for data-fetching pages             | Causes poor UX and CLS. Every page with async data needs a skeleton                                |
+| Store auth tokens in localStorage/sessionStorage                | Violates RNF-SEC-015. Use httpOnly Secure SameSite=Strict cookies when auth is implemented         |
+| Add external `<script>` tags without SRI                        | Violates RNF-SEC-016. All external scripts must have `integrity` and `crossorigin` attributes      |
+| Render unsanitized HTML from API with innerHTML                 | Violates RNF-SEC-013/DR-008. Government text rendered via JSX auto-escaping only                   |
+| Import `@pah/db`, `pg`, or `drizzle-orm` in frontend            | Violates RNF-SEC-012/DR-008. Frontend accesses data through the API only                           |
+| Use `NEXT_PUBLIC_` prefix for secrets/tokens                    | Violates RNF-SEC-012. Only `NEXT_PUBLIC_API_URL` is permitted                                      |
+| Expose server error details in UI                               | Violates RNF-SEC-014. Error boundaries show generic messages; use `digest` for correlation         |
 
 ---
 
@@ -950,14 +950,14 @@ describe('ScoreBadge', () => {
 
 ### Allowed External Packages
 
-| Category | Allowed Packages |
-|----------|-----------------|
-| Framework | `next`, `react`, `react-dom` |
-| Styling | `tailwindcss`, `tailwind-merge`, `clsx`, `class-variance-authority` |
-| UI Components | `@radix-ui/*` (via shadcn/ui), `lucide-react` (icons) |
-| Charts | `recharts` (if needed, dynamically imported) |
-| Testing | `vitest`, `@testing-library/react`, `playwright`, `@axe-core/playwright` |
-| Utilities | `packages/shared` (internal) |
+| Category      | Allowed Packages                                                         |
+| ------------- | ------------------------------------------------------------------------ |
+| Framework     | `next`, `react`, `react-dom`                                             |
+| Styling       | `tailwindcss`, `tailwind-merge`, `clsx`, `class-variance-authority`      |
+| UI Components | `@radix-ui/*` (via shadcn/ui), `lucide-react` (icons)                    |
+| Charts        | `recharts` (if needed, dynamically imported)                             |
+| Testing       | `vitest`, `@testing-library/react`, `playwright`, `@axe-core/playwright` |
+| Utilities     | `packages/shared` (internal)                                             |
 
 ### Banned Packages
 
@@ -1032,7 +1032,7 @@ const securityHeaders = [
 
 ## Changelog
 
-| Date | PRD Version | Summary |
-|------|-------------|---------|
-| 2026-02-28 | 1.0 | Initial frontend development guide |
-| 2026-03-07 | 1.1 | Add Frontend Security First principle (DR-008), full CSP header, client bundle protection, error sanitization, SRI policy |
+| Date       | PRD Version | Summary                                                                                                                   |
+| ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 2026-02-28 | 1.0         | Initial frontend development guide                                                                                        |
+| 2026-03-07 | 1.1         | Add Frontend Security First principle (DR-008), full CSP header, client bundle protection, error sanitization, SRI policy |

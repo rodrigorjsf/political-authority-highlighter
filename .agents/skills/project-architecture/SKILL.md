@@ -16,7 +16,7 @@ Enforces the architectural decisions documented in ARCHITECTURE.md and the 7 ADR
 ### 1. Two-Schema Database Separation (ADR-001)
 
 ```
-PostgreSQL 16
+PostgreSQL (local: Supabase CLI supabase start, port 54322; roles via supabase/roles.sql)
 ├── public schema (10 tables) — API reads from here
 │   ├── politicians, integrity_scores, bills, votes, expenses...
 │   └── data_source_status

@@ -5,8 +5,7 @@
   "exports": {
     "./public-schema": "./src/public-schema.ts",
     "./internal-schema": "./src/internal-schema.ts",
-    "./clients": "./src/clients.ts",
-    "./migrate": "./src/migrate.ts"
+    "./clients": "./src/clients.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
