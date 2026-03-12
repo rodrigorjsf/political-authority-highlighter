@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ApiError, fetchPoliticianBySlug, fetchPoliticians } from '../../../lib/api-client'
 import { ScoreBreakdown } from '../../../components/politician/score-breakdown'
 import { ExclusionNotice } from '../../../components/politician/exclusion-notice'
+import { PoliticianJsonLd } from '../../../components/seo/json-ld'
 
 export const revalidate = 3600
 
@@ -36,7 +37,7 @@ export async function generateMetadata({
 
   try {
     const politician = await fetchPoliticianBySlug(slug)
-    const title = `${politician.name} (${politician.party}-${politician.state}) — Autoridade Política`
+    const title = `${politician.name} (${politician.party}-${politician.state})`
     const description = `Perfil de integridade de ${politician.name}: pontuação ${politician.overallScore}/100. Projetos, votações e despesas de fontes oficiais.`
 
     return {
@@ -45,9 +46,32 @@ export async function generateMetadata({
       alternates: {
         canonical: `https://autoridade-politica.com.br/politicos/${slug}`,
       },
+      openGraph: {
+        type: 'profile',
+        title: `${politician.name} (${politician.party}-${politician.state}) — Autoridade Política`,
+        description,
+        url: `https://autoridade-politica.com.br/politicos/${slug}`,
+        images:
+          politician.photoUrl !== null
+            ? [
+                {
+                  url: politician.photoUrl,
+                  alt: `Foto oficial de ${politician.name}`,
+                },
+              ]
+            : [],
+        locale: 'pt_BR',
+        siteName: 'Autoridade Política',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${politician.name} (${politician.party}-${politician.state}) — Autoridade Política`,
+        description,
+        images: politician.photoUrl !== null ? [politician.photoUrl] : [],
+      },
     }
   } catch {
-    return { title: 'Político não encontrado — Autoridade Política' }
+    return { title: 'Político não encontrado' }
   }
 }
 
@@ -71,7 +95,9 @@ export default async function PoliticianProfilePage({
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <>
+      <PoliticianJsonLd politician={politician} />
+      <main className="container mx-auto px-4 py-8">
       {/* Profile header */}
       <div className="mb-8 flex flex-col gap-6 sm:flex-row">
         {/* Photo or initials fallback */}
@@ -143,12 +169,12 @@ export default async function PoliticianProfilePage({
 
       {/* Section tab navigation (placeholders — filled by RF-008/009/010/011/012) */}
       <nav aria-label="Seções do perfil" className="mb-6">
-        <ul className="flex flex-wrap gap-2" role="list">
+        <ul className="flex flex-col gap-2 sm:flex-row sm:flex-wrap" role="list">
           {PROFILE_TABS.map((tab) => (
             <li key={tab.href}>
               <Link
                 href={`/politicos/${slug}/${tab.href}`}
-                className="rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted"
+                className="block rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted sm:inline"
               >
                 {tab.label}
               </Link>
@@ -165,5 +191,6 @@ export default async function PoliticianProfilePage({
         </a>
       </p>
     </main>
+    </>
   )
 }
