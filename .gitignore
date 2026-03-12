@@ -65,3 +65,7 @@ playwright-report/
 # Temporary files
 tmp/
 .tmp/
+.vercel
+.env*.local
+.env*.staging
+.agents/

@@ -174,7 +174,7 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 | 6 | Profile Sections — Proposals + Agenda (RF-010, RF-011) | Proposals list + committee memberships, API endpoints, DB schema | complete | - | 2 | `.claude/PRPs/plans/completed/rf-010-011-profile-proposals-agenda.plan.md` |
 | 7 | Data Ingestion Pipeline (RF-013) | Bootstrap pipeline app, 6 source adapters, pg-boss scheduler, internal schema | complete | - | - | `.claude/PRPs/plans/completed/rf-013-data-ingestion-pipeline.plan.md` |
 | 8 | Scoring + Anti-Corruption + Freshness (RF-004, RF-006, RF-014) | Scoring engine, exclusion detection, data_source_status, /fontes page | complete | - | 7 | `.claude/PRPs/plans/completed/rf-004-006-014-scoring-exclusion-freshness.plan.md` |
-| 9 | SEO + Responsive Polish (RF-017, RF-016) | generateMetadata() per profile, JSON-LD, sitemap.xml, robots.txt, mobile audit | pending | - | 2,6 | - |
+| 9 | SEO + Responsive Polish (RF-017, RF-016) | generateMetadata() per profile, JSON-LD, sitemap.xml, robots.txt, mobile audit | complete | - | 2,6 | `.claude/PRPs/plans/completed/rf-016-017-seo-responsive-polish.plan.md` |
 | 10 | Frontend Security Hardening (DR-008) | CSP header, server-only guards, ESLint restrictions, CI bundle scan, pnpm audit (RNF-SEC-011,012,014,017) | pending | with 5 | - | - |
 | 11 | Code Quality & Best Practices Refactor | Align codebase with TypeScript best practices (interfaces, enums, type guards, destructuring, ms package) | pending | - | 10 | - |
 

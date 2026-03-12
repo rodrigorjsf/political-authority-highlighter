@@ -7,6 +7,7 @@ This file serves as the primary instructional context for Gemini CLI interaction
 **Political Authority Highlighter** is a Brazilian political transparency platform that cross-references 6+ official government sources (Camara, Senado, Portal da Transparencia, TSE, TCU, CGU) to compute an **Integrity Score (0-100)** for federal legislators.
 
 ### Core Mission
+
 - **Neutrality**: Uniform scoring across all parties and roles without editorial bias.
 - **Public Data**: Exclusively uses verifiable government sources (LAI).
 - **Privacy**: LGPD-compliant handling of sensitive data (encrypted CPFs).
@@ -17,6 +18,7 @@ This file serves as the primary instructional context for Gemini CLI interaction
 The project is a **Modular Monolith** organized as a TypeScript monorepo using **Turborepo** and **pnpm workspaces**.
 
 ### Tech Stack
+
 - **Language**: TypeScript 5.4+ (Strict mode)
 - **Frontend**: Next.js 15 (App Router, ISR, Server Components)
 - **Backend API**: Fastify 5
@@ -26,6 +28,7 @@ The project is a **Modular Monolith** organized as a TypeScript monorepo using *
 - **Infrastructure**: Vercel (Frontend), Supabase (API/DB), Cloudflare (CDN/DNS)
 
 ### Module Structure
+
 - `apps/web`: Next.js frontend application.
 - `apps/api`: Fastify REST API (Public-facing).
 - `apps/pipeline`: Data ingestion, transformation, and scoring engine.
@@ -42,9 +45,11 @@ The project is a **Modular Monolith** organized as a TypeScript monorepo using *
 ## Development Workflows
 
 ### Prerequisites
+
 - Node.js 20+, pnpm 9+, Docker.
 
 ### Key Commands
+
 - `pnpm install`: Install dependencies.
 - `docker compose up -d`: Start local PostgreSQL (port 5433).
 - `pnpm dev`: Start all applications in development mode.
@@ -56,6 +61,7 @@ The project is a **Modular Monolith** organized as a TypeScript monorepo using *
 - `pnpm --filter @pah/db migrate`: Run database migrations.
 
 ### Coding Standards
+
 - **Strict TypeScript**: `any` is banned; use `unknown` and type guards. Explicit return types for public functions.
 - **Style**: No semicolons, single quotes, 2-space indentation.
 - **Boundaries**: Respect import boundaries (e.g., API must not import `internal-schema.ts`).
@@ -65,10 +71,11 @@ The project is a **Modular Monolith** organized as a TypeScript monorepo using *
 ## AI Interaction Guidelines
 
 When working in this codebase, prioritize:
-1.  **Type Safety**: Ensure all new code is strictly typed and integrated into the `packages/shared` or `packages/db` structures.
-2.  **Surgical Changes**: Modify only what is necessary, following the established Modular Monolith patterns.
-3.  **Security Awareness**: Never inadvertently expose internal schema fields or unencrypted identifiers.
-4.  **Neutral Tone**: Maintain the project's commitment to political neutrality in all UI and documentation updates.
+
+1. **Type Safety**: Ensure all new code is strictly typed and integrated into the `packages/shared` or `packages/db` structures.
+2. **Surgical Changes**: Modify only what is necessary, following the established Modular Monolith patterns.
+3. **Security Awareness**: Never inadvertently expose internal schema fields or unencrypted identifiers.
+4. **Neutral Tone**: Maintain the project's commitment to political neutrality in all UI and documentation updates.
 
 ---
 *Last Updated: 2026-03-10*

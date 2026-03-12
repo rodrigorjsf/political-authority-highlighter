@@ -2,8 +2,19 @@ import type { Metadata } from 'next'
 import '../styles/globals.css'
 
 export const metadata: Metadata = {
-  title: 'Autoridade Política — Transparência Política no Brasil',
+  metadataBase: new URL(
+    process.env['NEXT_PUBLIC_BASE_URL'] ?? 'https://autoridade-politica.com.br',
+  ),
+  title: {
+    default: 'Autoridade Política — Transparência Política no Brasil',
+    template: '%s — Autoridade Política',
+  },
   description: 'Dados públicos de integridade de deputados federais e senadores brasileiros.',
+  openGraph: {
+    siteName: 'Autoridade Política',
+    locale: 'pt_BR',
+    type: 'website',
+  },
 }
 
 export default function RootLayout({

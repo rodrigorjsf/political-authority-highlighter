@@ -20,10 +20,14 @@ export async function generateMetadata({
   try {
     const politician = await fetchPoliticianBySlug(slug)
     return {
-      title: `Despesas — ${politician.name} (${politician.party}-${politician.state}) — Autoridade Política`,
+      title: `Despesas — ${politician.name} (${politician.party}-${politician.state})`,
+      description: `Despesas parlamentares de ${politician.name} (${politician.party}-${politician.state}). Dados do Portal da Transparência (CEAP/CEAPS).`,
+      alternates: {
+        canonical: `https://autoridade-politica.com.br/politicos/${slug}/despesas`,
+      },
     }
   } catch {
-    return { title: 'Despesas — Autoridade Política' }
+    return { title: 'Despesas' }
   }
 }
 
@@ -55,7 +59,7 @@ export default async function ExpensesPage({
       {/* Breadcrumb */}
       <Link
         href={`/politicos/${slug}`}
-        className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+        className="mb-4 inline-flex items-center py-2 text-sm text-muted-foreground hover:text-foreground"
       >
         ← {politician.name}
       </Link>

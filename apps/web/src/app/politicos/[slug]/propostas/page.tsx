@@ -18,10 +18,14 @@ export async function generateMetadata({
   try {
     const politician = await fetchPoliticianBySlug(slug)
     return {
-      title: `Propostas — ${politician.name} (${politician.party}-${politician.state}) — Autoridade Política`,
+      title: `Propostas — ${politician.name} (${politician.party}-${politician.state})`,
+      description: `Propostas legislativas de ${politician.name} (${politician.party}-${politician.state}). Requerimentos, indicações e outros atos parlamentares.`,
+      alternates: {
+        canonical: `https://autoridade-politica.com.br/politicos/${slug}/propostas`,
+      },
     }
   } catch {
-    return { title: 'Propostas — Autoridade Política' }
+    return { title: 'Propostas' }
   }
 }
 
@@ -52,7 +56,7 @@ export default async function ProposalsPage({
       {/* Breadcrumb */}
       <Link
         href={`/politicos/${slug}`}
-        className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+        className="mb-4 inline-flex items-center py-2 text-sm text-muted-foreground hover:text-foreground"
       >
         ← {politician.name}
       </Link>

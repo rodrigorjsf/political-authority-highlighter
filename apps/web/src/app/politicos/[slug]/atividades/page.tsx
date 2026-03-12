@@ -23,10 +23,14 @@ export async function generateMetadata({
   try {
     const politician = await fetchPoliticianBySlug(slug)
     return {
-      title: `Atividades — ${politician.name} (${politician.party}-${politician.state}) — Autoridade Política`,
+      title: `Atividades — ${politician.name} (${politician.party}-${politician.state})`,
+      description: `Participação em comissões de ${politician.name} (${politician.party}-${politician.state}). Comissões permanentes e temporárias.`,
+      alternates: {
+        canonical: `https://autoridade-politica.com.br/politicos/${slug}/atividades`,
+      },
     }
   } catch {
-    return { title: 'Atividades — Autoridade Política' }
+    return { title: 'Atividades' }
   }
 }
 
@@ -52,7 +56,7 @@ export default async function CommitteesPage({
       {/* Breadcrumb */}
       <Link
         href={`/politicos/${slug}`}
-        className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+        className="mb-4 inline-flex items-center py-2 text-sm text-muted-foreground hover:text-foreground"
       >
         ← {politician.name}
       </Link>
