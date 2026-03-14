@@ -39,5 +39,8 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Vercel Build Validation
+        run: npx vercel build --yes --token ${{ secrets.VERCEL_TOKEN }} || npx vercel build --yes
+
       - name: Check client bundle for leaks
         run: bash scripts/check-client-bundle.sh

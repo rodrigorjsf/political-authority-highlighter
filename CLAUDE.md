@@ -372,6 +372,7 @@ Before opening a pull request, verify:
 
 - [ ] `pnpm lint` passes across all packages (zero warnings)
 - [ ] `pnpm typecheck` passes with `tsc --noEmit`
+- [ ] `vercel build` passes successfully (OBRIGATÓRIO)
 - [ ] `pnpm test` passes all unit and integration tests
 - [ ] No `any` types introduced
 - [ ] No hardcoded URLs, secrets, or environment-specific values

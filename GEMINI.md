@@ -57,6 +57,7 @@ The project is a **Modular Monolith** organized as a TypeScript monorepo using *
 - `pnpm lint`: Run ESLint across the monorepo.
 - `pnpm typecheck`: Run type checks (`tsc --noEmit`).
 - `pnpm test`: Run unit and integration tests (Vitest).
+- `vercel build`: Run the Vercel build phase (OBRIGATÓRIO PASSAR COM SUCESSO).
 - `pnpm test:e2e`: Run Playwright E2E tests.
 - `pnpm --filter @pah/db migrate`: Run database migrations.
 

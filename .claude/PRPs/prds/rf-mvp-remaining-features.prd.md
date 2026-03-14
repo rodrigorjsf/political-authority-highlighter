@@ -51,7 +51,7 @@ We'll know we're right when average session depth reaches ≥ 3 pages within 30 
 | Profile page LCP | < 2.0s | Lighthouse CI |
 | API p95 response time (profile endpoints) | < 300ms | Fastify server logs |
 | All 594 politicians with computed score | 100% | DB query on integrity_scores |
-| `pnpm lint && pnpm typecheck && pnpm test` pass | 100% | CI/CD on every PR |
+| `pnpm lint && pnpm typecheck && pnpm test && vercel build` pass | 100% | CI/CD on every PR |
 
 ## Open Questions
 

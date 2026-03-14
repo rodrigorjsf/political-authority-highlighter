@@ -24,6 +24,7 @@ Maintains a **lean** GitHub Actions pipeline at `.github/workflows/ci.yml`. The 
 | TypeScript | 5.4 | Typecheck | `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess` |
 | Vitest | 2 | Unit tests | Fast unit tests, no external deps |
 | Next.js | 15 | Build | SSG/ISR build verification |
+| Vercel | CLI | Vercel Build Validation | OBRIGATÓRIO: Verifies Next.js app builds on Vercel |
 | Fastify | 5 | Build | Included via `pnpm build` |
 | pnpm audit | (via pnpm) | Security audit | Catches high/critical dependency vulnerabilities |
 | supabase/setup-cli | latest | Deploy (deploy.yml) | Supabase CLI: `supabase db push` (remote); local use `supabase start` and `supabase db reset --local` |

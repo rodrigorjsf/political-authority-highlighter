@@ -8,7 +8,10 @@ const CursorSchema = z.object({
   politicianId: z.string().uuid(),
 })
 
-type Cursor = z.infer<typeof CursorSchema>
+export interface Cursor {
+  overallScore: number
+  politicianId: string
+}
 
 function encodeCursor(cursor: Cursor): string {
   return Buffer.from(JSON.stringify(cursor)).toString('base64url')
@@ -97,7 +100,7 @@ export function createPoliticianService(repository: PoliticianRepository): {
       const lastRow = data.at(-1) // safe: .at(-1) handles noUncheckedIndexedAccess
       const nextCursor =
         hasMore && lastRow !== undefined
-          ? encodeCursor({ overallScore: lastRow.overallScore as number, politicianId: lastRow.id as string })
+          ? encodeCursor({ overallScore: lastRow.overallScore, politicianId: lastRow.id })
           : null
 
       return { data: data.map(toPoliticianCardDto), cursor: nextCursor }

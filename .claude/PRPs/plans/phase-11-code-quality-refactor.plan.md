@@ -624,7 +624,7 @@ pnpm --filter @pah/api test
 pnpm --filter @pah/web typecheck
 
 # Final full validation:
-pnpm lint && pnpm typecheck && pnpm test
+pnpm lint && pnpm typecheck && pnpm test && vercel build
 ```
 
 ---
@@ -640,6 +640,7 @@ pnpm lint && pnpm typecheck && pnpm test
 - [ ] `REVALIDATE` constants exported from `@pah/shared` and used in `api-client.ts`
 - [ ] `pnpm lint` passes with zero warnings
 - [ ] `pnpm typecheck` passes across all packages
+- [ ] `vercel build` passes successfully (OBRIGATÓRIO)
 - [ ] `pnpm test` passes — no regressions
 - [ ] New tests verify malformed cursors are rejected by Zod
 
