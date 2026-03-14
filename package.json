@@ -17,8 +17,13 @@
     "eslint": "^8.0.0",
     "eslint-plugin-import": "^2.29.0",
     "prettier": "^3.2.0",
-    "supabase": "^2.77.0",
+    "supabase": "^2.78.1",
     "turbo": "^2.0.0",
     "typescript": "^5.4.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "flatted": ">=3.4.0"
+    }
   }
 }
