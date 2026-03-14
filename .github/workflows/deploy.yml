@@ -1,22 +1,25 @@
 name: Deploy staging CI
 
 on:
-  pull_request:
-    branches: [ development ]
-    types: [ closed ]
+  workflow_run:
+    workflows: ["CI"]
+    branches: [development]
+    types: [completed]
 
 jobs:
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.title, '[skip ci]')
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
-
-      - name: Checkout
-        uses: actions/checkout@v5
+          node-version: 22
 
       - name: Vercel auto-deploy
         run: echo "Vercel deploys automatically via GitHub integration on push to development"

@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Security audit
+        run: pnpm audit --audit-level=high --ignore-registry-errors
+
       - name: Lint
         run: pnpm lint
 
@@ -35,3 +38,6 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Check client bundle for leaks
+        run: bash scripts/check-client-bundle.sh
