@@ -69,3 +69,5 @@ tmp/
 .env*.local
 .env*.staging
 .agents/
+
+.claude/settings.json
