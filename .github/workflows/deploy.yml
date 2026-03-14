@@ -1,18 +1,15 @@
 name: Deploy staging CI
 
 on:
-  workflow_run:
-    workflows: ["CI"]
+  pull_request:
+    types: [closed]
     branches: [development]
-    types: [completed]
 
 jobs:
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
-    if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push'
+    if: github.event.pull_request.merged == true
 
     steps:
       - uses: actions/checkout@v4

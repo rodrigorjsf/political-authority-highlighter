@@ -97,7 +97,7 @@ export function createPoliticianService(repository: PoliticianRepository): {
       const lastRow = data.at(-1) // safe: .at(-1) handles noUncheckedIndexedAccess
       const nextCursor =
         hasMore && lastRow !== undefined
-          ? encodeCursor({ overallScore: lastRow.overallScore, politicianId: lastRow.id })
+          ? encodeCursor({ overallScore: lastRow.overallScore as number, politicianId: lastRow.id as string })
           : null
 
       return { data: data.map(toPoliticianCardDto), cursor: nextCursor }
