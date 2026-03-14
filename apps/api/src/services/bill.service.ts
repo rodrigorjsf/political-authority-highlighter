@@ -7,7 +7,10 @@ const BillCursorSchema = z.object({
   billId: z.string().uuid(),
 })
 
-type BillCursor = z.infer<typeof BillCursorSchema>
+export interface BillCursor {
+  submissionDate: string
+  billId: string
+}
 
 function encodeCursor(cursor: BillCursor): string {
   return Buffer.from(JSON.stringify(cursor)).toString('base64url')
@@ -16,7 +19,16 @@ function encodeCursor(cursor: BillCursor): string {
 function decodeCursor(encoded: string): BillCursor {
   try {
     const raw: unknown = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf-8'))
-    return BillCursorSchema.parse(raw)
+    const parsed = BillCursorSchema.parse(raw)
+    
+    if (parsed.submissionDate === undefined || parsed.billId === undefined) {
+      throw new Error('Invalid cursor data')
+    }
+    
+    return {
+      submissionDate: parsed.submissionDate,
+      billId: parsed.billId,
+    }
   } catch {
     throw new Error('Invalid cursor')
   }

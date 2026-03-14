@@ -7,7 +7,10 @@ const VoteCursorSchema = z.object({
   voteId: z.string().uuid(),
 })
 
-type VoteCursor = z.infer<typeof VoteCursorSchema>
+export interface VoteCursor {
+  sessionDate: string
+  voteId: string
+}
 
 function encodeCursor(cursor: VoteCursor): string {
   return Buffer.from(JSON.stringify(cursor)).toString('base64url')
@@ -16,7 +19,16 @@ function encodeCursor(cursor: VoteCursor): string {
 function decodeCursor(encoded: string): VoteCursor {
   try {
     const raw: unknown = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf-8'))
-    return VoteCursorSchema.parse(raw)
+    const parsed = VoteCursorSchema.parse(raw)
+    
+    if (parsed.sessionDate === undefined || parsed.voteId === undefined) {
+      throw new Error('Invalid cursor data')
+    }
+    
+    return {
+      sessionDate: parsed.sessionDate,
+      voteId: parsed.voteId,
+    }
   } catch {
     throw new Error('Invalid cursor')
   }

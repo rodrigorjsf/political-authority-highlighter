@@ -7,7 +7,10 @@ const ProposalCursorSchema = z.object({
   proposalId: z.string().uuid(),
 })
 
-type ProposalCursor = z.infer<typeof ProposalCursorSchema>
+export interface ProposalCursor {
+  submissionDate: string
+  proposalId: string
+}
 
 function encodeCursor(cursor: ProposalCursor): string {
   return Buffer.from(JSON.stringify(cursor)).toString('base64url')
@@ -16,7 +19,16 @@ function encodeCursor(cursor: ProposalCursor): string {
 function decodeCursor(encoded: string): ProposalCursor {
   try {
     const raw: unknown = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf-8'))
-    return ProposalCursorSchema.parse(raw)
+    const parsed = ProposalCursorSchema.parse(raw)
+    
+    if (parsed.submissionDate === undefined || parsed.proposalId === undefined) {
+      throw new Error('Invalid cursor data')
+    }
+    
+    return {
+      submissionDate: parsed.submissionDate,
+      proposalId: parsed.proposalId,
+    }
   } catch {
     throw new Error('Invalid cursor')
   }

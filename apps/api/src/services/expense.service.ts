@@ -9,7 +9,11 @@ const ExpenseCursorSchema = z.object({
   expenseId: z.string().uuid(),
 })
 
-type ExpenseCursor = z.infer<typeof ExpenseCursorSchema>
+export interface ExpenseCursor {
+  year: number
+  month: number
+  expenseId: string
+}
 
 export interface FindExpensesInput {
   slug: string
@@ -95,7 +99,21 @@ function encodeCursor(row: ExpenseRow): string {
 function decodeCursor(encoded: string): ExpenseCursor {
   try {
     const raw: unknown = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'))
-    return ExpenseCursorSchema.parse(raw)
+    const parsed = ExpenseCursorSchema.parse(raw)
+    
+    if (
+      parsed.year === undefined ||
+      parsed.month === undefined ||
+      parsed.expenseId === undefined
+    ) {
+      throw new Error('Invalid cursor data')
+    }
+    
+    return {
+      year: parsed.year,
+      month: parsed.month,
+      expenseId: parsed.expenseId,
+    }
   } catch {
     throw new Error('Invalid cursor')
   }

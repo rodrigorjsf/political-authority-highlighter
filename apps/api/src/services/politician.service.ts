@@ -20,7 +20,16 @@ function encodeCursor(cursor: Cursor): string {
 function decodeCursor(encoded: string): Cursor {
   try {
     const raw: unknown = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf-8'))
-    return CursorSchema.parse(raw)
+    const parsed = CursorSchema.parse(raw)
+    
+    if (parsed.overallScore === undefined || parsed.politicianId === undefined) {
+      throw new Error('Invalid cursor data')
+    }
+    
+    return {
+      overallScore: parsed.overallScore,
+      politicianId: parsed.politicianId,
+    }
   } catch {
     throw new Error('Invalid cursor')
   }
