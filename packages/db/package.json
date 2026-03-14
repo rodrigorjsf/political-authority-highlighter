@@ -14,7 +14,8 @@
   "dependencies": {
     "@pah/shared": "workspace:*",
     "drizzle-orm": "^0.36.0",
-    "postgres": "^3.4.0"
+    "postgres": "^3.4.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
