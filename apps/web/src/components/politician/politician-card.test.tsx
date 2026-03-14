@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { PoliticianCard } from './politician-card'
 import type { PoliticianCard as PoliticianCardType } from '@pah/shared'
+import { Role } from '@pah/shared'
 
 const mockPolitician: PoliticianCardType = {
   id: '550e8400-e29b-41d4-a716-446655440000',
@@ -9,7 +10,7 @@ const mockPolitician: PoliticianCardType = {
   name: 'João Silva',
   party: 'PL',
   state: 'SP',
-  role: 'deputado',
+  role: Role.DEPUTADO,
   photoUrl: null,
   tenureStartDate: '2023-02-01',
   overallScore: 72,

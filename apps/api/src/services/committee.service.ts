@@ -13,12 +13,16 @@ function toCommitteeDto(row: CommitteeRow): CommitteeDto {
   }
 }
 
+export interface FindCommitteesInput {
+  slug: string
+}
+
 /** Service for committee queries: response shaping (no pagination). */
 export function createCommitteeService(committeeRepository: CommitteeRepository): {
-  findByPoliticianSlug: (slug: string) => Promise<CommitteeListResponseDto>
+  findByPoliticianSlug: (input: FindCommitteesInput) => Promise<CommitteeListResponseDto>
 } {
   return {
-    async findByPoliticianSlug(slug: string): Promise<CommitteeListResponseDto> {
+    async findByPoliticianSlug({ slug }: FindCommitteesInput): Promise<CommitteeListResponseDto> {
       const rows = await committeeRepository.selectByPoliticianSlug(slug)
       return { data: rows.map(toCommitteeDto) }
     },

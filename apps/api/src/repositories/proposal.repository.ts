@@ -1,11 +1,12 @@
 import { eq, and, lt, or, desc } from 'drizzle-orm'
 import type { PublicDb } from '@pah/db/clients'
 import { proposals, politicians } from '@pah/db/public-schema'
+import type { LegislativeSource } from '@pah/shared'
 
 export interface ProposalRow {
   id: string
   externalId: string
-  source: string
+  source: LegislativeSource
   proposalType: string
   proposalNumber: string
   proposalYear: number
@@ -64,6 +65,8 @@ export function createProposalRepository(db: PublicDb): {
 
       return rows.map((row) => ({
         ...row,
+        // Drizzle returns varchar as string; DB enforces 'camara'|'senado' — cast is safe here
+        source: row.source as LegislativeSource,
         sourceUrl: row.sourceUrl ?? null,
         proposalYear: Number(row.proposalYear),
       }))

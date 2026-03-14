@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createPoliticianService } from './politician.service.js'
+import { Role } from '@pah/shared'
 import type {
   PoliticianRepository,
   PoliticianWithScore,
@@ -13,7 +14,7 @@ function buildRow(overrides: Partial<PoliticianWithScore> = {}): PoliticianWithS
     name: 'João Silva',
     party: 'PL',
     state: 'SP',
-    role: 'deputado',
+    role: Role.DEPUTADO,
     photoUrl: null,
     tenureStartDate: '2023-02-01',
     overallScore: 72,
@@ -98,7 +99,7 @@ describe('createPoliticianService', () => {
 
     it('passes decoded cursor to repository when cursor is provided', async () => {
       const cursor = Buffer.from(
-        JSON.stringify({ overallScore: 80, politicianId: 'bbb' }),
+        JSON.stringify({ overallScore: 80, politicianId: '550e8400-e29b-41d4-a716-446655440001' }),
       ).toString('base64url')
       const repository = buildRepository([])
       const service = createPoliticianService(repository)
@@ -106,7 +107,7 @@ describe('createPoliticianService', () => {
       await service.findByFilters({ limit: 20, cursor })
 
       expect(repository.selectWithFilters).toHaveBeenCalledWith(
-        expect.objectContaining({ cursor: { overallScore: 80, politicianId: 'bbb' } }),
+        expect.objectContaining({ cursor: { overallScore: 80, politicianId: '550e8400-e29b-41d4-a716-446655440001' } }),
       )
     })
 
@@ -115,6 +116,22 @@ describe('createPoliticianService', () => {
       await expect(service.findByFilters({ limit: 20, cursor: 'not-valid-base64url-json' })).rejects.toThrow(
         'Invalid cursor',
       )
+    })
+
+    it('throws Invalid cursor when cursor JSON is missing required fields', async () => {
+      // Missing politicianId — Zod should reject and we rethrow as 'Invalid cursor'
+      const cursor = Buffer.from(JSON.stringify({ overallScore: 80 })).toString('base64url')
+      const service = createPoliticianService(buildRepository([]))
+      await expect(service.findByFilters({ limit: 20, cursor })).rejects.toThrow('Invalid cursor')
+    })
+
+    it('throws Invalid cursor when politicianId is not a UUID', async () => {
+      // Zod validates politicianId as uuid — non-uuid should be rejected
+      const cursor = Buffer.from(
+        JSON.stringify({ overallScore: 80, politicianId: 'not-a-uuid' }),
+      ).toString('base64url')
+      const service = createPoliticianService(buildRepository([]))
+      await expect(service.findByFilters({ limit: 20, cursor })).rejects.toThrow('Invalid cursor')
     })
   })
 
@@ -126,7 +143,7 @@ describe('createPoliticianService', () => {
         name: 'João Silva',
         party: 'PSDB',
         state: 'SP',
-        role: 'deputado',
+        role: Role.DEPUTADO,
         photoUrl: null,
         bioSummary: null,
         tenureStartDate: null,

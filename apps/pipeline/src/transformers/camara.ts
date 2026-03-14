@@ -1,4 +1,6 @@
 import type { CamaraDeputy, CamaraBill, PoliticianUpsert, BillUpsert } from '../types.js'
+import { DataSource } from '../types.js'
+import { Role, LegislativeSource } from '@pah/shared'
 
 /** Generates a URL-friendly slug from name and state. */
 function slugify(name: string, state: string): string {
@@ -15,12 +17,12 @@ function slugify(name: string, state: string): string {
 export function transformCamaraDeputy(raw: CamaraDeputy): PoliticianUpsert {
   return {
     externalId: `camara-${raw.id}`,
-    source: 'camara',
+    source: DataSource.CAMARA,
     name: raw.nome,
     slug: slugify(raw.nome, raw.siglaUf),
     state: raw.siglaUf,
     party: raw.siglaPartido,
-    role: 'deputado',
+    role: Role.DEPUTADO,
     photoUrl: raw.urlFoto || null,
     tenureStartDate: null, // Populated from detailed deputy endpoint if available
   }
@@ -31,7 +33,7 @@ export function transformCamaraBill(raw: CamaraBill, politicianId: string): Bill
   return {
     politicianId,
     externalId: `camara-bill-${raw.id}`,
-    source: 'camara',
+    source: LegislativeSource.CAMARA,
     title: raw.ementa,
     billType: raw.siglaTipo,
     billNumber: String(raw.numero),

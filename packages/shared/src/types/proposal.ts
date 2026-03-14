@@ -1,8 +1,10 @@
+import { LegislativeSource } from '../enums.js'
+
 /** A parliamentary proposal authored or co-authored by a politician (RF-010). */
 export interface Proposal {
   id: string
   externalId: string
-  source: 'camara' | 'senado'
+  source: LegislativeSource
   proposalType: string // 'PL', 'PEC', 'PLP', 'MP', 'PDL', etc.
   proposalNumber: string
   proposalYear: number

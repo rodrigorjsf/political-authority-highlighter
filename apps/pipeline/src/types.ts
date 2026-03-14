@@ -1,4 +1,5 @@
 import type { Logger } from 'pino'
+import type { Role, LegislativeSource } from '@pah/shared'
 
 /** Government data sources supported by the pipeline. */
 export enum DataSource {
@@ -107,12 +108,12 @@ export interface CGUExclusion {
 /** Unified politician data ready for upsert into public schema. */
 export interface PoliticianUpsert {
   externalId: string
-  source: string
+  source: DataSource
   name: string
   slug: string
   state: string
   party: string
-  role: string
+  role: Role
   photoUrl: string | null
   tenureStartDate: string | null
 }
@@ -121,7 +122,7 @@ export interface PoliticianUpsert {
 export interface BillUpsert {
   politicianId: string
   externalId: string
-  source: string
+  source: LegislativeSource
   title: string
   billType: string
   billNumber: string
@@ -135,7 +136,7 @@ export interface BillUpsert {
 export interface VoteUpsert {
   politicianId: string
   externalId: string
-  source: string
+  source: LegislativeSource
   sessionDate: string
   matterDescription: string
   voteCast: string
@@ -147,7 +148,7 @@ export interface VoteUpsert {
 export interface ExpenseUpsert {
   politicianId: string
   externalId: string
-  source: string
+  source: DataSource // Portal da Transparencia is also a valid source for expenses
   year: number
   month: number
   category: string

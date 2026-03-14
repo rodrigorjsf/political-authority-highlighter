@@ -1,4 +1,6 @@
 import type { SenadorData, PoliticianUpsert } from '../types.js'
+import { DataSource } from '../types.js'
+import { Role } from '@pah/shared'
 
 /** Generates a URL-friendly slug from name and state. */
 function slugify(name: string, state: string): string {
@@ -15,12 +17,12 @@ function slugify(name: string, state: string): string {
 export function transformSenador(raw: SenadorData): PoliticianUpsert {
   return {
     externalId: `senado-${raw.CodigoParlamentar}`,
-    source: 'senado',
+    source: DataSource.SENADO,
     name: raw.NomeParlamentar,
     slug: slugify(raw.NomeParlamentar, raw.UfParlamentar),
     state: raw.UfParlamentar,
     party: raw.SiglaPartidoParlamentar,
-    role: 'senador',
+    role: Role.SENADOR,
     photoUrl: raw.UrlFotoParlamentar || null,
     tenureStartDate: null, // Populated from detailed senator endpoint if available
   }

@@ -1,3 +1,5 @@
+export { Role, LegislativeSource } from './enums.js'
+export { REVALIDATE } from './constants.js'
 export type {
   PoliticianCard,
   PoliticianFilters,

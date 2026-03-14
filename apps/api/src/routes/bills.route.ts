@@ -28,7 +28,8 @@ export function createBillsRoute(deps: RouteDeps): FastifyPluginAsyncTypebox {
         const { slug } = request.params
         const { limit = 20, cursor } = request.query
 
-        const result = await deps.billService.findByPoliticianSlug(slug, {
+        const result = await deps.billService.findByPoliticianSlug({
+          slug,
           limit,
           cursor,
         })

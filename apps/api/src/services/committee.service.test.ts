@@ -1,12 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createCommitteeService } from './committee.service.js'
+import { LegislativeSource } from '@pah/shared'
 import type { CommitteeRepository, CommitteeRow } from '../repositories/committee.repository.js'
 
 function buildRow(overrides: Partial<CommitteeRow> = {}): CommitteeRow {
   return {
     id: '550e8400-e29b-41d4-a716-446655440001',
     externalId: 'COM-123',
-    source: 'camara',
+    source: LegislativeSource.CAMARA,
     committeeName: 'Comissão de Constituição e Justiça',
     role: 'Titular',
     startDate: '2024-02-01',
@@ -25,14 +26,14 @@ describe('createCommitteeService', () => {
   describe('findByPoliticianSlug', () => {
     it('returns empty data when repository returns no rows', async () => {
       const service = createCommitteeService(buildRepository([]))
-      const result = await service.findByPoliticianSlug('joao-silva-sp')
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp' })
       expect(result.data).toHaveLength(0)
     })
 
     it('maps rows to CommitteeDto correctly', async () => {
       const row = buildRow()
       const service = createCommitteeService(buildRepository([row]))
-      const result = await service.findByPoliticianSlug('joao-silva-sp')
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp' })
       expect(result.data).toHaveLength(1)
       expect(result.data[0]).toEqual({
         id: row.id,
@@ -48,14 +49,14 @@ describe('createCommitteeService', () => {
     it('preserves endDate null for active memberships', async () => {
       const row = buildRow({ endDate: null })
       const service = createCommitteeService(buildRepository([row]))
-      const result = await service.findByPoliticianSlug('joao-silva-sp')
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp' })
       expect(result.data[0]!.endDate).toBeNull()
     })
 
     it('preserves endDate string for completed memberships', async () => {
       const row = buildRow({ endDate: '2024-12-31' })
       const service = createCommitteeService(buildRepository([row]))
-      const result = await service.findByPoliticianSlug('joao-silva-sp')
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp' })
       expect(result.data[0]!.endDate).toBe('2024-12-31')
     })
 
@@ -66,7 +67,7 @@ describe('createCommitteeService', () => {
         buildRow({ id: 'id-3', externalId: 'c3' }),
       ]
       const service = createCommitteeService(buildRepository(rows))
-      const result = await service.findByPoliticianSlug('joao-silva-sp')
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp' })
       expect(result.data).toHaveLength(3)
     })
   })

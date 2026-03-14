@@ -1,5 +1,5 @@
 import type { PoliticianProfile } from '../../lib/api-types'
-
+import { Role } from '@pah/shared'
 interface PoliticianJsonLdProps {
   politician: PoliticianProfile
 }
@@ -11,7 +11,7 @@ export function PoliticianJsonLd({ politician }: PoliticianJsonLdProps): React.J
     name: politician.name,
     image: politician.photoUrl,
     url: `https://autoridade-politica.com.br/politicos/${politician.slug}`,
-    jobTitle: politician.role === 'senador' ? 'Senador da República' : 'Deputado Federal',
+    jobTitle: politician.role === Role.SENADOR ? 'Senador da República' : 'Deputado Federal',
     memberOf: {
       '@type': 'Organization',
       name: politician.party,

@@ -1,11 +1,12 @@
 import { eq, and, desc, lt, or, sql } from 'drizzle-orm'
 import type { PublicDb } from '@pah/db/clients'
 import { politicians, integrityScores } from '@pah/db/public-schema'
+import type { Role } from '@pah/shared'
 
 export interface ListFilters {
   limit: number
   cursor?: { overallScore: number; politicianId: string } | undefined
-  role?: string | undefined
+  role?: Role | undefined
   state?: string | undefined
   search?: string | undefined
 }
@@ -16,7 +17,7 @@ export interface PoliticianWithScore {
   name: string
   party: string
   state: string
-  role: string
+  role: Role
   photoUrl: string | null
   tenureStartDate: string | null
   overallScore: number
@@ -28,7 +29,7 @@ export interface PoliticianProfileRow {
   name: string
   party: string
   state: string
-  role: string
+  role: Role
   photoUrl: string | null
   bioSummary: string | null
   tenureStartDate: string | null
@@ -107,6 +108,8 @@ export function createPoliticianRepository(db: PublicDb): {
 
       return rows.map((row) => ({
         ...row,
+        // Drizzle returns varchar as string; DB enforces 'deputado'|'senador' — cast is safe here
+        role: row.role as Role,
         photoUrl: row.photoUrl ?? null,
         tenureStartDate: row.tenureStartDate ?? null,
         overallScore: Number(row.overallScore),
@@ -143,6 +146,8 @@ export function createPoliticianRepository(db: PublicDb): {
 
       return {
         ...row,
+        // Drizzle returns varchar as string; DB enforces 'deputado'|'senador' — cast is safe here
+        role: row.role as Role,
         photoUrl: row.photoUrl ?? null,
         bioSummary: row.bioSummary ?? null,
         tenureStartDate: row.tenureStartDate ?? null,

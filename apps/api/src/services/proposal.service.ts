@@ -1,10 +1,13 @@
+import { z } from 'zod'
 import type { ProposalRepository, ProposalRow } from '../repositories/proposal.repository.js'
 import type { ProposalDto, ProposalListResponseDto } from '../schemas/proposal.schema.js'
 
-interface ProposalCursor {
-  submissionDate: string
-  proposalId: string
-}
+const ProposalCursorSchema = z.object({
+  submissionDate: z.string(),
+  proposalId: z.string().uuid(),
+})
+
+type ProposalCursor = z.infer<typeof ProposalCursorSchema>
 
 function encodeCursor(cursor: ProposalCursor): string {
   return Buffer.from(JSON.stringify(cursor)).toString('base64url')
@@ -12,7 +15,8 @@ function encodeCursor(cursor: ProposalCursor): string {
 
 function decodeCursor(encoded: string): ProposalCursor {
   try {
-    return JSON.parse(Buffer.from(encoded, 'base64url').toString('utf-8')) as ProposalCursor
+    const raw: unknown = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf-8'))
+    return ProposalCursorSchema.parse(raw)
   } catch {
     throw new Error('Invalid cursor')
   }
@@ -34,28 +38,30 @@ function toProposalDto(row: ProposalRow): ProposalDto {
 }
 
 export interface FindProposalsInput {
+  slug: string
   limit: number
   cursor?: string | undefined
 }
 
 /** Service for proposal queries: cursor encoding and response shaping. */
 export function createProposalService(repository: ProposalRepository): {
-  findByPoliticianSlug: (slug: string, input: FindProposalsInput) => Promise<ProposalListResponseDto>
+  findByPoliticianSlug: (input: FindProposalsInput) => Promise<ProposalListResponseDto>
 } {
   return {
-    async findByPoliticianSlug(
-      slug: string,
-      input: FindProposalsInput,
-    ): Promise<ProposalListResponseDto> {
-      const decodedCursor = input.cursor !== undefined ? decodeCursor(input.cursor) : undefined
+    async findByPoliticianSlug({
+      slug,
+      limit,
+      cursor,
+    }: FindProposalsInput): Promise<ProposalListResponseDto> {
+      const decodedCursor = cursor !== undefined ? decodeCursor(cursor) : undefined
 
       const rows = await repository.selectByPoliticianSlug(slug, {
-        limit: input.limit,
+        limit,
         cursor: decodedCursor,
       })
 
-      const hasMore = rows.length > input.limit
-      const data = hasMore ? rows.slice(0, input.limit) : rows
+      const hasMore = rows.length > limit
+      const data = hasMore ? rows.slice(0, limit) : rows
 
       const lastRow = data.at(-1)
       const nextCursor =

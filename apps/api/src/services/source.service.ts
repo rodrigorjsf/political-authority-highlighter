@@ -1,12 +1,15 @@
+import { z } from 'zod'
 import type { SourceRepository, SourceStatusRow } from '../repositories/source.repository.js'
 import type { SourceStatusDto, SourceListResponseDto } from '../schemas/source.schema.js'
+
+const SourceStatusValueSchema = z.enum(['pending', 'syncing', 'synced', 'failed'])
 
 function toSourceDto(row: SourceStatusRow): SourceStatusDto {
   return {
     source: row.source,
     lastSyncAt: row.lastSyncAt?.toISOString() ?? null,
     recordCount: row.recordCount,
-    status: row.status as SourceStatusDto['status'],
+    status: SourceStatusValueSchema.parse(row.status),
     updatedAt: row.updatedAt.toISOString(),
   }
 }

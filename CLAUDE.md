@@ -49,7 +49,7 @@ Political Authority Highlighter is a Brazilian political transparency platform t
 
 ## Monorepo Structure
 
-```
+```text
 political-authority-highlighter/
 +-- package.json                    # pnpm workspace root
 +-- pnpm-workspace.yaml
@@ -219,7 +219,7 @@ All packages use `tsconfig.base.json` as the base with these strict settings:
 
 ### Branch Naming
 
-```
+```text
 feat/PAH-<number>-<short-description>
 fix/PAH-<number>-<short-description>
 chore/<short-description>
@@ -233,7 +233,7 @@ Examples:
 
 ### Conventional Commits
 
-```
+```text
 <type>(<scope>): <description>
 
 Types: feat, fix, refactor, docs, test, chore, perf, ci
@@ -392,7 +392,7 @@ Before opening a pull request, verify:
 | ------------------------ | -------------------------- | --------------------------------------------------------------------- |
 | Backend (API + Pipeline) | `apps/api/CLAUDE.md`       | Fastify routes, services, Drizzle queries, pipeline adapters, scoring |
 | Frontend                 | `apps/web/CLAUDE.md`       | Next.js pages, components, ISR, SEO, accessibility                    |
-| Infrastructure           | `infrastructure/CLAUDE.md` | Supabase CLI local, Docker optional, CI/CD, monitoring                 |
+| Infrastructure           | `infrastructure/CLAUDE.md` | Supabase CLI local, Docker optional, CI/CD, monitoring                |
 
 ---
 

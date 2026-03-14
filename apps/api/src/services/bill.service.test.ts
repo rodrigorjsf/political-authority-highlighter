@@ -1,12 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createBillService } from './bill.service.js'
+import { LegislativeSource } from '@pah/shared'
 import type { BillRepository, BillRow } from '../repositories/bill.repository.js'
 
 function buildRow(overrides: Partial<BillRow> = {}): BillRow {
   return {
     id: '550e8400-e29b-41d4-a716-446655440001',
     externalId: 'PL-123-2024',
-    source: 'camara',
+    source: LegislativeSource.CAMARA,
     title: 'Dispõe sobre a criação de comitê parlamentar',
     billType: 'PL',
     billNumber: '123',
@@ -28,7 +29,7 @@ describe('createBillService', () => {
   describe('findByPoliticianSlug', () => {
     it('returns empty data and null cursor when repository returns no rows', async () => {
       const service = createBillService(buildRepository([]))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 20 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20 })
       expect(result.data).toHaveLength(0)
       expect(result.cursor).toBeNull()
     })
@@ -36,7 +37,7 @@ describe('createBillService', () => {
     it('returns rows mapped to BillDto', async () => {
       const row = buildRow()
       const service = createBillService(buildRepository([row]))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 20 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20 })
       expect(result.data).toHaveLength(1)
       expect(result.data[0]).toEqual({
         id: row.id,
@@ -55,7 +56,7 @@ describe('createBillService', () => {
     it('returns null cursor when rows <= limit', async () => {
       const rows = [buildRow(), buildRow({ id: 'other-id', externalId: 'PL-124-2024' })]
       const service = createBillService(buildRepository(rows))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 20 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20 })
       expect(result.cursor).toBeNull()
     })
 
@@ -66,7 +67,7 @@ describe('createBillService', () => {
         buildRow({ id: 'id-3', externalId: 'e3', submissionDate: '2024-03-01' }),
       ]
       const service = createBillService(buildRepository(rows))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 2 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 2 })
       expect(result.data).toHaveLength(2)
       expect(result.cursor).not.toBeNull()
     })
@@ -77,12 +78,26 @@ describe('createBillService', () => {
         buildRow({ id: 'id-2', externalId: 'e2', submissionDate: '2024-03-02' }),
       ]
       const service = createBillService(buildRepository(rows))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 1 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 1 })
       expect(result.cursor).not.toBeNull()
       const decoded: unknown = JSON.parse(
         Buffer.from(result.cursor!, 'base64url').toString('utf-8'),
       )
       expect(decoded).toEqual({ submissionDate: '2024-03-03', billId: 'id-1' })
+    })
+
+    it('throws Invalid cursor when cursor JSON is missing required fields', async () => {
+      const cursor = Buffer.from(JSON.stringify({ submissionDate: '2024-03-01' })).toString('base64url')
+      const service = createBillService(buildRepository([]))
+      await expect(service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20, cursor })).rejects.toThrow('Invalid cursor')
+    })
+
+    it('throws Invalid cursor when billId is not a UUID', async () => {
+      const cursor = Buffer.from(
+        JSON.stringify({ submissionDate: '2024-03-01', billId: 'not-a-uuid' }),
+      ).toString('base64url')
+      const service = createBillService(buildRepository([]))
+      await expect(service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20, cursor })).rejects.toThrow('Invalid cursor')
     })
   })
 })

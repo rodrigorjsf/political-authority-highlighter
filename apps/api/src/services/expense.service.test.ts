@@ -1,13 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import type { ExpenseRow } from '../repositories/expense.repository.js'
 import { createExpenseService } from './expense.service.js'
+import { LegislativeSource } from '@pah/shared'
 
 describe('ExpenseService', () => {
   function buildExpenseRow(overrides: Partial<ExpenseRow> = {}): ExpenseRow {
     return {
       id: '123e4567-e89b-12d3-a456-426614174000',
       externalId: 'CEAP-2023-001',
-      source: 'camara',
+      source: LegislativeSource.CAMARA,
       year: 2023,
       month: 1,
       category: 'Combustíveis e Lubrificantes',
@@ -26,7 +27,7 @@ describe('ExpenseService', () => {
     }
     const service = createExpenseService(mockRepository)
 
-    const result = await service.findByPoliticianSlug('joao-silva-sp')
+    const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp' })
 
     expect(result.data).toHaveLength(0)
     expect(result.cursor).toBeNull()
@@ -40,7 +41,7 @@ describe('ExpenseService', () => {
     }
     const service = createExpenseService(mockRepository)
 
-    const result = await service.findByPoliticianSlug('joao-silva-sp')
+    const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp' })
 
     expect(result.data[0]?.amount).toBe(1234.56)
     expect(typeof result.data[0]?.amount).toBe('number')
@@ -57,7 +58,7 @@ describe('ExpenseService', () => {
     }
     const service = createExpenseService(mockRepository)
 
-    const result = await service.findByPoliticianSlug('joao-silva-sp', undefined, 20)
+    const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20 })
 
     expect(result.data).toHaveLength(20)
     expect(result.cursor).not.toBeNull()
@@ -72,7 +73,7 @@ describe('ExpenseService', () => {
     }
     const service = createExpenseService(mockRepository)
 
-    const result = await service.findByPoliticianSlug('joao-silva-sp', undefined, 20)
+    const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20 })
 
     expect(result.data).toHaveLength(2)
     expect(result.cursor).toBeNull()

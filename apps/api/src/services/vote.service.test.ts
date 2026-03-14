@@ -1,12 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createVoteService } from './vote.service.js'
+import { LegislativeSource } from '@pah/shared'
 import type { VoteRepository, VoteRow } from '../repositories/vote.repository.js'
 
 function buildRow(overrides: Partial<VoteRow> = {}): VoteRow {
   return {
     id: '550e8400-e29b-41d4-a716-446655440001',
     externalId: 'VT-123-2024',
-    source: 'camara',
+    source: LegislativeSource.CAMARA,
     sessionDate: '2024-03-01',
     matterDescription: 'PL 1234/2023 — Dispõe sobre a criação de comitê parlamentar',
     voteCast: 'sim',
@@ -30,7 +31,7 @@ describe('createVoteService', () => {
   describe('findByPoliticianSlug', () => {
     it('returns empty data, null cursor, and 0 participationRate when no rows', async () => {
       const service = createVoteService(buildRepository([], { total: 0, present: 0 }))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 20 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20 })
       expect(result.data).toHaveLength(0)
       expect(result.cursor).toBeNull()
       expect(result.participationRate).toBe(0)
@@ -39,7 +40,7 @@ describe('createVoteService', () => {
     it('returns rows mapped to VoteDto', async () => {
       const row = buildRow()
       const service = createVoteService(buildRepository([row], { total: 10, present: 8 }))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 20 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20 })
       expect(result.data).toHaveLength(1)
       expect(result.data[0]).toEqual({
         id: row.id,
@@ -56,7 +57,7 @@ describe('createVoteService', () => {
     it('returns null cursor when rows <= limit', async () => {
       const rows = [buildRow(), buildRow({ id: 'other-id', externalId: 'VT-124-2024' })]
       const service = createVoteService(buildRepository(rows, { total: 2, present: 2 }))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 20 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20 })
       expect(result.cursor).toBeNull()
     })
 
@@ -67,7 +68,7 @@ describe('createVoteService', () => {
         buildRow({ id: 'id-3', externalId: 'e3', sessionDate: '2024-03-01' }),
       ]
       const service = createVoteService(buildRepository(rows, { total: 3, present: 3 }))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 2 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 2 })
       expect(result.data).toHaveLength(2)
       expect(result.cursor).not.toBeNull()
     })
@@ -78,7 +79,7 @@ describe('createVoteService', () => {
         buildRow({ id: 'id-2', externalId: 'e2', sessionDate: '2024-03-02' }),
       ]
       const service = createVoteService(buildRepository(rows, { total: 2, present: 2 }))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 1 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 1 })
       expect(result.cursor).not.toBeNull()
       const decoded: unknown = JSON.parse(
         Buffer.from(result.cursor!, 'base64url').toString('utf-8'),
@@ -88,15 +89,29 @@ describe('createVoteService', () => {
 
     it('participation rate is 0 when total is 0', async () => {
       const service = createVoteService(buildRepository([], { total: 0, present: 0 }))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 20 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20 })
       expect(result.participationRate).toBe(0)
     })
 
     it('participation rate is computed as present/total', async () => {
       const row = buildRow()
       const service = createVoteService(buildRepository([row], { total: 100, present: 87 }))
-      const result = await service.findByPoliticianSlug('joao-silva-sp', { limit: 20 })
+      const result = await service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20 })
       expect(result.participationRate).toBe(0.87)
+    })
+
+    it('throws Invalid cursor when cursor JSON is missing required fields', async () => {
+      const cursor = Buffer.from(JSON.stringify({ sessionDate: '2024-03-01' })).toString('base64url')
+      const service = createVoteService(buildRepository([], { total: 0, present: 0 }))
+      await expect(service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20, cursor })).rejects.toThrow('Invalid cursor')
+    })
+
+    it('throws Invalid cursor when voteId is not a UUID', async () => {
+      const cursor = Buffer.from(
+        JSON.stringify({ sessionDate: '2024-03-01', voteId: 'not-a-uuid' }),
+      ).toString('base64url')
+      const service = createVoteService(buildRepository([], { total: 0, present: 0 }))
+      await expect(service.findByPoliticianSlug({ slug: 'joao-silva-sp', limit: 20, cursor })).rejects.toThrow('Invalid cursor')
     })
   })
 })

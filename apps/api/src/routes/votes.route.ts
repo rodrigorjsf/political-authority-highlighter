@@ -28,7 +28,8 @@ export function createVotesRoute(deps: RouteDeps): FastifyPluginAsyncTypebox {
         const { slug } = request.params
         const { limit = 20, cursor } = request.query
 
-        const result = await deps.voteService.findByPoliticianSlug(slug, {
+        const result = await deps.voteService.findByPoliticianSlug({
+          slug,
           limit,
           cursor,
         })

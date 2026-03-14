@@ -26,7 +26,7 @@ export function createExpensesRoute(config: { expenseService: ExpenseService }):
         const { slug } = request.params
         const { limit = 20, cursor } = request.query
 
-        const result = await config.expenseService.findByPoliticianSlug(slug, cursor, limit)
+        const result = await config.expenseService.findByPoliticianSlug({ slug, cursor, limit })
 
         void reply.header('Cache-Control', 'public, max-age=300, s-maxage=3600')
         return result

@@ -1,8 +1,10 @@
+import { LegislativeSource } from '../enums.js'
+
 /** A legislative bill authored or co-authored by a politician (RF-008). */
 export interface Bill {
   id: string
   externalId: string
-  source: 'camara' | 'senado'
+  source: LegislativeSource
   title: string
   billType: string // 'PL', 'PEC', 'PDL', 'PLV', etc.
   billNumber: string

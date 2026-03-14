@@ -1,8 +1,10 @@
+import { LegislativeSource } from '../enums.js'
+
 /** A parliamentary voting record for a politician (RF-009). */
 export interface Vote {
   id: string
   externalId: string
-  source: 'camara' | 'senado'
+  source: LegislativeSource
   sessionDate: string // ISO date 'YYYY-MM-DD'
   matterDescription: string
   voteCast: string // 'sim' | 'não' | 'abstenção' | 'ausente'

@@ -24,7 +24,7 @@ export function createCommitteesRoute(deps: RouteDeps): FastifyPluginAsyncTypebo
       async (request, reply) => {
         const { slug } = request.params
 
-        const result = await deps.committeeService.findByPoliticianSlug(slug)
+        const result = await deps.committeeService.findByPoliticianSlug({ slug })
 
         void reply.header('Cache-Control', 'public, max-age=300, s-maxage=3600')
 
