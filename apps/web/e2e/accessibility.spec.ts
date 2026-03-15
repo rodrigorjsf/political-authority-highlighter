@@ -33,6 +33,11 @@ test.describe('Accessibility — WCAG 2.1 AA', () => {
     await checkA11y(page, testInfo)
   })
 
+  test('página de comparação — estado vazio', async ({ page }, testInfo) => {
+    await page.goto('/comparar')
+    await checkA11y(page, testInfo)
+  })
+
   test.skip('perfil de político — requer DB populado', async ({ page }, testInfo) => {
     await page.goto('/politicos/joao-silva-sp')
     await checkA11y(page, testInfo)
