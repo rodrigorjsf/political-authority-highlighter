@@ -26,7 +26,7 @@ the implementation skill. It is fire-and-forget.
 
 ## How to Invoke
 
-Delegate to the `github-issue-creator` agent using the `Agent` tool. Always run in the background
+Delegate to the ´[github-issue-creator](../../agents/github-issue-creator.md) agent using the `Agent` tool. Always run in the background
 so the parent workflow is never blocked.
 
 ```
