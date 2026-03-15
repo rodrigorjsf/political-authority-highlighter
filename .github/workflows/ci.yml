@@ -42,7 +42,7 @@ jobs:
       - name: Vercel Build Validation
         run: |
           mkdir -p apps/web/.vercel
-          echo '{"projectId":"prj_pUWBs7CY8ji8YsjCxz2zc5m2gNHF","orgId":"team_kDcY3EtjosSYFT6dL6CRRC3V"}' > apps/web/.vercel/project.json
+          echo '{"projectId":"prj_I3P9RQqFK7tztjwxpfTIMnVvDXpj","orgId":"team_kDcY3EtjosSYFT6dL6CRRC3V"}' > apps/web/.vercel/project.json
           cd apps/web && npx vercel build --yes --token ${{ secrets.VERCEL_TOKEN }} || npx vercel build --yes
 
       - name: Check client bundle for leaks
