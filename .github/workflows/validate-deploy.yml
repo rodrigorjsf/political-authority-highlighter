@@ -1,0 +1,48 @@
+name: Validate Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [development]
+    types: [completed]
+
+jobs:
+  validate:
+    name: Validate CI + Vercel + Supabase
+    runs-on: ubuntu-latest
+    # Only run for PRs from the same repo (not forks — cannot push fixes to fork branches)
+    if: github.event.workflow_run.head_repository.full_name == github.repository
+    permissions:
+      contents: write        # push fixes to PR branch
+      pull-requests: write   # post PR comments
+      actions: read          # read CI run logs via gh CLI
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - name: Run Claude Deploy Validator
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # additional_permissions grants the Claude agent gh CLI access to Actions logs.
+          # This is distinct from the job-level permissions block above, which governs
+          # the GITHUB_TOKEN scope for push/comment operations.
+          additional_permissions: |
+            actions: read
+          prompt: |
+            Run /project-deploy-validator for:
+            - branch: ${{ github.event.workflow_run.head_branch }}
+            - head_sha: ${{ github.event.workflow_run.head_sha }}
+            - ci_run_id: ${{ github.event.workflow_run.id }}
+            - ci_conclusion: ${{ github.event.workflow_run.conclusion }}
+            Use head_sha to match the correct Vercel deployment (not just branch name).
+            Fix any failures found, push fixes, and post
+            a summary comment on the PR (or stdout if no open PR exists).
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
