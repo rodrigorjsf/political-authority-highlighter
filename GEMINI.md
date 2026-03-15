@@ -38,7 +38,7 @@ The project is a **Modular Monolith** organized as a TypeScript monorepo using *
 ## Critical Domain Rules (Non-Negotiable)
 
 - **DR-001: Silent Exclusion**: The public API/frontend must **never** expose why an anticorruption score is 0. Only a boolean `exclusion_flag` crosses the schema boundary.
-- **DR-002: Political Neutrality**: No party colors in UI. Neutral palette (authoritative token set: `docs/assets/frontend_design_prd.md`). Factual language only (no "best/worst" labels). All `apps/web/` UI must comply with the Frontend Design PRD — design tokens, typography (`Inter`/`Plus Jakarta Sans` for UI; `JetBrains Mono` for scores/numbers), dark mode, Bento Grid layout, and component specs are non-negotiable.
+- **DR-002: Political Neutrality**: No party colors in UI. Neutral palette (authoritative token set: `docs/prd/frontend_design_prd.md`). Factual language only (no "best/worst" labels). All `apps/web/` UI must comply with the Frontend Design PRD — design tokens, typography (`Inter`/`Plus Jakarta Sans` for UI; `JetBrains Mono` for scores/numbers), dark mode, Bento Grid layout, and component specs are non-negotiable.
 - **DR-005: CPF Protection**: CPFs must be encrypted (AES-256-GCM) at rest and never exposed in logs, error messages, or API responses.
 - **DR-006: Schema Isolation**: The `api_reader` role has **zero access** to the `internal_data` schema. This isolation is enforced at the database level.
 
@@ -78,7 +78,7 @@ When working in this codebase, prioritize:
 3. **Security Awareness**: Never inadvertently expose internal schema fields or unencrypted identifiers.
 4. **Neutral Tone**: Maintain the project's commitment to political neutrality in all UI and documentation updates.
 5. **Mandatory Validation**: Before claiming any task is complete, run `pnpm build` AND `vercel build`. Both must pass. `pnpm typecheck` alone is insufficient — `pnpm build` catches Next.js compilation errors and `vercel build` catches Vercel-specific issues that CI will reject.
-6. **Frontend Design Compliance**: Any UI change in `apps/web/` must comply with `docs/assets/frontend_design_prd.md`. Consult the `web-frontend-design` skill checklist before every UI PR. For visual inspiration, use the images in `docs/assets/inspirations/` and [Sloth UI](https://www.slothui.com/) (Figma-only — reference only, not a code dependency).
+6. **Frontend Design Compliance**: Any UI change in `apps/web/` must comply with `docs/prd/frontend_design_prd.md`. Consult the `web-frontend-design` skill checklist before every UI PR. For visual inspiration, use the images in `docs/assets/inspirations/` and [Sloth UI](https://www.slothui.com/) (Figma-only — reference only, not a code dependency).
 
 ---
 *Last Updated: 2026-03-15*

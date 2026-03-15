@@ -7,7 +7,7 @@ description: Use when creating, modifying, or reviewing any UI component, page, 
 
 ## Critical Rule — No Exceptions
 
-**Every implementation touching `apps/web/` UI MUST comply with the Frontend Design PRD at `docs/assets/frontend_design_prd.md` and draw inspiration from `docs/assets/inspirations/`.**
+**Every implementation touching `apps/web/` UI MUST comply with the Frontend Design PRD at `docs/prd/frontend_design_prd.md` and draw inspiration from `docs/assets/inspirations/`.**
 
 Violating the letter of these rules is violating the spirit of the rules.
 
@@ -248,7 +248,7 @@ mockups.
 The complete Frontend Design PRD (design tokens, typography scale, component specs, responsiveness rules) is at:
 
 ```
-docs/assets/frontend_design_prd.md
+docs/prd/frontend_design_prd.md
 ```
 
 Read it before implementing any new page or component. It is the authoritative source.
