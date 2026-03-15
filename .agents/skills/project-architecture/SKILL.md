@@ -1,8 +1,6 @@
 ---
 name: project-architecture
 description: Architecture enforcement during development. Use when creating files, database queries, adding dependencies, or modifying infrastructure.
-license: Apache-2.0
-version: 1.0.0
 ---
 
 # Project Architecture Enforcement
@@ -16,7 +14,7 @@ Enforces the architectural decisions documented in ARCHITECTURE.md and the 7 ADR
 ### 1. Two-Schema Database Separation (ADR-001)
 
 ```
-PostgreSQL (local: Supabase CLI supabase start, port 54322; roles via supabase/roles.sql)
+PostgreSQL 16
 ├── public schema (10 tables) — API reads from here
 │   ├── politicians, integrity_scores, bills, votes, expenses...
 │   └── data_source_status
@@ -91,6 +89,10 @@ All `tsconfig.json` files must include:
 - Static generation for methodology page
 - No client-side state management library (use URL search params + Server Components)
 - Tailwind CSS + shadcn/ui for UI components
+
+> **Design Enforcement:** For any work involving UI components, pages, or visual styles in `apps/web/`,
+> **REQUIRED SUB-SKILL:** `web-frontend-design`. This skill governs design tokens, typography,
+> responsiveness, component specs, and accessibility as defined in `docs/assets/frontend_design_prd.md`.
 
 ### 6. Managed Infrastructure on Supabase (ADR-006)
 

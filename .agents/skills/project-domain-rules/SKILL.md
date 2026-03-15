@@ -1,8 +1,6 @@
 ---
 name: project-domain-rules
 description: Domain rule enforcement for Political Authority Highlighter. Use when writing business logic, scoring algorithms, data ingestion, or API endpoints.
-license: Apache-2.0
-version: 1.0.0
 ---
 
 # Domain Rules Enforcement
@@ -46,11 +44,15 @@ return { total: 513, excluded: 47, visible: 466 }
 
 **Rule:** The platform must NEVER exhibit political bias. Score methodology is identical across all parties, roles, and states. No editorializing.
 
+> For the **UI implementation** of color neutrality, **REQUIRED SUB-SKILL:** `web-frontend-design`
+> (section 1 — Design Token Enforcement defines the approved neutral palette and explicitly forbids
+> party-associated colors).
+
 ### Code Review Checklist
 
 - [ ] Score algorithm has NO party-specific logic (no `if party === 'PT'`)
 - [ ] Score weights are the same for all politicians regardless of party/state/role
-- [ ] UI uses neutral colors (no red/blue party associations)
+- [ ] UI uses neutral colors (no red/blue party associations) → see `web-frontend-design` token palette
 - [ ] Vote descriptions are factual (no "voted against the people" editorializing)
 - [ ] No hardcoded party names in scoring or display logic
 - [ ] Default sort is by score descending (not by party or ideology)

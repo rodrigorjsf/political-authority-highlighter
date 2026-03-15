@@ -1,6 +1,6 @@
 ---
 name: project-guardian
-description: Guardian skill that enforces PRD compliance during development. Use when implementing any feature, creating endpoints, or modifying UI.
+description: Guardian skill that enforces PRD compliance during development. Use when implementing any feature, creating endpoints, or modifying UI. For any UI change in apps/web/, also requires web-frontend-design skill.
 ---
 
 # Project Guardian — PRD Compliance Enforcement
@@ -95,14 +95,20 @@ For any new API endpoint:
 
 ### 5. UI Neutrality Check
 
+**REQUIRED SUB-SKILL:** For ANY UI change in `apps/web/`, invoke `web-frontend-design` BEFORE writing code.
+The `web-frontend-design` skill enforces the full Frontend Design PRD (design tokens, typography,
+layout, component specs, accessibility). The checks below are the domain-level invariants; the
+design skill governs the visual and UX implementation.
+
 For any UI change:
 
-- [ ] Uses neutral color palette (no party colors)?
+- [ ] Uses neutral color palette (no party colors)? → See `web-frontend-design` for approved token palette
 - [ ] Presents data factually without qualitative judgment?
 - [ ] Default sort is by highest score (never by lowest)?
 - [ ] No "worst" or "bottom" ranking visible?
-- [ ] Mobile responsive (320px minimum)?
-- [ ] Accessibility: semantic HTML, aria labels, WCAG 2.1 AA?
+- [ ] Mobile responsive (320px minimum)? → See `web-frontend-design` for breakpoint rules
+- [ ] Accessibility: semantic HTML, aria labels, WCAG 2.1 AA? → See `web-frontend-design` section 5
+- [ ] Inspiration images consulted? (`docs/assets/inspirations/`)
 
 ### 6. Budget Impact Assessment
 

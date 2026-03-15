@@ -90,6 +90,10 @@ All `tsconfig.json` files must include:
 - No client-side state management library (use URL search params + Server Components)
 - Tailwind CSS + shadcn/ui for UI components
 
+> **Design Enforcement:** For any work involving UI components, pages, or visual styles in `apps/web/`,
+> **REQUIRED SUB-SKILL:** `web-frontend-design`. This skill governs design tokens, typography,
+> responsiveness, component specs, and accessibility as defined in `docs/assets/frontend_design_prd.md`.
+
 ### 6. Managed Infrastructure on Supabase (ADR-006)
 
 - Database on Supabase (Free tier, upgrade to Pro when needed)
