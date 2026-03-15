@@ -21,10 +21,5 @@ jobs:
         with:
           node-version: 22
 
-      - name: 'notify vercel'
-        uses: 'vercel/repository-dispatch/actions/status@v1'
-        with:
-          name: Vercel - political-authority-highlighter-api: lint
-
       - name: Vercel auto-deploy
         run: echo "Vercel deploys automatically via GitHub integration on push to development"
