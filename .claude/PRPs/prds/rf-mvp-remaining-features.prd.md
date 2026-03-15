@@ -176,7 +176,7 @@ Researchers needing bulk data export (post-MVP API), users wanting comparison fe
 | 8 | Scoring + Anti-Corruption + Freshness (RF-004, RF-006, RF-014) | Scoring engine, exclusion detection, data_source_status, /fontes page | complete | - | 7 | `.claude/PRPs/plans/completed/rf-004-006-014-scoring-exclusion-freshness.plan.md` |
 | 9 | SEO + Responsive Polish (RF-017, RF-016) | generateMetadata() per profile, JSON-LD, sitemap.xml, robots.txt, mobile audit | complete | - | 2,6 | `.claude/PRPs/plans/completed/rf-016-017-seo-responsive-polish.plan.md` |
 | 10 | Frontend Security Hardening (DR-008) | CSP header, server-only guards, ESLint restrictions, CI bundle scan, pnpm audit (RNF-SEC-011,012,014,017) | complete | with 5 | - | `.claude/PRPs/plans/completed/dr-008-frontend-security-hardening.plan.md` |
-| 11 | Code Quality & Best Practices Refactor | Align codebase with TypeScript best practices (interfaces, enums, type guards, destructuring, ms package) | pending | - | 10 | - |
+| 11 | Code Quality & Best Practices Refactor | Align codebase with TypeScript best practices (interfaces, enums, type guards, destructuring, ms package) | complete | - | 10 | `.claude/PRPs/plans/completed/phase-11-code-quality-refactor.plan.md` |
 
 ### Phase Details
 

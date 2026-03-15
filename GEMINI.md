@@ -53,11 +53,11 @@ The project is a **Modular Monolith** organized as a TypeScript monorepo using *
 - `pnpm install`: Install dependencies.
 - `docker compose up -d`: Start local PostgreSQL (port 5433).
 - `pnpm dev`: Start all applications in development mode.
-- `pnpm build`: Build all packages and apps.
+- `pnpm build`: Build all packages and apps (OBRIGATÓRIO — catches Next.js and tsc compile errors).
 - `pnpm lint`: Run ESLint across the monorepo.
 - `pnpm typecheck`: Run type checks (`tsc --noEmit`).
 - `pnpm test`: Run unit and integration tests (Vitest).
-- `vercel build`: Run the Vercel build phase (OBRIGATÓRIO PASSAR COM SUCESSO).
+- `vercel build`: Run the Vercel build phase (OBRIGATÓRIO — final gate, simulates Vercel CI environment).
 - `pnpm test:e2e`: Run Playwright E2E tests.
 - `pnpm --filter @pah/db migrate`: Run database migrations.
 
@@ -77,6 +77,7 @@ When working in this codebase, prioritize:
 2. **Surgical Changes**: Modify only what is necessary, following the established Modular Monolith patterns.
 3. **Security Awareness**: Never inadvertently expose internal schema fields or unencrypted identifiers.
 4. **Neutral Tone**: Maintain the project's commitment to political neutrality in all UI and documentation updates.
+5. **Mandatory Validation**: Before claiming any task is complete, run `pnpm build` AND `vercel build`. Both must pass. `pnpm typecheck` alone is insufficient — `pnpm build` catches Next.js compilation errors and `vercel build` catches Vercel-specific issues that CI will reject.
 
 ---
-*Last Updated: 2026-03-10*
+*Last Updated: 2026-03-14*

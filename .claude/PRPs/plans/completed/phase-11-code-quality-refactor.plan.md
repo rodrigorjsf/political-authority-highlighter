@@ -640,6 +640,7 @@ pnpm lint && pnpm typecheck && pnpm test && vercel build
 - [ ] `REVALIDATE` constants exported from `@pah/shared` and used in `api-client.ts`
 - [ ] `pnpm lint` passes with zero warnings
 - [ ] `pnpm typecheck` passes across all packages
+- [ ] `pnpm build` passes across all packages (OBRIGATÓRIO — catches Next.js and tsc build errors)
 - [ ] `vercel build` passes successfully (OBRIGATÓRIO)
 - [ ] `pnpm test` passes — no regressions
 - [ ] New tests verify malformed cursors are rejected by Zod
