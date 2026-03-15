@@ -2,6 +2,7 @@ import { render } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { PoliticianJsonLd } from './json-ld'
 import type { PoliticianProfile } from '../../lib/api-types'
+import { Role } from '@pah/shared'
 
 const mockPolitician: PoliticianProfile = {
   id: '1',
@@ -9,7 +10,7 @@ const mockPolitician: PoliticianProfile = {
   name: 'João Silva',
   party: 'PT',
   state: 'SP',
-  role: 'deputado',
+  role: Role.DEPUTADO,
   photoUrl: 'https://www.camara.leg.br/internet/deputado/bandep/12345.jpg',
   bioSummary: null,
   tenureStartDate: '2023-01-01',
@@ -45,7 +46,7 @@ describe('PoliticianJsonLd', () => {
   })
 
   it('includes correct jobTitle for senador', () => {
-    const senator = { ...mockPolitician, role: 'senador' as const }
+    const senator = { ...mockPolitician, role: Role.SENADOR }
     const { container } = render(<PoliticianJsonLd politician={senator} />)
     const script = container.querySelector('script[type="application/ld+json"]')
     const jsonLd = JSON.parse(script?.innerHTML ?? '{}') as Record<string, unknown>

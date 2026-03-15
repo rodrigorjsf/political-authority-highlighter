@@ -1,30 +1,39 @@
+import { z } from 'zod'
 import { Buffer } from 'node:buffer'
 import type { ExpenseRepository, ExpenseRow } from '../repositories/expense.repository.js'
 import type { ExpenseDto, ExpenseListResponseDto } from '../schemas/expense.schema.js'
 
-/**
- * Cursor for keyset pagination on expenses (year, month, id).
- * Encoded as base64url for transport in URL query strings.
- */
-interface ExpenseCursor {
+const ExpenseCursorSchema = z.object({
+  year: z.number(),
+  month: z.number(),
+  expenseId: z.string().uuid(),
+})
+
+export interface ExpenseCursor {
   year: number
   month: number
   expenseId: string
 }
 
+export interface FindExpensesInput {
+  slug: string
+  cursor?: string | undefined
+  limit?: number | undefined
+}
+
 export function createExpenseService(expenseRepository: ExpenseRepository): {
-  findByPoliticianSlug: (slug: string, cursor?: string, limit?: number) => Promise<ExpenseListResponseDto>
+  findByPoliticianSlug: (input: FindExpensesInput) => Promise<ExpenseListResponseDto>
 } {
   return {
     /**
      * Fetches paginated expenses for a politician with yearly totals aggregation.
      * Uses cursor-based pagination for stable ordering across data changes.
      */
-    async findByPoliticianSlug(
-      slug: string,
-      cursor?: string,
-      limit: number = 20,
-    ): Promise<ExpenseListResponseDto> {
+    async findByPoliticianSlug({
+      slug,
+      cursor,
+      limit = 20,
+    }: FindExpensesInput): Promise<ExpenseListResponseDto> {
       const decodedCursor = cursor ? decodeCursor(cursor) : undefined
 
       // Fetch one extra to determine if there's a next page
@@ -85,11 +94,29 @@ function encodeCursor(row: ExpenseRow): string {
 }
 
 /**
- * Decodes a base64url cursor.
+ * Decodes a base64url cursor, validated by Zod to reject malformed inputs.
  */
 function decodeCursor(encoded: string): ExpenseCursor {
-  const json = Buffer.from(encoded, 'base64url').toString('utf8')
-  return JSON.parse(json) as ExpenseCursor
+  try {
+    const raw: unknown = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'))
+    const parsed = ExpenseCursorSchema.parse(raw)
+    
+    if (
+      parsed.year === undefined ||
+      parsed.month === undefined ||
+      parsed.expenseId === undefined
+    ) {
+      throw new Error('Invalid cursor data')
+    }
+    
+    return {
+      year: parsed.year,
+      month: parsed.month,
+      expenseId: parsed.expenseId,
+    }
+  } catch {
+    throw new Error('Invalid cursor')
+  }
 }
 
 export type ExpenseService = ReturnType<typeof createExpenseService>

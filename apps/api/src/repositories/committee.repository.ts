@@ -1,11 +1,12 @@
 import { eq, and, desc } from 'drizzle-orm'
 import type { PublicDb } from '@pah/db/clients'
 import { committees, politicians } from '@pah/db/public-schema'
+import type { LegislativeSource } from '@pah/shared'
 
 export interface CommitteeRow {
   id: string
   externalId: string
-  source: string
+  source: LegislativeSource
   committeeName: string
   role: string
   startDate: string // Drizzle returns date as string 'YYYY-MM-DD'
@@ -36,7 +37,12 @@ export function createCommitteeRepository(db: PublicDb): {
         .where(and(eq(politicians.slug, slug), eq(politicians.active, true)))
         .orderBy(desc(committees.startDate))
 
-      return rows.map((row) => ({ ...row, endDate: row.endDate ?? null }))
+      return rows.map((row) => ({
+        ...row,
+        // Drizzle returns varchar as string; DB enforces 'camara'|'senado' — cast is safe here
+        source: row.source as LegislativeSource,
+        endDate: row.endDate ?? null,
+      }))
     },
   }
 }

@@ -1,7 +1,14 @@
+import { z } from 'zod'
+import type { Role } from '@pah/shared'
 import type { PoliticianRepository, PoliticianWithScore, PoliticianProfileRow } from '../repositories/politician.repository.js'
 import type { PoliticianCardDto, PoliticianProfileDto } from '../schemas/politician.schema.js'
 
-interface Cursor {
+const CursorSchema = z.object({
+  overallScore: z.number(),
+  politicianId: z.string().uuid(),
+})
+
+export interface Cursor {
   overallScore: number
   politicianId: string
 }
@@ -12,7 +19,17 @@ function encodeCursor(cursor: Cursor): string {
 
 function decodeCursor(encoded: string): Cursor {
   try {
-    return JSON.parse(Buffer.from(encoded, 'base64url').toString('utf-8')) as Cursor
+    const raw: unknown = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf-8'))
+    const parsed = CursorSchema.parse(raw)
+    
+    if (parsed.overallScore === undefined || parsed.politicianId === undefined) {
+      throw new Error('Invalid cursor data')
+    }
+    
+    return {
+      overallScore: parsed.overallScore,
+      politicianId: parsed.politicianId,
+    }
   } catch {
     throw new Error('Invalid cursor')
   }
@@ -56,7 +73,7 @@ function toPoliticianProfileDto(row: PoliticianProfileRow): PoliticianProfileDto
 export interface FindByFiltersInput {
   limit: number
   cursor?: string | undefined
-  role?: string | undefined
+  role?: Role | undefined
   state?: string | undefined
   search?: string | undefined
 }

@@ -14,6 +14,7 @@ import type {
   CommitteeListResponse,
 } from './api-types'
 import type { SourceListResponse } from '@pah/shared'
+import { REVALIDATE } from '@pah/shared'
 
 const API_BASE_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001/api/v1'
 
@@ -63,7 +64,7 @@ export async function fetchPoliticians(
   if (filters.limit !== undefined) params.set('limit', String(filters.limit))
 
   return apiFetch<ListPoliticiansResponse>(`/politicians?${params.toString()}`, {
-    next: { revalidate: 300, tags: ['politicians'] },
+    next: { revalidate: REVALIDATE.FIVE_MINUTES, tags: ['politicians'] },
   })
 }
 
@@ -74,7 +75,7 @@ export async function fetchPoliticians(
  */
 export async function fetchPoliticianBySlug(slug: string): Promise<PoliticianProfile> {
   return apiFetch<PoliticianProfile>(`/politicians/${encodeURIComponent(slug)}`, {
-    next: { revalidate: 3600, tags: [`politician-${slug}`] },
+    next: { revalidate: REVALIDATE.ONE_HOUR, tags: [`politician-${slug}`] },
   })
 }
 
@@ -92,7 +93,7 @@ export async function fetchPoliticianBills(
   if (filters.limit !== undefined) params.set('limit', String(filters.limit))
   return apiFetch<BillListResponse>(
     `/politicians/${encodeURIComponent(slug)}/bills?${params.toString()}`,
-    { next: { revalidate: 300, tags: [`politician-${slug}-bills`] } },
+    { next: { revalidate: REVALIDATE.FIVE_MINUTES, tags: [`politician-${slug}-bills`] } },
   )
 }
 
@@ -110,7 +111,7 @@ export async function fetchPoliticianVotes(
   if (filters.limit !== undefined) params.set('limit', String(filters.limit))
   return apiFetch<VoteListResponse>(
     `/politicians/${encodeURIComponent(slug)}/votes?${params.toString()}`,
-    { next: { revalidate: 300, tags: [`politician-${slug}-votes`] } },
+    { next: { revalidate: REVALIDATE.FIVE_MINUTES, tags: [`politician-${slug}-votes`] } },
   )
 }
 
@@ -128,7 +129,7 @@ export async function fetchPoliticianExpenses(
   if (filters.limit !== undefined) params.set('limit', String(filters.limit))
   return apiFetch<ExpenseListResponse>(
     `/politicians/${encodeURIComponent(slug)}/expenses?${params.toString()}`,
-    { next: { revalidate: 300, tags: [`politician-${slug}-expenses`] } },
+    { next: { revalidate: REVALIDATE.FIVE_MINUTES, tags: [`politician-${slug}-expenses`] } },
   )
 }
 
@@ -146,7 +147,7 @@ export async function fetchPoliticianProposals(
   if (filters.limit !== undefined) params.set('limit', String(filters.limit))
   return apiFetch<ProposalListResponse>(
     `/politicians/${encodeURIComponent(slug)}/proposals?${params.toString()}`,
-    { next: { revalidate: 300, tags: [`politician-${slug}-proposals`] } },
+    { next: { revalidate: REVALIDATE.FIVE_MINUTES, tags: [`politician-${slug}-proposals`] } },
   )
 }
 
@@ -160,7 +161,7 @@ export async function fetchPoliticianCommittees(
 ): Promise<CommitteeListResponse> {
   return apiFetch<CommitteeListResponse>(
     `/politicians/${encodeURIComponent(slug)}/committees`,
-    { next: { revalidate: 300, tags: [`politician-${slug}-committees`] } },
+    { next: { revalidate: REVALIDATE.FIVE_MINUTES, tags: [`politician-${slug}-committees`] } },
   )
 }
 
@@ -171,6 +172,6 @@ export async function fetchPoliticianCommittees(
  */
 export async function fetchSources(): Promise<SourceListResponse> {
   return apiFetch<SourceListResponse>('/sources', {
-    next: { revalidate: 3600, tags: ['sources'] },
+    next: { revalidate: REVALIDATE.ONE_HOUR, tags: ['sources'] },
   })
 }

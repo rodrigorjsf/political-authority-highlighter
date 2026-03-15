@@ -18,6 +18,8 @@ const cspHeader = `
 `
 
 const config: NextConfig = {
+  // Enables webpack to resolve .js → .ts for workspace packages that use TypeScript ESM imports
+  transpilePackages: ['@pah/shared'],
   images: {
     remotePatterns: [
       // Camara dos Deputados official photo CDN

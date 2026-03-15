@@ -24,6 +24,7 @@ Maintains a **lean** GitHub Actions pipeline at `.github/workflows/ci.yml`. The 
 | TypeScript | 5.4 | Typecheck | `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess` |
 | Vitest | 2 | Unit tests | Fast unit tests, no external deps |
 | Next.js | 15 | Build | SSG/ISR build verification |
+| Vercel | CLI | Vercel Build Validation | OBRIGATÓRIO: Verifies Next.js app builds on Vercel |
 | Fastify | 5 | Build | Included via `pnpm build` |
 | pnpm audit | (via pnpm) | Security audit | Catches high/critical dependency vulnerabilities |
 | supabase/setup-cli | latest | Deploy (deploy.yml) | Supabase CLI: `supabase db push` (remote); local use `supabase start` and `supabase db reset --local` |
@@ -192,6 +193,30 @@ Enforced via lint-staged hook (not CI), but documented here:
 
 ---
 
+## Mandatory Local Validation Before Any PR
+
+**These commands must ALL pass locally before creating a PR.** This prevents CI failures that waste
+pipeline time and hide regressions.
+
+```bash
+pnpm lint              # ESLint — zero errors required
+pnpm typecheck         # tsc --noEmit — zero errors required
+pnpm build             # Full monorepo build (OBRIGATÓRIO — catches Next.js compile errors)
+vercel build           # Vercel build simulation (OBRIGATÓRIO — CI gate, must pass)
+pnpm test              # All unit tests — zero failures required
+```
+
+> **Why `pnpm build` is not optional**: `pnpm typecheck` validates types but does NOT run the
+> Next.js compiler or Turborepo's build pipeline. Build failures (missing exports, invalid imports,
+> webpack configuration errors) only surface in `pnpm build`. A PR that passes typecheck but fails
+> `pnpm build` in CI is a bug that could have been caught in 30 seconds locally.
+>
+> **Why `vercel build` is not optional**: The Vercel CI environment has different TypeScript version
+> constraints and build flags. `vercel build` locally simulates that environment. If it fails here,
+> the deploy.yml workflow will reject the PR.
+
+---
+
 ## Leanness Checklist
 
 Before every `ci.yml` change, verify:
@@ -213,3 +238,4 @@ The default answer to "should I add this?" is **no**. Add only when the answer t
 | 2026-02-28 | 1.0 | Initial CI/CD maintenance skill |
 | 2026-03-07 | 1.1 | Add pnpm audit to CI stack, add Security CI Steps section (DR-008, RNF-SEC-017), remove pnpm audit from exclusions |
 | 2026-03-09 | 1.2 | Document Supabase CLI in deploy workflow |
+| 2026-03-14 | 1.2 | Add mandatory local validation section: pnpm build + vercel build required before any PR |

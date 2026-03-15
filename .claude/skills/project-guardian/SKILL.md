@@ -135,6 +135,37 @@ For any frontend change, verify DR-008 compliance:
 - [ ] Destructuring used for objects?
 - [ ] `ms` package used for time configurations?
 
+### 9. Mandatory Pre-Completion Validation
+
+**Before claiming any task, feature, or fix is complete, ALL of these must pass:**
+
+```bash
+pnpm lint              # ESLint — zero errors
+pnpm typecheck         # tsc --noEmit — zero errors
+pnpm build             # Full build (Next.js + tsc) — OBRIGATÓRIO
+vercel build           # Vercel build simulation — OBRIGATÓRIO (CI gate)
+pnpm test              # All unit tests green
+```
+
+> **Why `pnpm build` AND `vercel build`?** `pnpm typecheck` alone is insufficient.
+> `pnpm build` catches Next.js compilation errors (e.g., missing exports, module resolution failures)
+> that typecheck does not. `vercel build` simulates the exact Vercel CI environment — if it fails
+> here, the CI pipeline rejects the PR. Both commands must pass before any PR is created.
+
+### 10. Post-PR Validation (Required)
+
+After creating a PR to `development`, validate the deploy:
+
+- **Automatic:** `validate-deploy.yml` triggers after `ci.yml` completes and posts a result
+  comment on the PR
+- **Manual (when needed):** invoke `/project-deploy-validator` in Claude Code
+
+Only consider implementation **COMPLETE** when all three are confirmed:
+
+- [ ] CI (`ci.yml`) passed on GitHub Actions
+- [ ] Vercel deploy confirmed (preview URL available on PR comment)
+- [ ] Supabase migrations applied without errors
+
 ## Violation Response
 
 If any check fails:
@@ -151,3 +182,5 @@ If any check fails:
 | 2026-02-28 | 1.0 | Initial guardian skill |
 | 2026-03-07 | 1.1 | Add Frontend Security Check (section 7) for DR-008 enforcement |
 | 2026-03-09 | 1.2 | Schema rename public_data→public, Supabase Free tier |
+| 2026-03-14 | 1.2 | Add section 9: mandatory pnpm build + vercel build before any PR |
+| 2026-03-14 | 1.2 | Add section 10: post-PR validation via validate-deploy.yml and project-deploy-validator skill |

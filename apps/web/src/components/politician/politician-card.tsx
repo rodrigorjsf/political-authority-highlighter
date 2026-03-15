@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { PoliticianCard } from '@pah/shared'
+import { Role } from '@pah/shared'
 
 interface PoliticianCardProps {
   politician: PoliticianCard
@@ -20,7 +21,7 @@ export function PoliticianCard({
 }: PoliticianCardProps): React.JSX.Element {
   const { slug, name, party, state, role, photoUrl, tenureStartDate, overallScore } = politician
 
-  const roleLabel = role === 'deputado' ? 'Deputado Federal' : 'Senadora Federal'
+  const roleLabel = role === Role.DEPUTADO ? 'Deputado Federal' : 'Senadora Federal'
   const tenureDisplay = tenureStartDate
     ? new Intl.DateTimeFormat('pt-BR', { year: 'numeric', month: 'short' }).format(
         new Date(tenureStartDate),

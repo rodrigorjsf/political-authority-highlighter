@@ -1,4 +1,5 @@
 import type { TransparenciaExpense, ExpenseUpsert } from '../types.js'
+import { DataSource } from '../types.js'
 
 /**
  * Transforms a Portal da Transparencia expense into a unified ExpenseUpsert.
@@ -7,7 +8,7 @@ import type { TransparenciaExpense, ExpenseUpsert } from '../types.js'
 export function transformTransparenciaExpense(
   raw: TransparenciaExpense,
   politicianId: string,
-  source: 'camara' | 'senado',
+  source: DataSource,
 ): ExpenseUpsert {
   const date = new Date(raw.dataDocumento)
   return {

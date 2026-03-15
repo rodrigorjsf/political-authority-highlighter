@@ -107,6 +107,7 @@ pnpm build        # Build artifacts
 pnpm lint         # Run ESLint
 pnpm typecheck    # Run type checks
 pnpm test         # Run unit and integration tests
+vercel build      # Run the Vercel build phase (OBRIGATÓRIO PASSAR COM SUCESSO)
 pnpm test:e2e     # Run Playwright E2E tests
 ```
 

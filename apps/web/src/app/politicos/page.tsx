@@ -9,6 +9,7 @@ import { StateFilter } from '../../components/filters/state-filter'
 import { SearchBar } from '../../components/filters/search-bar'
 import type { Metadata } from 'next'
 import type { PoliticianFilters } from '@pah/shared'
+import { Role } from '@pah/shared'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -33,7 +34,7 @@ export default async function PoliticosPage({ searchParams }: Props): Promise<Re
   // exactOptionalPropertyTypes: build filters object conditionally (no undefined spreads)
   const filters: PoliticianFilters = {}
   if (cursor !== undefined) filters.cursor = cursor
-  if (role !== undefined) filters.role = role as 'deputado' | 'senador'
+  if (role !== undefined) filters.role = role as Role
   if (state !== undefined) filters.state = state
   if (search !== undefined) filters.search = search
 

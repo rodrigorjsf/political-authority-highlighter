@@ -1,4 +1,5 @@
 import { Type, type Static } from '@sinclair/typebox'
+import { Role } from '@pah/shared'
 
 /**
  * Query parameters for GET /api/v1/politicians.
@@ -10,7 +11,7 @@ export const PoliticianListQuerySchema = Type.Object({
     Type.String({ description: 'Opaque base64url cursor from previous response' }),
   ),
   // Phase 2: role
-  role: Type.Optional(Type.Union([Type.Literal('deputado'), Type.Literal('senador')])),
+  role: Type.Optional(Type.Union([Type.Literal(Role.DEPUTADO), Type.Literal(Role.SENADOR)])),
   // Phase 3: state
   state: Type.Optional(Type.String({ minLength: 2, maxLength: 2 })),
   // Phase 4: search (RF-015)

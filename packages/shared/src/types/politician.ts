@@ -1,3 +1,5 @@
+import type { Role } from '../enums.js'
+
 /**
  * Summary representation of a politician as displayed on the listing page (RF-001).
  * Contains only public schema fields — no internal data, no CPF, no exclusion details.
@@ -8,7 +10,7 @@ export interface PoliticianCard {
   name: string
   party: string
   state: string
-  role: 'deputado' | 'senador'
+  role: Role
   photoUrl: string | null
   tenureStartDate: string | null // ISO date string; null if not available
   overallScore: number // 0-100 integer
@@ -21,7 +23,7 @@ export interface PoliticianCard {
 export interface PoliticianFilters {
   cursor?: string
   limit?: number
-  role?: 'deputado' | 'senador'
+  role?: Role
   state?: string
   search?: string
 }
@@ -47,7 +49,7 @@ export interface PoliticianProfile {
   name: string
   party: string
   state: string
-  role: 'deputado' | 'senador'
+  role: Role
   photoUrl: string | null
   bioSummary: string | null
   tenureStartDate: string | null
@@ -59,3 +61,4 @@ export interface PoliticianProfile {
   exclusionFlag: boolean
   methodologyVersion: string
 }
+

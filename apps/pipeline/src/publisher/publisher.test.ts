@@ -22,6 +22,8 @@ vi.mock('@pah/db/internal-schema', () => ({
 }))
 
 import type { PipelineDb } from '@pah/db/clients'
+import { DataSource } from '../types.js'
+import { Role } from '@pah/shared'
 
 interface MockDb {
   db: PipelineDb
@@ -60,12 +62,12 @@ describe('createPublisher', () => {
 
       const result = await publisher.upsertPolitician({
         externalId: 'ext-123',
-        source: 'camara',
+        source: DataSource.CAMARA,
         name: 'Test Politician',
         slug: 'test-politician-sp',
         state: 'SP',
         party: 'PART',
-        role: 'deputado',
+        role: Role.DEPUTADO,
         photoUrl: null,
         tenureStartDate: null,
       })
@@ -80,12 +82,12 @@ describe('createPublisher', () => {
       await expect(
         publisher.upsertPolitician({
           externalId: 'ext-123',
-          source: 'camara',
+          source: DataSource.CAMARA,
           name: 'Test Politician',
           slug: 'test-politician-sp',
           state: 'SP',
           party: 'PART',
-          role: 'deputado',
+          role: Role.DEPUTADO,
           photoUrl: null,
           tenureStartDate: null,
         }),
@@ -100,7 +102,7 @@ describe('createPublisher', () => {
 
       await publisher.upsertExclusionRecord({
         politicianId: 'politician-uuid',
-        source: 'tcu',
+        source: DataSource.TCU,
         cpfHash: 'abc123hash',
         exclusionType: 'INABILITADO',
         recordDate: new Date('2024-01-15'),
@@ -116,7 +118,7 @@ describe('createPublisher', () => {
       const { db, insertMock } = buildMockDb()
       const publisher = createPublisher(db)
 
-      await publisher.upsertDataSourceStatus('camara', 594)
+      await publisher.upsertDataSourceStatus(DataSource.CAMARA, 594)
 
       expect(insertMock).toHaveBeenCalled()
     })

@@ -21,7 +21,7 @@
     },
     "supabase": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=xvtxbvakzoezzjnpbiyv"
+      "url": "https://mcp.supabase.com/mcp?project_ref=jrffytnebargxceoznkn"
     },
     "playwright": {
       "command": "npx",

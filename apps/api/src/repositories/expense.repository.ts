@@ -1,11 +1,12 @@
 import { eq, and, lt, or, desc, sum } from 'drizzle-orm'
 import type { PublicDb } from '@pah/db/clients'
 import { expenses, politicians } from '@pah/db/public-schema'
+import type { LegislativeSource } from '@pah/shared'
 
 export interface ExpenseRow {
   id: string
   externalId: string
-  source: string
+  source: LegislativeSource
   year: number
   month: number
   category: string
@@ -68,6 +69,8 @@ export function createExpenseRepository(db: PublicDb): {
 
       return rows.map((row) => ({
         ...row,
+        // Drizzle returns varchar as string; DB enforces 'camara'|'senado' — cast is safe here
+        source: row.source as LegislativeSource,
         documentNumber: row.documentNumber ?? null,
         sourceUrl: row.sourceUrl ?? null,
       }))

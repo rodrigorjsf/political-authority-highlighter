@@ -1,3 +1,5 @@
+import type { LegislativeSource } from '../enums.js'
+
 /**
  * Parliamentary expense (CEAP/CEAPS) from Camara or Senado.
  * Represents a single reimbursement claim with category, supplier, amount, and documentation link.
@@ -5,7 +7,7 @@
 export interface Expense {
   id: string
   externalId: string
-  source: 'camara' | 'senado'
+  source: LegislativeSource
   year: number
   month: number
   category: string

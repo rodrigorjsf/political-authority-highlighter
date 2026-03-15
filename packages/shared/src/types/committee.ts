@@ -1,8 +1,10 @@
+import type { LegislativeSource } from '../enums.js'
+
 /** Committee membership for a politician (RF-011). */
 export interface Committee {
   id: string
   externalId: string
-  source: 'camara' | 'senado'
+  source: LegislativeSource
   committeeName: string
   role: string // 'Titular', 'Suplente', 'Presidente', etc.
   startDate: string // ISO date 'YYYY-MM-DD'
