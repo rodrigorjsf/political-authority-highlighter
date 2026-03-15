@@ -93,7 +93,7 @@ export default async function FontesPage(): Promise<React.JSX.Element> {
     .catch(() => [] as DataSourceStatus[])
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
       <h1 className="mb-4 text-2xl font-bold text-foreground">Fontes de Dados</h1>
       <p className="mb-6 text-sm text-muted-foreground">
         A plataforma utiliza dados públicos de seis fontes governamentais, acessados sob a Lei de

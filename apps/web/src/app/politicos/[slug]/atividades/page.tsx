@@ -52,7 +52,7 @@ export default async function CommitteesPage({
   const result = await fetchPoliticianCommittees(slug)
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
       {/* Breadcrumb */}
       <Link
         href={`/politicos/${slug}`}
@@ -72,13 +72,13 @@ export default async function CommitteesPage({
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" aria-label={`Atividades de ${politician.name}`}>
             <thead>
               <tr className="border-b border-border text-left text-muted-foreground">
-                <th className="pb-3 pr-4">Comissão</th>
-                <th className="pb-3 pr-4">Cargo</th>
-                <th className="pb-3 pr-4">Desde</th>
-                <th className="pb-3">Até</th>
+                <th scope="col" className="pb-3 pr-4">Comissão</th>
+                <th scope="col" className="pb-3 pr-4">Cargo</th>
+                <th scope="col" className="pb-3 pr-4">Desde</th>
+                <th scope="col" className="pb-3">Até</th>
               </tr>
             </thead>
             <tbody>

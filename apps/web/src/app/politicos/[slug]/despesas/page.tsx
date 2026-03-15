@@ -55,7 +55,7 @@ export default async function ExpensesPage({
   const result = await fetchPoliticianExpenses(slug, expenseFilters)
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
       {/* Breadcrumb */}
       <Link
         href={`/politicos/${slug}`}
@@ -87,14 +87,14 @@ export default async function ExpensesPage({
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" aria-label={`Despesas de ${politician.name}`}>
             <thead>
               <tr className="border-b border-border text-left text-muted-foreground">
-                <th className="pb-3 pr-4">Mês/Ano</th>
-                <th className="pb-3 pr-4">Categoria</th>
-                <th className="pb-3 pr-4">Fornecedor</th>
-                <th className="pb-3 pr-4 text-right">Valor</th>
-                <th className="pb-3">Documento</th>
+                <th scope="col" className="pb-3 pr-4">Mês/Ano</th>
+                <th scope="col" className="pb-3 pr-4">Categoria</th>
+                <th scope="col" className="pb-3 pr-4">Fornecedor</th>
+                <th scope="col" className="pb-3 pr-4 text-right">Valor</th>
+                <th scope="col" className="pb-3">Documento</th>
               </tr>
             </thead>
             <tbody>
@@ -117,6 +117,7 @@ export default async function ExpensesPage({
                         className="text-primary underline"
                       >
                         {expense.documentNumber ?? 'Ver'}
+                        <span className="sr-only"> (abre em nova aba)</span>
                       </a>
                     ) : (
                       (expense.documentNumber ?? '—')
@@ -134,7 +135,7 @@ export default async function ExpensesPage({
         {cursor !== undefined && (
           <Link
             href={`/politicos/${slug}/despesas`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
           >
             ← Início
           </Link>
@@ -142,7 +143,7 @@ export default async function ExpensesPage({
         {result.cursor !== null && (
           <Link
             href={`/politicos/${slug}/despesas?cursor=${result.cursor}`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
           >
             Próxima →
           </Link>

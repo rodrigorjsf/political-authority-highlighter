@@ -48,7 +48,7 @@ export default async function BillsPage({
   const result = await fetchPoliticianBills(slug, billFilters)
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
       {/* Breadcrumb */}
       <Link
         href={`/politicos/${slug}`}
@@ -68,13 +68,13 @@ export default async function BillsPage({
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" aria-label={`Projetos de lei de ${politician.name}`}>
             <thead>
               <tr className="border-b border-border text-left text-muted-foreground">
-                <th className="pb-3 pr-4">Número</th>
-                <th className="pb-3 pr-4">Título</th>
-                <th className="pb-3 pr-4">Situação</th>
-                <th className="pb-3">Data</th>
+                <th scope="col" className="pb-3 pr-4">Número</th>
+                <th scope="col" className="pb-3 pr-4">Título</th>
+                <th scope="col" className="pb-3 pr-4">Situação</th>
+                <th scope="col" className="pb-3">Data</th>
               </tr>
             </thead>
             <tbody>
@@ -89,6 +89,7 @@ export default async function BillsPage({
                         className="text-primary underline"
                       >
                         {bill.billType} {bill.billNumber}/{bill.billYear}
+                        <span className="sr-only"> (abre em nova aba)</span>
                       </a>
                     ) : (
                       <span>
@@ -115,7 +116,7 @@ export default async function BillsPage({
         {cursor !== undefined && (
           <Link
             href={`/politicos/${slug}/projetos`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
           >
             ← Início
           </Link>
@@ -123,7 +124,7 @@ export default async function BillsPage({
         {result.cursor !== null && (
           <Link
             href={`/politicos/${slug}/projetos?cursor=${result.cursor}`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
           >
             Próxima →
           </Link>

@@ -7,7 +7,7 @@ describe('ErrorPage', () => {
     render(<ErrorPage error={new Error('db connection string leaked')} reset={vi.fn()} />)
     const heading = screen.getByRole('heading', { level: 1 })
     expect(heading).toBeInTheDocument()
-    expect(heading).toHaveTextContent('An unexpected error occurred')
+    expect(heading).toHaveTextContent('Ocorreu um erro inesperado')
   })
 
   it('does NOT render error.message in the output', () => {
@@ -17,13 +17,13 @@ describe('ErrorPage', () => {
 
   it('renders a "Try again" button', () => {
     render(<ErrorPage error={new Error('something broke')} reset={vi.fn()} />)
-    expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument()
   })
 
   it('calls reset() when the button is clicked', () => {
     const reset = vi.fn()
     render(<ErrorPage error={new Error('')} reset={reset} />)
-    fireEvent.click(screen.getByRole('button', { name: /try again/i }))
+    fireEvent.click(screen.getByRole('button', { name: /tentar novamente/i }))
     expect(reset).toHaveBeenCalledOnce()
   })
 
