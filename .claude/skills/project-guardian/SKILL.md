@@ -135,6 +135,23 @@ For any frontend change, verify DR-008 compliance:
 - [ ] Destructuring used for objects?
 - [ ] `ms` package used for time configurations?
 
+### 9. Mandatory Pre-Completion Validation
+
+**Before claiming any task, feature, or fix is complete, ALL of these must pass:**
+
+```bash
+pnpm lint              # ESLint — zero errors
+pnpm typecheck         # tsc --noEmit — zero errors
+pnpm build             # Full build (Next.js + tsc) — OBRIGATÓRIO
+vercel build           # Vercel build simulation — OBRIGATÓRIO (CI gate)
+pnpm test              # All unit tests green
+```
+
+> **Why `pnpm build` AND `vercel build`?** `pnpm typecheck` alone is insufficient.
+> `pnpm build` catches Next.js compilation errors (e.g., missing exports, module resolution failures)
+> that typecheck does not. `vercel build` simulates the exact Vercel CI environment — if it fails
+> here, the CI pipeline rejects the PR. Both commands must pass before any PR is created.
+
 ## Violation Response
 
 If any check fails:
@@ -151,3 +168,4 @@ If any check fails:
 | 2026-02-28 | 1.0 | Initial guardian skill |
 | 2026-03-07 | 1.1 | Add Frontend Security Check (section 7) for DR-008 enforcement |
 | 2026-03-09 | 1.2 | Schema rename public_data→public, Supabase Free tier |
+| 2026-03-14 | 1.2 | Add section 9: mandatory pnpm build + vercel build before any PR |
