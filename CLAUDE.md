@@ -384,6 +384,7 @@ Before opening a pull request, verify:
 - [ ] Public-facing text is politically neutral and factual
 - [ ] New API endpoints include request/response schemas with TypeBox
 - [ ] New components are accessible (keyboard navigable, proper ARIA attributes)
+- [ ] UI changes reviewed against `docs/assets/frontend_design_prd.md` (design tokens, typography, dark mode, component specs) — run `web-frontend-design` skill checklist
 - [ ] Conventional commit message format used
 
 ---
@@ -393,7 +394,7 @@ Before opening a pull request, verify:
 | Layer                    | Guide Location             | Scope                                                                 |
 | ------------------------ | -------------------------- | --------------------------------------------------------------------- |
 | Backend (API + Pipeline) | `apps/api/CLAUDE.md`       | Fastify routes, services, Drizzle queries, pipeline adapters, scoring |
-| Frontend                 | `apps/web/CLAUDE.md`       | Next.js pages, components, ISR, SEO, accessibility                    |
+| Frontend                 | `apps/web/CLAUDE.md`       | Next.js pages, components, ISR, SEO, accessibility, **Frontend Design PRD compliance** (`docs/assets/frontend_design_prd.md`) |
 | Infrastructure           | `infrastructure/CLAUDE.md` | Supabase CLI local, Docker optional, CI/CD, monitoring                |
 
 ---
@@ -404,3 +405,4 @@ Before opening a pull request, verify:
 | ---------- | ----------- | ----------------------------------------------------- |
 | 2026-02-28 | 1.0         | Initial project-wide development guide                |
 | 2026-03-09 | 1.2         | Supabase Free tier, schema rename public_data->public |
+| 2026-03-15 | 1.2         | Add `web-frontend-design` skill to Pre-PR Checklist; update Frontend layer guide to reference Frontend Design PRD |
