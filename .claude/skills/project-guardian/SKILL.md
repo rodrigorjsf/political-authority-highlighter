@@ -152,6 +152,20 @@ pnpm test              # All unit tests green
 > that typecheck does not. `vercel build` simulates the exact Vercel CI environment — if it fails
 > here, the CI pipeline rejects the PR. Both commands must pass before any PR is created.
 
+### 10. Post-PR Validation (Required)
+
+After creating a PR to `development`, validate the deploy:
+
+- **Automatic:** `validate-deploy.yml` triggers after `ci.yml` completes and posts a result
+  comment on the PR
+- **Manual (when needed):** invoke `/project-deploy-validator` in Claude Code
+
+Only consider implementation **COMPLETE** when all three are confirmed:
+
+- [ ] CI (`ci.yml`) passed on GitHub Actions
+- [ ] Vercel deploy confirmed (preview URL available on PR comment)
+- [ ] Supabase migrations applied without errors
+
 ## Violation Response
 
 If any check fails:
@@ -169,3 +183,4 @@ If any check fails:
 | 2026-03-07 | 1.1 | Add Frontend Security Check (section 7) for DR-008 enforcement |
 | 2026-03-09 | 1.2 | Schema rename public_data→public, Supabase Free tier |
 | 2026-03-14 | 1.2 | Add section 9: mandatory pnpm build + vercel build before any PR |
+| 2026-03-14 | 1.2 | Add section 10: post-PR validation via validate-deploy.yml and project-deploy-validator skill |
