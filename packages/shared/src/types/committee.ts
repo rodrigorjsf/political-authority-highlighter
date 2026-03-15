@@ -1,4 +1,4 @@
-import { LegislativeSource } from '../enums.js'
+import type { LegislativeSource } from '../enums.js'
 
 /** Committee membership for a politician (RF-011). */
 export interface Committee {

@@ -1,4 +1,4 @@
-import { LegislativeSource } from '../enums.js'
+import type { LegislativeSource } from '../enums.js'
 
 /** A parliamentary proposal authored or co-authored by a politician (RF-010). */
 export interface Proposal {

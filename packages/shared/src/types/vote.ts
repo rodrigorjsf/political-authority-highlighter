@@ -1,4 +1,4 @@
-import { LegislativeSource } from '../enums.js'
+import type { LegislativeSource } from '../enums.js'
 
 /** A parliamentary voting record for a politician (RF-009). */
 export interface Vote {

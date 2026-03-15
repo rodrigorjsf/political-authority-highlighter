@@ -1,4 +1,4 @@
-import { Role } from '../enums.js'
+import type { Role } from '../enums.js'
 
 /**
  * Summary representation of a politician as displayed on the listing page (RF-001).

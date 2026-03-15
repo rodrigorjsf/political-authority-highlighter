@@ -1,4 +1,4 @@
-import { LegislativeSource } from '../enums.js'
+import type { LegislativeSource } from '../enums.js'
 
 /**
  * Parliamentary expense (CEAP/CEAPS) from Camara or Senado.

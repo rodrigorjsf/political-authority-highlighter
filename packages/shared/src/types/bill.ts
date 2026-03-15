@@ -1,4 +1,4 @@
-import { LegislativeSource } from '../enums.js'
+import type { LegislativeSource } from '../enums.js'
 
 /** A legislative bill authored or co-authored by a politician (RF-008). */
 export interface Bill {
