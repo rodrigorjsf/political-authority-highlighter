@@ -101,8 +101,33 @@ Implemented WCAG 2.1 AA accessibility improvements across the entire `apps/web` 
 
 ---
 
+## CI Incident — Lighthouse preset misconfiguration (2026-03-15)
+
+**Incident:** PR 29 CI failed on the "Lighthouse CI" step with 6 hard failures (✘) and 6 warnings (⚠️).
+
+**Root cause:** `.lighthouserc.json` foi criado com `"preset": "lighthouse:no-pwa"`, que habilita asserções para TODAS as categorias Lighthouse (Performance, SEO, Best Practices, além de Accessibility). O Phase 2 definia apenas `accessibility ≥ 0.95`. As falhas eram todas de Performance, SEO e Best Practices — nenhuma de Accessibility:
+
+| Falha | Categoria | Motivo em CI |
+| ----- | --------- | ------------ |
+| `errors-in-console` | Best Practices | API calls falham sem banco de dados em CI → console errors |
+| `legacy-javascript-insight` | Performance | Next.js bundle inclui polyfills (comportamento normal) |
+| `network-dependency-tree-insight` | Performance | Característica estrutural de SSR |
+| `unused-javascript` | Performance | Next.js code splitting normal |
+| `meta-description` (só `/politicos`) | SEO | Provável render degradado em CI sem API disponível |
+| `bf-cache` (só `/politicos`) | Performance | Headers Next.js previnem bfcache por design |
+
+**Correção aplicada (2026-03-15):**
+
+- Removido `"preset": "lighthouse:no-pwa"` do `.lighthouserc.json` — mantido apenas `categories:accessibility ≥ 0.95`
+- Adicionada Phase 6 ao PRD (`post-mvp-engagement-and-reach.prd.md`) para cobrir SEO, Best Practices e Performance contra Vercel preview URL quando o produto estiver completo
+
+**Lição:** Lighthouse CI em servidor local sem banco de dados real não é ambiente confiável para categorias de Performance, Best Practices e SEO. Essas categorias requerem execução contra Vercel preview deployment (dados reais + CDN). Somente `categories:accessibility` é confiável em servidor local, pois não depende de dados dinâmicos.
+
+---
+
 ## Next Steps
 
+- [x] Fix `.lighthouserc.json` — preset removido, CI passa agora
 - [ ] Review implementation
 - [ ] Create PR: `gh pr create` or `/prp-pr`
 - [ ] Configure `LHCI_GITHUB_APP_TOKEN` secret in GitHub (optional — CI passes without it)
