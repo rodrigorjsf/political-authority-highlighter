@@ -54,15 +54,15 @@ Saberemos que estamos certos quando a média de páginas por sessão atingir ≥
 
 ## Success Metrics
 
-| Metric | Target | How Measured |
-|--------|--------|--------------|
-| Páginas por sessão | ≥ 3 (KPI PRD principal) | Plausible Analytics dashboard |
-| Taxa de rejeição | < 60% | Plausible Analytics |
-| MAU retornante via alertas | ≥ 5% dos inscritos ativos/mês | Query em `alert_subscriptions` |
-| Chamadas à API pública | > 100/dia após 30 dias de go-live | Logs `api_keys.last_used_at` |
-| Score Lighthouse Accessibility | ≥ 95 em todas as rotas | Lighthouse CI no GitHub Actions |
-| Violações axe-core críticas/sérias | 0 em todas as rotas | `@axe-core/playwright` em CI |
-| `pnpm lint && pnpm typecheck && pnpm test && vercel build` passa | 100% | CI/CD em cada PR |
+| Metric                                                           | Target                            | How Measured                    |
+| ---------------------------------------------------------------- | --------------------------------- | ------------------------------- |
+| Páginas por sessão                                               | ≥ 3 (KPI PRD principal)           | Plausible Analytics dashboard   |
+| Taxa de rejeição                                                 | < 60%                             | Plausible Analytics             |
+| MAU retornante via alertas                                       | ≥ 5% dos inscritos ativos/mês     | Query em `alert_subscriptions`  |
+| Chamadas à API pública                                           | > 100/dia após 30 dias de go-live | Logs `api_keys.last_used_at`    |
+| Score Lighthouse Accessibility                                   | ≥ 95 em todas as rotas            | Lighthouse CI no GitHub Actions |
+| Violações axe-core críticas/sérias                               | 0 em todas as rotas               | `@axe-core/playwright` em CI    |
+| `pnpm lint && pnpm typecheck && pnpm test && vercel build` passa | 100%                              | CI/CD em cada PR                |
 
 ## Open Questions
 
@@ -78,32 +78,32 @@ Saberemos que estamos certos quando a média de páginas por sessão atingir ≥
 
 ### Completed Features
 
-| RF | Feature | Branch/PR |
-|----|---------|-----------|
-| RF-001 | Politician Catalog Listing | merged: main |
-| RF-002 | Filter by Political Role | merged: main |
-| RF-003 | Filter by State/UF | merged: main |
-| RF-004 | Integrity Score Calculation | merged: main |
-| RF-005 | Methodology Page | merged: main |
+| RF     | Feature                          | Branch/PR    |
+| ------ | -------------------------------- | ------------ |
+| RF-001 | Politician Catalog Listing       | merged: main |
+| RF-002 | Filter by Political Role         | merged: main |
+| RF-003 | Filter by State/UF               | merged: main |
+| RF-004 | Integrity Score Calculation      | merged: main |
+| RF-005 | Methodology Page                 | merged: main |
 | RF-006 | Anti-Corruption Exclusion Filter | merged: main |
-| RF-007 | Politician Profile Overview | merged: main |
-| RF-008 | Profile Section — Bills | merged: main |
-| RF-009 | Profile Section — Voting Record | merged: main |
-| RF-010 | Profile Section — Proposals | merged: main |
-| RF-011 | Profile Section — Agenda | merged: main |
-| RF-012 | Profile Section — Expenses | merged: main |
-| RF-013 | Data Ingestion Pipeline | merged: main |
-| RF-014 | Data Freshness Indicator | merged: main |
-| RF-015 | Search Politician by Name | merged: main |
-| RF-016 | Responsive Mobile Web Layout | merged: main |
-| RF-017 | SEO and Social Sharing Metadata | merged: main |
+| RF-007 | Politician Profile Overview      | merged: main |
+| RF-008 | Profile Section — Bills          | merged: main |
+| RF-009 | Profile Section — Voting Record  | merged: main |
+| RF-010 | Profile Section — Proposals      | merged: main |
+| RF-011 | Profile Section — Agenda         | merged: main |
+| RF-012 | Profile Section — Expenses       | merged: main |
+| RF-013 | Data Ingestion Pipeline          | merged: main |
+| RF-014 | Data Freshness Indicator         | merged: main |
+| RF-015 | Search Politician by Name        | merged: main |
+| RF-016 | Responsive Mobile Web Layout     | merged: main |
+| RF-017 | SEO and Social Sharing Metadata  | merged: main |
 
 ### Partial Implementations (estrutura existe, funcionalidade ausente)
 
-| RF | What Exists | What's Missing |
-|----|-------------|----------------|
-| RNF-A11Y | Semantic HTML em componentes, `aria-label` em alguns elementos | Auditoria axe-core em CI, `skip to content` link, WCAG 2.1 AA comprova análise de contraste, labels ARIA em filtros dinâmicos |
-| RF-POST-003 | API Fastify funcional com todos os endpoints, rate limit global de 60 req/min | Sistema de chaves `X-API-Key`, Swagger/Scalar UI, rate limit por tier, documentação OpenAPI |
+| RF          | What Exists                                                                   | What's Missing                                                                                                                |
+| ----------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| RNF-A11Y    | Semantic HTML em componentes, `aria-label` em alguns elementos                | Auditoria axe-core em CI, `skip to content` link, WCAG 2.1 AA comprova análise de contraste, labels ARIA em filtros dinâmicos |
+| RF-POST-003 | API Fastify funcional com todos os endpoints, rate limit global de 60 req/min | Sistema de chaves `X-API-Key`, Swagger/Scalar UI, rate limit por tier, documentação OpenAPI                                   |
 
 ### Not Started
 
@@ -139,14 +139,14 @@ Usuários que querem comentar ou interagir socialmente com conteúdo (pós-MVP s
 
 ### Core Capabilities (MoSCoW)
 
-| Priority | RF | Capability | Rationale |
-|----------|----|------------|-----------|
-| Must | Analytics | Plausible LGPD-compliant | Sem métricas reais, impossível validar KPIs do PRD; quick win de 1 dia |
-| Must | RNF-A11Y | Acessibilidade WCAG 2.1 AA | Requisito não-funcional do PRD principal pendente; dívida técnica crescente |
-| Must | RF-POST-001 | Comparação de 2 políticos | Feature mais demandada após listagem; aumenta pages/session diretamente |
-| Should | RF-POST-002 | Alertas por email de variação de score | Único mecanismo de retenção sem autenticação completa |
-| Should | RF-POST-003 | API pública documentada (Scalar UI + chaves) | Habilita ecossistema civic tech; dados já existem, falta apenas exposição estruturada |
-| Won't | RF-POST-004 | Comentários/Social Features | Requer autenticação, moderação, prevenção de abuso — PRD separado |
+| Priority | RF          | Capability                                   | Rationale                                                                             |
+| -------- | ----------- | -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Must     | Analytics   | Plausible LGPD-compliant                     | Sem métricas reais, impossível validar KPIs do PRD; quick win de 1 dia                |
+| Must     | RNF-A11Y    | Acessibilidade WCAG 2.1 AA                   | Requisito não-funcional do PRD principal pendente; dívida técnica crescente           |
+| Must     | RF-POST-001 | Comparação de 2 políticos                    | Feature mais demandada após listagem; aumenta pages/session diretamente               |
+| Should   | RF-POST-002 | Alertas por email de variação de score       | Único mecanismo de retenção sem autenticação completa                                 |
+| Should   | RF-POST-003 | API pública documentada (Scalar UI + chaves) | Habilita ecossistema civic tech; dados já existem, falta apenas exposição estruturada |
+| Won't    | RF-POST-004 | Comentários/Social Features                  | Requer autenticação, moderação, prevenção de abuso — PRD separado                     |
 
 ---
 
@@ -164,13 +164,13 @@ Usuários que querem comentar ou interagir socialmente com conteúdo (pós-MVP s
 
 **Technical Risks**
 
-| Risk | Likelihood | Mitigation |
-|------|------------|------------|
-| Plausible script bloqueado por ad-blockers (imprecisão de métricas) | HIGH | Proxy de analytics pelo próprio domínio via Next.js rewrites — padrão documentado no `next-plausible` |
-| Resend free tier (3.000 emails/mês) insuficiente com volume de inscrições | MEDIUM | Rate limit de 1 email por subscritor por semana; upgrade automático de plano documentado como trigger |
-| axe-core encontrar violações bloqueantes em componentes com design system fixo | LOW | Auditoria preview antes de CI gate; violações de baixa severidade como warning, não erro |
-| Scalar UI adicionar peso ao bundle da API | LOW | Scalar é servido como rota separada `/docs`, não bundleado no código da API |
-| Comparação de slugs inválidos causa 2x 404 — UX confusa | MEDIUM | Error state dedicado na página `/comparar` com mensagem clara e redirect para listagem |
+| Risk                                                                           | Likelihood | Mitigation                                                                                            |
+| ------------------------------------------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------- |
+| Plausible script bloqueado por ad-blockers (imprecisão de métricas)            | HIGH       | Proxy de analytics pelo próprio domínio via Next.js rewrites — padrão documentado no `next-plausible` |
+| Resend free tier (3.000 emails/mês) insuficiente com volume de inscrições      | MEDIUM     | Rate limit de 1 email por subscritor por semana; upgrade automático de plano documentado como trigger |
+| axe-core encontrar violações bloqueantes em componentes com design system fixo | LOW        | Auditoria preview antes de CI gate; violações de baixa severidade como warning, não erro              |
+| Scalar UI adicionar peso ao bundle da API                                      | LOW        | Scalar é servido como rota separada `/docs`, não bundleado no código da API                           |
+| Comparação de slugs inválidos causa 2x 404 — UX confusa                        | MEDIUM     | Error state dedicado na página `/comparar` com mensagem clara e redirect para listagem                |
 
 ---
 
@@ -182,13 +182,13 @@ Usuários que querem comentar ou interagir socialmente com conteúdo (pós-MVP s
   DEPENDS: phases que devem completar primeiro
 -->
 
-| # | Phase | Description | Status | Parallel | Depends | PRP Plan |
-|---|-------|-------------|--------|----------|---------|----------|
-| 1 | Analytics LGPD-Compliant (Plausible) | Script Plausible em layout.tsx, SRI hash, custom events nos Client Components existentes, env var para desativar em CI | pending | with 2 | - | `.claude/PRPs/plans/post-mvp-phase-1-analytics.plan.md` |
-| 2 | Acessibilidade WCAG 2.1 AA | axe-core via @axe-core/playwright, auditoria de todas as rotas, correção de contraste/ARIA/foco, skip link, Lighthouse CI ≥ 95 | pending | with 1 | - | `.claude/PRPs/plans/post-mvp-phase-2-accessibility.plan.md` |
-| 3 | Comparação de Políticos (RF-POST-001) | Rota /comparar com URL state, 2x fetchPoliticianBySlug paralelo, tabela comparativa responsiva, OG metadata, botão compartilhar | pending | - | 2 | `.claude/PRPs/plans/post-mvp-phase-3-comparison.plan.md` |
-| 4 | Alertas de Pontuação por Email (RF-POST-002) | Tabelas alert_subscriptions + pending_subscriptions, double opt-in, AES-256-GCM para email, job pg-boss score-alert, worker Resend | pending | - | 3 | `.claude/PRPs/plans/post-mvp-phase-4-alerts.plan.md` |
-| 5 | API Pública Documentada (RF-POST-003) | Tabela api_keys, @fastify/swagger + Scalar UI em /docs, middleware X-API-Key, rate limit por tier, self-service de chave via email | pending | - | 4 | `.claude/PRPs/plans/post-mvp-phase-5-public-api.plan.md` |
+| #   | Phase                                        | Description                                                                                                                        | Status      | Parallel | Depends | PRP Plan                                                         |
+| --- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------- | -------- | ------- | ---------------------------------------------------------------- |
+| 1   | Analytics LGPD-Compliant (Plausible)         | Script Plausible em layout.tsx, SRI hash, custom events nos Client Components existentes, env var para desativar em CI             | in-progress | with 2   | -       | `.claude/PRPs/plans/post-mvp-phase-1-analytics.plan.md`          |
+| 2   | Acessibilidade WCAG 2.1 AA                   | axe-core via @axe-core/playwright, auditoria de todas as rotas, correção de contraste/ARIA/foco, skip link, Lighthouse CI ≥ 95     | pending     | with 1   | -       | `.claude/PRPs/plans/post-mvp-phase-2-accessibility.plan.md`      |
+| 3   | Comparação de Políticos (RF-POST-001)        | Rota /comparar com URL state, 2x fetchPoliticianBySlug paralelo, tabela comparativa responsiva, OG metadata, botão compartilhar    | pending     | -        | 2       | `.claude/PRPs/plans/post-mvp-phase-3-comparison.plan.md`         |
+| 4   | Alertas de Pontuação por Email (RF-POST-002) | Tabelas alert_subscriptions + pending_subscriptions, double opt-in, AES-256-GCM para email, job pg-boss score-alert, worker Resend | pending     | -        | 3       | `.claude/PRPs/plans/post-mvp-phase-4-alerts.plan.md`             |
+| 5   | API Pública Documentada (RF-POST-003)        | Tabela api_keys, @fastify/swagger + Scalar UI em /docs, middleware X-API-Key, rate limit por tier, self-service de chave via email | pending     | -        | 4       | `.claude/PRPs/plans/post-mvp-phase-5-public-api.plan.md`         |
 
 ### Phase Details
 
@@ -255,59 +255,59 @@ Usuários que querem comentar ou interagir socialmente com conteúdo (pós-MVP s
 
 ### New API Endpoints Required
 
-| Endpoint | RF/Phase | Returns |
-|----------|----------|---------|
-| `POST /api/v1/politicians/:slug/subscribe` | RF-POST-002 / Phase 4 | 202 Accepted |
-| `GET /api/v1/subscribe/confirm?token={token}` | RF-POST-002 / Phase 4 | 200 confirmation message |
-| `GET /api/v1/subscribe/unsubscribe?token={token}` | RF-POST-002 / Phase 4 | 200 unsubscribed message |
-| `POST /api/v1/api-keys` | RF-POST-003 / Phase 5 | `{prefix, createdAt, tier}` |
-| `GET /docs` | RF-POST-003 / Phase 5 | Scalar UI (HTML) |
+| Endpoint                                          | RF/Phase              | Returns                     |
+| ------------------------------------------------- | --------------------- | --------------------------- |
+| `POST /api/v1/politicians/:slug/subscribe`        | RF-POST-002 / Phase 4 | 202 Accepted                |
+| `GET /api/v1/subscribe/confirm?token={token}`     | RF-POST-002 / Phase 4 | 200 confirmation message    |
+| `GET /api/v1/subscribe/unsubscribe?token={token}` | RF-POST-002 / Phase 4 | 200 unsubscribed message    |
+| `POST /api/v1/api-keys`                           | RF-POST-003 / Phase 5 | `{prefix, createdAt, tier}` |
+| `GET /docs`                                       | RF-POST-003 / Phase 5 | Scalar UI (HTML)            |
 
 ### New DB Tables Required
 
-| Table | Schema | RF/Phase | Migration |
-|-------|--------|----------|-----------|
-| `public.alert_subscriptions` | public | RF-POST-002 / Phase 4 | 0009_add_alert_subscriptions.sql |
+| Table                          | Schema | RF/Phase              | Migration                        |
+| ------------------------------ | ------ | --------------------- | -------------------------------- |
+| `public.alert_subscriptions`   | public | RF-POST-002 / Phase 4 | 0009_add_alert_subscriptions.sql |
 | `public.pending_subscriptions` | public | RF-POST-002 / Phase 4 | 0009_add_alert_subscriptions.sql |
-| `public.api_keys` | public | RF-POST-003 / Phase 5 | 0010_add_api_keys.sql |
+| `public.api_keys`              | public | RF-POST-003 / Phase 5 | 0010_add_api_keys.sql            |
 
 ### New Next.js Routes Required
 
-| Route | RF/Phase | Type |
-|-------|----------|------|
+| Route       | RF/Phase              | Type                                           |
+| ----------- | --------------------- | ---------------------------------------------- |
 | `/comparar` | RF-POST-001 / Phase 3 | ISR `revalidate=0` (data driven by URL params) |
 
 ### New Packages Required
 
-| Package | App | Phase | Motivo |
-|---------|-----|-------|--------|
-| `next-plausible` | `apps/web` | 1 | Plausible Analytics compatível com App Router e Turbopack |
-| `@axe-core/playwright` | `apps/web` | 2 | WCAG 2.1 audit em testes E2E Playwright existentes |
-| `resend` | `apps/api`, `apps/pipeline` | 4 | Email transacional — confirmação double opt-in e alertas de score |
-| `@fastify/swagger` | `apps/api` | 5 | Geração automática de OpenAPI 3.1 a partir dos schemas TypeBox |
-| `@scalar/fastify-api-reference` | `apps/api` | 5 | Scalar UI moderno (alternativa ao swagger-ui, zero jQuery) |
+| Package                         | App                         | Phase | Motivo                                                            |
+| ------------------------------- | --------------------------- | ----- | ----------------------------------------------------------------- |
+| `next-plausible`                | `apps/web`                  | 1     | Plausible Analytics compatível com App Router e Turbopack         |
+| `@axe-core/playwright`          | `apps/web`                  | 2     | WCAG 2.1 audit em testes E2E Playwright existentes                |
+| `resend`                        | `apps/api`, `apps/pipeline` | 4     | Email transacional — confirmação double opt-in e alertas de score |
+| `@fastify/swagger`              | `apps/api`                  | 5     | Geração automática de OpenAPI 3.1 a partir dos schemas TypeBox    |
+| `@scalar/fastify-api-reference` | `apps/api`                  | 5     | Scalar UI moderno (alternativa ao swagger-ui, zero jQuery)        |
 
 ### New Environment Variables Required
 
-| Variable | App | Phase | Description |
-|----------|-----|-------|-------------|
-| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | `apps/web` | 1 | Domínio Plausible (`autoridade-politica.com.br`) |
-| `NEXT_PUBLIC_PLAUSIBLE_ENABLED` | `apps/web` | 1 | Flag para desativar em CI/dev (`true`/`false`) |
-| `RESEND_API_KEY` | `apps/api`, `apps/pipeline` | 4 | Chave Resend para envio de emails transacionais |
-| `EMAIL_ENCRYPTION_KEY` | `apps/pipeline` | 4 | AES-256-GCM key para criptografar emails armazenados (similar a `CPF_ENCRYPTION_KEY`) |
+| Variable                        | App                         | Phase | Description                                                                           |
+| ------------------------------- | --------------------------- | ----- | ------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`  | `apps/web`                  | 1     | Domínio Plausible (`autoridade-politica.com.br`)                                      |
+| `NEXT_PUBLIC_PLAUSIBLE_ENABLED` | `apps/web`                  | 1     | Flag para desativar em CI/dev (`true`/`false`)                                        |
+| `RESEND_API_KEY`                | `apps/api`, `apps/pipeline` | 4     | Chave Resend para envio de emails transacionais                                       |
+| `EMAIL_ENCRYPTION_KEY`          | `apps/pipeline`             | 4     | AES-256-GCM key para criptografar emails armazenados (similar a `CPF_ENCRYPTION_KEY`) |
 
 ---
 
 ## Decisions Log
 
-| Decision | Choice | Alternatives | Rationale |
-|----------|--------|--------------|-----------|
-| Analytics | Plausible Cloud | GA4, Mixpanel, self-hosted Plausible | LGPD-compliant por design, zero cookies → zero banner, €9/mês cabe no orçamento, `next-plausible` tem suporte nativo App Router |
-| Email provider | Resend | SendGrid, Mailgun, AWS SES | DX superior (SDK TypeScript first-class), free tier (3.000/mês) suficiente para MVP post, onboarding < 1 hora |
-| Storage de email para alertas | AES-256-GCM encrypted + SHA-256 hash | Email plaintext, hash-only | Mesma infraestrutura do CPF (`crypto/cpf.ts`) — LGPD minimização de dados, padrão DR-005 aplicado a emails |
-| Swagger UI | Scalar | swagger-ui-express, Redoc | Mais moderno (sem jQuery), menor bundle, suporte nativo TypeBox + Fastify, manutenção ativa |
-| Endpoint de comparação | Sem endpoint dedicado (2x `fetchPoliticianBySlug`) | Endpoint `/compare?a=slug1&b=slug2` | Dados já existem no endpoint de perfil; YAGNI; menos surface de API para documentar e manter |
-| Fase order | Analytics → A11y → Comparação → Alertas → API | Por complexidade, por RF ID | Analytics entrega valor imediato (sem risco); A11y resolve dívida técnica antes de adicionar páginas; Alertas reutilizados pela API de chaves |
+| Decision                      | Choice                                             | Alternatives                         | Rationale                                                                                                                                     |
+| ----------------------------- | -------------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Analytics                     | Plausible Cloud                                    | GA4, Mixpanel, self-hosted Plausible | LGPD-compliant por design, zero cookies → zero banner, €9/mês cabe no orçamento, `next-plausible` tem suporte nativo App Router               |
+| Email provider                | Resend                                             | SendGrid, Mailgun, AWS SES           | DX superior (SDK TypeScript first-class), free tier (3.000/mês) suficiente para MVP post, onboarding < 1 hora                                 |
+| Storage de email para alertas | AES-256-GCM encrypted + SHA-256 hash               | Email plaintext, hash-only           | Mesma infraestrutura do CPF (`crypto/cpf.ts`) — LGPD minimização de dados, padrão DR-005 aplicado a emails                                    |
+| Swagger UI                    | Scalar                                             | swagger-ui-express, Redoc            | Mais moderno (sem jQuery), menor bundle, suporte nativo TypeBox + Fastify, manutenção ativa                                                   |
+| Endpoint de comparação        | Sem endpoint dedicado (2x `fetchPoliticianBySlug`) | Endpoint `/compare?a=slug1&b=slug2`  | Dados já existem no endpoint de perfil; YAGNI; menos surface de API para documentar e manter                                                  |
+| Fase order                    | Analytics → A11y → Comparação → Alertas → API      | Por complexidade, por RF ID          | Analytics entrega valor imediato (sem risco); A11y resolve dívida técnica antes de adicionar páginas; Alertas reutilizados pela API de chaves |
 
 ---
 
