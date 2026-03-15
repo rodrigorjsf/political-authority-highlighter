@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { useCallback } from 'react'
+import { useAnalytics } from '../../lib/analytics-events'
 
 const ROLE_OPTIONS = [
   { value: '', label: 'Todos os cargos' },
@@ -13,12 +14,15 @@ export function RoleFilter(): React.JSX.Element {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const track = useAnalytics()
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>): void => {
+      const { value } = e.target
       const params = new URLSearchParams(searchParams.toString())
-      if (e.target.value !== '') {
-        params.set('role', e.target.value)
+      if (value !== '') {
+        params.set('role', value)
+        track('filtro_aplicado', { props: { filtro: 'cargo', valor: value } })
       } else {
         params.delete('role')
       }
@@ -26,7 +30,7 @@ export function RoleFilter(): React.JSX.Element {
       const qs = params.toString()
       router.push(qs !== '' ? `${pathname}?${qs}` : pathname)
     },
-    [router, pathname, searchParams],
+    [router, pathname, searchParams, track],
   )
 
   return (

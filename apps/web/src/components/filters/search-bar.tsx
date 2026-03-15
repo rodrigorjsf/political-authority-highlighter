@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useAnalytics } from '../../lib/analytics-events'
 
 export function SearchBar(): React.JSX.Element {
   const router = useRouter()
@@ -11,12 +12,14 @@ export function SearchBar(): React.JSX.Element {
   // Ref avoids stale closure in debounce effect while keeping searchParams out of deps
   const searchParamsRef = useRef(searchParams)
   searchParamsRef.current = searchParams
+  const track = useAnalytics()
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       const params = new URLSearchParams(searchParamsRef.current.toString())
       if (value.length >= 2) {
         params.set('search', value)
+        track('busca_realizada', { props: { query: value } })
       } else {
         params.delete('search')
       }
@@ -25,7 +28,7 @@ export function SearchBar(): React.JSX.Element {
       router.push(qs !== '' ? `${pathname}?${qs}` : pathname)
     }, 300)
     return () => clearTimeout(timeout)
-  }, [value, router, pathname]) // searchParamsRef intentionally omitted (ref, not state)
+  }, [value, router, pathname, track]) // searchParamsRef intentionally omitted (ref, not state)
 
   return (
     <div className="flex items-center gap-2">

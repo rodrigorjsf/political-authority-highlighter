@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import PlausibleProvider from 'next-plausible'
 import '../styles/globals.css'
 
 export const metadata: Metadata = {
@@ -24,7 +25,13 @@ export default function RootLayout({
 }): React.JSX.Element {
   return (
     <html lang="pt-BR">
-      <body className="min-h-screen bg-background font-sans antialiased">{children}</body>
+      <PlausibleProvider
+        domain={process.env['NEXT_PUBLIC_PLAUSIBLE_DOMAIN'] ?? 'autoridade-politica.com.br'}
+        enabled={process.env['NEXT_PUBLIC_PLAUSIBLE_ENABLED'] === 'true'}
+        trackOutboundLinks
+      >
+        <body className="min-h-screen bg-background font-sans antialiased">{children}</body>
+      </PlausibleProvider>
     </html>
   )
 }

@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { withPlausibleProxy } from 'next-plausible'
 
 const isDev = process.env['NODE_ENV'] === 'development'
 const apiUrl = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001'
@@ -45,4 +46,6 @@ const config: NextConfig = {
   },
 }
 
-export default config
+// withPlausibleProxy adds /js/script.js and /proxy/api/event rewrites (afterFiles).
+// Plausible script is served from same-origin — covered by script-src 'self', no CSP change needed.
+export default withPlausibleProxy()(config)
