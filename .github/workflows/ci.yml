@@ -39,6 +39,13 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Lighthouse CI
+        run: |
+          pnpm add -g @lhci/cli
+          lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
       - name: Vercel Build Validation
         run: |
           mkdir -p .vercel

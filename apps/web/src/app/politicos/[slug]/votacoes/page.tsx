@@ -51,7 +51,7 @@ export default async function VotesPage({
   const participationPct = (result.participationRate * 100).toFixed(1)
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
       {/* Breadcrumb */}
       <Link
         href={`/politicos/${slug}`}
@@ -77,13 +77,13 @@ export default async function VotesPage({
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" aria-label={`Votações de ${politician.name}`}>
             <thead>
               <tr className="border-b border-border text-left text-muted-foreground">
-                <th className="pb-3 pr-4">Data</th>
-                <th className="pb-3 pr-4">Matéria</th>
-                <th className="pb-3 pr-4">Voto</th>
-                <th className="pb-3">Resultado</th>
+                <th scope="col" className="pb-3 pr-4">Data</th>
+                <th scope="col" className="pb-3 pr-4">Matéria</th>
+                <th scope="col" className="pb-3 pr-4">Voto</th>
+                <th scope="col" className="pb-3">Resultado</th>
               </tr>
             </thead>
             <tbody>
@@ -101,6 +101,7 @@ export default async function VotesPage({
                         className="text-primary underline"
                       >
                         {vote.matterDescription}
+                        <span className="sr-only"> (abre em nova aba)</span>
                       </a>
                     ) : (
                       vote.matterDescription
@@ -124,7 +125,7 @@ export default async function VotesPage({
         {cursor !== undefined && (
           <Link
             href={`/politicos/${slug}/votacoes`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
           >
             ← Início
           </Link>
@@ -132,7 +133,7 @@ export default async function VotesPage({
         {result.cursor !== null && (
           <Link
             href={`/politicos/${slug}/votacoes?cursor=${result.cursor}`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
           >
             Próxima →
           </Link>

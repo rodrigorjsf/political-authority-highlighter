@@ -19,6 +19,7 @@ export function ExclusionNotice(): React.JSX.Element {
           className="text-primary underline"
         >
           Portal da Transparência
+          <span className="sr-only"> (abre em nova aba)</span>
         </a>
         .
       </p>

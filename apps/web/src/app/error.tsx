@@ -8,19 +8,23 @@ export default function ErrorPage({
   reset: () => void
 }): React.JSX.Element {
   return (
-    <main className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
-      <h1 className="text-2xl font-bold">An unexpected error occurred</h1>
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="flex min-h-[50vh] flex-col items-center justify-center gap-4 focus:outline-none"
+    >
+      <h1 className="text-2xl font-bold">Ocorreu um erro inesperado</h1>
       <p className="text-muted-foreground">
-        We are working to resolve this issue. Please try again later.
+        Estamos trabalhando para resolver este problema. Por favor, tente novamente mais tarde.
       </p>
       {error.digest !== undefined && (
-        <p className="text-xs text-muted-foreground">Reference: {error.digest}</p>
+        <p className="text-xs text-muted-foreground">Referência: {error.digest}</p>
       )}
       <button
         onClick={reset}
-        className="rounded-md bg-primary px-4 py-2 text-primary-foreground"
+        className="rounded-md bg-primary px-4 py-2 text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       >
-        Try again
+        Tentar novamente
       </button>
     </main>
   )

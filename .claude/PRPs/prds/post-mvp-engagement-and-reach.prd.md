@@ -60,9 +60,12 @@ Saberemos que estamos certos quando a média de páginas por sessão atingir ≥
 | Taxa de rejeição                                                 | < 60%                             | Plausible Analytics             |
 | MAU retornante via alertas                                       | ≥ 5% dos inscritos ativos/mês     | Query em `alert_subscriptions`  |
 | Chamadas à API pública                                           | > 100/dia após 30 dias de go-live | Logs `api_keys.last_used_at`    |
-| Score Lighthouse Accessibility                                   | ≥ 95 em todas as rotas            | Lighthouse CI no GitHub Actions |
-| Violações axe-core críticas/sérias                               | 0 em todas as rotas               | `@axe-core/playwright` em CI    |
-| `pnpm lint && pnpm typecheck && pnpm test && vercel build` passa | 100%                              | CI/CD em cada PR                |
+| Score Lighthouse Accessibility                                   | ≥ 95 em todas as rotas            | Lighthouse CI no GitHub Actions (servidor local) |
+| Score Lighthouse SEO                                             | ≥ 95 em todas as rotas            | Lighthouse CI no GitHub Actions (Vercel preview) |
+| Score Lighthouse Best Practices                                  | ≥ 90 em todas as rotas            | Lighthouse CI no GitHub Actions (Vercel preview) |
+| Score Lighthouse Performance                                     | ≥ 80 em todas as rotas            | Lighthouse CI no GitHub Actions (Vercel preview) |
+| Violações axe-core críticas/sérias                               | 0 em todas as rotas               | `@axe-core/playwright` em CI                     |
+| `pnpm lint && pnpm typecheck && pnpm test && vercel build` passa | 100%                              | CI/CD em cada PR                                 |
 
 ## Open Questions
 
@@ -185,10 +188,11 @@ Usuários que querem comentar ou interagir socialmente com conteúdo (pós-MVP s
 | #   | Phase                                        | Description                                                                                                                        | Status      | Parallel | Depends | PRP Plan                                                         |
 | --- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------- | -------- | ------- | ---------------------------------------------------------------- |
 | 1   | Analytics LGPD-Compliant (Plausible)         | Script Plausible em layout.tsx, SRI hash, custom events nos Client Components existentes, env var para desativar em CI             | complete    | with 2   | -       | `.claude/PRPs/plans/completed/post-mvp-phase-1-analytics.plan.md`|
-| 2   | Acessibilidade WCAG 2.1 AA                   | axe-core via @axe-core/playwright, auditoria de todas as rotas, correção de contraste/ARIA/foco, skip link, Lighthouse CI ≥ 95     | pending     | with 1   | -       | `.claude/PRPs/plans/post-mvp-phase-2-accessibility.plan.md`      |
+| 2   | Acessibilidade WCAG 2.1 AA                   | axe-core via @axe-core/playwright, auditoria de todas as rotas, correção de contraste/ARIA/foco, skip link, Lighthouse CI accessibility ≥ 95 (somente categoria accessibility; demais categorias em Phase 6) | complete    | with 1   | -       | `.claude/PRPs/plans/completed/post-mvp-phase-2-accessibility.plan.md` |
 | 3   | Comparação de Políticos (RF-POST-001)        | Rota /comparar com URL state, 2x fetchPoliticianBySlug paralelo, tabela comparativa responsiva, OG metadata, botão compartilhar    | pending     | -        | 2       | `.claude/PRPs/plans/post-mvp-phase-3-comparison.plan.md`         |
 | 4   | Alertas de Pontuação por Email (RF-POST-002) | Tabelas alert_subscriptions + pending_subscriptions, double opt-in, AES-256-GCM para email, job pg-boss score-alert, worker Resend | pending     | -        | 3       | `.claude/PRPs/plans/post-mvp-phase-4-alerts.plan.md`             |
 | 5   | API Pública Documentada (RF-POST-003)        | Tabela api_keys, @fastify/swagger + Scalar UI em /docs, middleware X-API-Key, rate limit por tier, self-service de chave via email | pending     | -        | 4       | `.claude/PRPs/plans/post-mvp-phase-5-public-api.plan.md`         |
+| 6   | Lighthouse Full Coverage (Qualidade CI)      | Expandir Lighthouse CI para cobrir SEO ≥ 95, Best Practices ≥ 90, Performance ≥ 80 executando contra Vercel preview URL; corrigir quaisquer gaps revelados pela auditoria completa | pending     | -        | 5       | `.claude/PRPs/plans/post-mvp-phase-6-lighthouse-full-coverage.plan.md` |
 
 ### Phase Details
 
@@ -241,12 +245,26 @@ Usuários que querem comentar ou interagir socialmente com conteúdo (pós-MVP s
 - **Success signal:** Scalar UI acessível em `/docs` sem autenticação. Chave `pah_xxx` com tier `research` recebe 600 req/min; `anonymous` recebe 60 req/min. `next build` + `vercel build` passam. DR-001: `internal_data` schema sem exposição via API documentada.
 - **Depends on:** Phase 4
 
+**Phase 6: Lighthouse Full Coverage (Qualidade CI)**
+
+- **Goal:** Completar o gate de qualidade do CI com todas as categorias Lighthouse: SEO ≥ 95, Best Practices ≥ 90, Performance ≥ 80 — executados contra a Vercel preview URL (dados reais, CDN, sem falsos positivos de ambiente local sem banco de dados).
+- **Rationale:** As categorias de Performance, SEO e Best Practices do Lighthouse são não-confiáveis quando executadas contra um servidor local sem banco de dados real (API calls falham → erros no console → scores degradados). O ambiente correto para essas categorias é a Vercel preview deployment, onde ISR, CDN e API real estão disponíveis.
+- **Scope:**
+  - **CI workflow:** Adicionar segundo step "Lighthouse CI — Full" no `.github/workflows/ci.yml` que roda `lhci autorun` com `--config=.lighthouserc.full.json` após o deploy da Vercel preview estar disponível. Usar `gh api` ou `jq` para capturar a Vercel preview URL do status check do PR e passá-la via `--url`.
+  - **`.lighthouserc.full.json`:** Nova config LHCI com `collect.url` dinâmico (Vercel preview URL) e asserções para todas as 4 categorias: `categories:accessibility ≥ 0.95` (redundante, mas confirma paridade prod/CI), `categories:seo ≥ 0.95`, `categories:best-practices ≥ 0.90`, `categories:performance ≥ 0.80`.
+  - **Auditoria e correções:** Executar Lighthouse completo contra preview após todas as páginas de Phase 3–5 estarem implementadas. Corrigir gaps de SEO (e.g., verificar `meta-description` em todas as rotas dinamicamente, `canonical` URLs corretas, JSON-LD válido). Verificar `errors-in-console` = 0 em produção (com dados reais, erros de API não devem ocorrer). Performance: confirmar LCP < 2s via ISR + Vercel CDN.
+  - **Manter `.lighthouserc.json` existente** (servidor local, somente `categories:accessibility`) inalterado — continua como gate rápido de regressão de acessibilidade em cada PR.
+- **DB changes:** Nenhuma
+- **Success signal:** CI step "Lighthouse CI — Full" passa com SEO ≥ 95, Best Practices ≥ 90, Performance ≥ 80 contra Vercel preview URL. Step local de accessibility continua passando ≥ 95. Nenhum `errors-in-console` na preview.
+- **Depends on:** Phase 5 (todas as novas páginas adicionadas — /comparar, rotas de alertas, /docs — garantem que os scores reflitam o produto completo)
+
 ### Parallelism Notes
 
 - Phases 1 e 2 podem rodar em worktrees simultâneas — ambas são independentes de novas APIs e tabelas de banco de dados
 - Phase 3 depende de Phase 2 (acessibilidade garantida antes de adicionar nova página `/comparar`)
 - Phase 4 depende de Phase 3 (componente `<SubscribeForm>` integrado ao perfil do político que pode ter sido ajustado em Phase 3)
 - Phase 5 depende de Phase 4 (reutiliza Resend e padrão de email para self-service de chaves)
+- Phase 6 depende de Phase 5 (produto completo antes de auditar qualidade CI final; requer Vercel preview com todas as páginas)
 - Phase 7 (pipeline scoring) já existe — Phase 4 apenas adiciona o step de detecção de diff e job pg-boss
 
 ---

@@ -47,22 +47,22 @@ export default async function PoliticosPage({ searchParams }: Props): Promise<Re
   if (search !== undefined) baseParams.set('search', search)
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
       <h1 className="mb-6 text-2xl font-bold text-foreground">Políticos</h1>
 
       {/* Search bar — primary search action above filter bar */}
       <div className="mb-4">
-        <Suspense fallback={<div className="h-10 w-64 animate-pulse rounded-md bg-muted" />}>
+        <Suspense fallback={<div className="h-10 w-64 motion-safe:animate-pulse rounded-md bg-muted" />}>
           <SearchBar />
         </Suspense>
       </div>
 
       {/* Filter bar */}
       <div className="mb-6 flex items-center gap-4">
-        <Suspense fallback={<div className="h-10 w-48 animate-pulse rounded-md bg-muted" />}>
+        <Suspense fallback={<div className="h-10 w-48 motion-safe:animate-pulse rounded-md bg-muted" />}>
           <RoleFilter />
         </Suspense>
-        <Suspense fallback={<div className="h-10 w-36 animate-pulse rounded-md bg-muted" />}>
+        <Suspense fallback={<div className="h-10 w-36 motion-safe:animate-pulse rounded-md bg-muted" />}>
           <StateFilter />
         </Suspense>
       </div>
@@ -87,7 +87,7 @@ export default async function PoliticosPage({ searchParams }: Props): Promise<Re
         {cursor !== undefined && (
           <Link
             href={baseParams.toString() !== '' ? `/politicos?${baseParams.toString()}` : '/politicos'}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
           >
             ← Início
           </Link>
@@ -95,7 +95,7 @@ export default async function PoliticosPage({ searchParams }: Props): Promise<Re
         {result.cursor !== null && (
           <Link
             href={`/politicos?${new URLSearchParams({ ...Object.fromEntries(baseParams), cursor: result.cursor }).toString()}`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
           >
             Próxima →
           </Link>
