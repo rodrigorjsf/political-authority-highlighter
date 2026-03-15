@@ -19,6 +19,7 @@ When invoked from the GitHub Actions workflow, you will receive:
 - `head_sha` — the exact commit SHA that triggered the CI run
 - `ci_run_id` — the GitHub Actions run ID for the CI workflow
 - `ci_conclusion` — `success` or `failure`
+- `SUPABASE_PROJECT_REF` — available as env var; passed by the workflow and must be provided explicitly to every mcp__supabase__* call as the `project_id` argument
 
 When invoked manually, derive these from the current git state:
 
@@ -64,8 +65,9 @@ gh run list --branch <branch> --workflow "CI" --limit 3 --json databaseId,conclu
 Use `mcp__vercel__list_deployments` filtered by the branch.
 
 - Find the deployment where `meta.githubCommitSha == <head_sha>`
-- If no matching deployment exists yet: poll up to **3 times with 30s delay** before
-  reporting as "deploy not yet triggered"
+- If no matching deployment exists yet: call `mcp__vercel__list_deployments` again after
+  30s, up to **3 total attempts (90s)**. If still no match after the third attempt,
+  report as "Vercel deploy not yet triggered for this commit" and stop polling.
 - If deployment `state == ERROR` or `state == CANCELED`:
   Use `mcp__vercel__get_deployment_build_logs` with the deployment ID to collect errors
 - If deployment `state == READY`: capture the preview URL for the success report
@@ -86,7 +88,7 @@ mcp__supabase__list_migrations(project_id: <SUPABASE_PROJECT_REF>)
 - Also run:
 
   ```
-  mcp__supabase__get_logs(project_id: <SUPABASE_PROJECT_REF>, type: "db")
+  mcp__supabase__get_logs(project_id: <SUPABASE_PROJECT_REF>, type: "postgres")
   ```
 
   Scan for recent ERROR entries related to migration execution.
