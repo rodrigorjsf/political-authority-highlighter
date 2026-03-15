@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { useCallback } from 'react'
+import { useAnalytics } from '../../lib/analytics-events'
 
 const STATE_OPTIONS = [
   { value: '', label: 'Todos os estados' },
@@ -38,12 +39,15 @@ export function StateFilter(): React.JSX.Element {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const track = useAnalytics()
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>): void => {
+      const { value } = e.target
       const params = new URLSearchParams(searchParams.toString())
-      if (e.target.value !== '') {
-        params.set('state', e.target.value)
+      if (value !== '') {
+        params.set('state', value)
+        track('filtro_aplicado', { props: { filtro: 'estado', valor: value } })
       } else {
         params.delete('state')
       }
@@ -51,7 +55,7 @@ export function StateFilter(): React.JSX.Element {
       const qs = params.toString()
       router.push(qs !== '' ? `${pathname}?${qs}` : pathname)
     },
-    [router, pathname, searchParams],
+    [router, pathname, searchParams, track],
   )
 
   return (
