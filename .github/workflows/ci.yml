@@ -40,6 +40,7 @@ jobs:
         run: pnpm build
 
       - name: Vercel Build Validation
+        working-directory: apps/web
         run: npx vercel build --yes --token ${{ secrets.VERCEL_TOKEN }} || npx vercel build --yes
 
       - name: Check client bundle for leaks
