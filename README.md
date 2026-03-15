@@ -125,6 +125,7 @@ pnpm test:e2e     # Run Playwright E2E tests
 - [PRD](docs/prd/PRD.md)
 - [Architecture](docs/prd/ARCHITECTURE.md)
 - [ER Diagram](docs/prd/ER.md)
+- [Frontend Design PRD](docs/prd/frontend_design_prd.md)
 - [CLAUDE.md](CLAUDE.md)
 
 ## Status

@@ -19,6 +19,8 @@
 
 5. **Mobile-First Responsive Design**: Tailwind breakpoints start at 320px minimum viewport. Design for mobile first, enhance for desktop. Touch targets minimum 44x44px. No horizontal scrolling on any screen size.
 
+6. **Frontend Design PRD Compliance (Non-Negotiable)**: Every component, page, or visual style change in `apps/web/` must comply with `docs/prd/frontend_design_prd.md`. This document is the authoritative source for design tokens, color palette (semantic roles with light/dark variants), typography (`Inter`/`Plus Jakarta Sans` for UI text; `JetBrains Mono` for scores and financial numbers), Bento Grid layout, component specifications (gauge charts, data tables, buttons), motion rules, and accessibility requirements. Before implementing any new page or component, consult the inspiration images in `docs/assets/inspirations/` and [Sloth UI](https://www.slothui.com/) for visual reference. **Run the `web-frontend-design` skill checklist before every UI PR.**
+
 ---
 
 ## Architecture Boundaries
@@ -489,6 +491,11 @@ export async function fetchPoliticianBySlug(
 
 ## UI Conventions
 
+> **Design Authority**: The canonical design token set, typography rules, component specs, and
+> responsiveness requirements live in `docs/prd/frontend_design_prd.md`. The color palette and
+> layout patterns below are a working summary — when there is any conflict, the PRD is authoritative.
+> For visual reference, consult `docs/assets/inspirations/` and [Sloth UI](https://www.slothui.com/).
+
 ### Tailwind CSS
 
 - Use Tailwind utility classes exclusively. No custom CSS except for Tailwind `@layer` extensions in `globals.css`.
@@ -832,11 +839,11 @@ test('politician profile page has no accessibility violations', async ({ page })
 
 3. **Use `next/image`** for all images. Set explicit `width`/`height` to prevent CLS. Use `priority` for above-the-fold images.
 
-3. **Dynamic import** interactive components (charts, maps) with `next/dynamic` and `{ ssr: false }` when they are below the fold.
+4. **Dynamic import** interactive components (charts, maps) with `next/dynamic` and `{ ssr: false }` when they are below the fold.
 
-4. **No barrel exports** (`index.ts` that re-exports everything from a directory). They prevent tree-shaking.
+5. **No barrel exports** (`index.ts` that re-exports everything from a directory). They prevent tree-shaking.
 
-5. **Preload critical API calls** using React `cache()` function to deduplicate fetch calls within a single render.
+6. **Preload critical API calls** using React `cache()` function to deduplicate fetch calls within a single render.
 
 ```typescript
 import { cache } from 'react'
@@ -943,6 +950,7 @@ describe('ScoreBadge', () => {
 | Import `@pah/db`, `pg`, or `drizzle-orm` in frontend            | Violates RNF-SEC-012/DR-008. Frontend accesses data through the API only                           |
 | Use `NEXT_PUBLIC_` prefix for secrets/tokens                    | Violates RNF-SEC-012. Only `NEXT_PUBLIC_API_URL` is permitted                                      |
 | Expose server error details in UI                               | Violates RNF-SEC-014. Error boundaries show generic messages; use `digest` for correlation         |
+| Implement UI without reading `docs/prd/frontend_design_prd.md` | Design tokens, typography, dark mode variants, component specs, and motion rules are defined there — skip it and you will introduce visual inconsistencies |
 
 ---
 
@@ -1036,3 +1044,4 @@ const securityHeaders = [
 | ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
 | 2026-02-28 | 1.0         | Initial frontend development guide                                                                                        |
 | 2026-03-07 | 1.1         | Add Frontend Security First principle (DR-008), full CSP header, client bundle protection, error sanitization, SRI policy |
+| 2026-03-15 | 1.2         | Add principle 6: Frontend Design PRD compliance (`docs/prd/frontend_design_prd.md`); add UI Conventions design authority note; add anti-pattern for skipping PRD; add Sloth UI as visual reference |
