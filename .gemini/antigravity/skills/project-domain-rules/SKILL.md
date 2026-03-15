@@ -13,29 +13,47 @@ Enforces the 8 domain rules (DR-001 through DR-008) that define the core busines
 
 ## DR-001: SilentExclusionInvariant
 
-**Rule:** Politicians with active corruption indicators are silently excluded from ALL public-facing queries. The platform NEVER indicates that a politician was excluded or WHY they are absent.
+**Rule:** Politicians with active exclusion records remain visible in all public-facing queries. Their anticorruption score component is zeroed (0/25), and a generic notice indicates that anti-corruption data affected the score. The platform NEVER exposes exclusion record details (source name, date, record type, reason) — only the boolean `exclusion_flag` crosses the schema boundary.
+
+**How it works in the codebase:**
+
+1. `exclusion_flag` boolean on `public.politicians` and `public.integrity_scores` — set by pipeline
+2. API listing endpoint (`/politicians`) omits `exclusion_flag` from response (not a filter)
+3. API profile endpoint (`/politicians/:slug`) includes `exclusion_flag` as boolean
+4. Frontend `ExclusionNotice` component renders a generic message when `exclusionFlag === true`
+5. Methodology page explains the binary scoring: 25 if clean, 0 if any record exists
 
 ### Code Review Checklist
 
-- [ ] No API endpoint returns `exclusion_records` or `corruption_indicator` fields
-- [ ] No API error message mentions exclusion (e.g., "politician excluded due to...")
-- [ ] No UI element shows "X politicians excluded" or similar counts
+- [ ] No API endpoint returns `exclusion_records`, `corruption_indicator`, or exclusion details
+- [ ] No API error message mentions exclusion reasons (e.g., "politician excluded due to...")
+- [ ] No UI element shows exclusion source names, dates, record types, or counts
 - [ ] No log at INFO level or below contains exclusion reasons (DEBUG only, in pipeline)
-- [ ] All public queries on the `public` schema include `WHERE exclusion_flag = FALSE` (or equivalent)
+- [ ] Public queries do NOT filter out excluded politicians — they remain visible with lowered scores
 - [ ] The `internal_data` schema is not imported in any `apps/api/` file
-- [ ] Search results respect exclusion (excluded politicians never appear)
+- [ ] `exclusion_flag` is omitted from listing response schema, included only in profile response
+- [ ] Frontend exclusion notice uses only the generic message (no record details)
 
 ### Anti-patterns to REJECT
 
 ```typescript
-// BAD: Leaks exclusion status
+// BAD: Leaks exclusion details
 return { politician, isExcluded: true, reason: "CEIS sanction" }
 
-// BAD: Implies exclusion exists
+// BAD: Implies politician is removed
 return { error: "This politician has been excluded from the platform" }
 
-// BAD: Count reveals exclusions
+// BAD: Count reveals exclusion numbers
 return { total: 513, excluded: 47, visible: 466 }
+
+// BAD: Filters excluded politicians from public queries
+.where(eq(politicians.exclusionFlag, false))
+
+// BAD: Shows exclusion source in UI
+<p>Excluído por registro no CEIS em 2024-01-15</p>
+
+// GOOD: Generic notice without details
+<ExclusionNotice /> // "Informações de bases públicas de anticorrupção influenciaram este componente"
 ```
 
 ---
@@ -44,11 +62,15 @@ return { total: 513, excluded: 47, visible: 466 }
 
 **Rule:** The platform must NEVER exhibit political bias. Score methodology is identical across all parties, roles, and states. No editorializing.
 
+> For the **UI implementation** of color neutrality, **REQUIRED SUB-SKILL:** `web-frontend-design`
+> (section 1 — Design Token Enforcement defines the approved neutral palette and explicitly forbids
+> party-associated colors).
+
 ### Code Review Checklist
 
 - [ ] Score algorithm has NO party-specific logic (no `if party === 'PT'`)
 - [ ] Score weights are the same for all politicians regardless of party/state/role
-- [ ] UI uses neutral colors (no red/blue party associations)
+- [ ] UI uses neutral colors (no red/blue party associations) → see `web-frontend-design` token palette
 - [ ] Vote descriptions are factual (no "voted against the people" editorializing)
 - [ ] No hardcoded party names in scoring or display logic
 - [ ] Default sort is by score descending (not by party or ideology)
@@ -249,3 +271,4 @@ catch (error) { return <p>{error.message}: {error.stack}</p> }
 | 2026-02-28 | 1.0 | Initial domain rules enforcement skill |
 | 2026-03-07 | 1.1 | Add DR-008 FrontendSecurityFirstInvariant |
 | 2026-03-09 | 1.2 | Schema rename public_data→public |
+| 2026-03-15 | 1.2 | Fix DR-001: politicians stay visible with zeroed anticorruption score, not removed from queries |

@@ -76,6 +76,8 @@ Use `mcp__vercel__list_deployments` filtered by the branch.
 
 ### Step 3: Check Supabase Migrations
 
+**Primary method:** Supabase MCP (if available)
+
 > IMPORTANT: always pass `project_id: <SUPABASE_PROJECT_REF>` explicitly on every
 > `mcp__supabase__*` call. The MCP does NOT read this from the environment automatically.
 
@@ -92,6 +94,19 @@ mcp__supabase__list_migrations(project_id: <SUPABASE_PROJECT_REF>)
   ```
 
   Scan for recent ERROR entries related to migration execution.
+
+**Fallback method:** Supabase CLI (if MCP tools are unavailable or not whitelisted)
+
+```bash
+# List applied migrations via CLI
+supabase migration list --project-ref <SUPABASE_PROJECT_REF>
+
+# Compare against local migration files
+ls -1 supabase/migrations/
+```
+
+- Cross-reference both lists to identify unapplied migrations
+- If `supabase` CLI is not authenticated, report as "Supabase migration check skipped — CLI not authenticated" and continue to Step 4 (do NOT block on this)
 
 ---
 
@@ -183,3 +198,4 @@ If running on a direct push to `development` with no open PR:
 | Date | Summary |
 | --- | --- |
 | 2026-03-14 | Initial skill — post-PR deploy validation |
+| 2026-03-15 | Add Supabase CLI fallback when MCP tools are unavailable |

@@ -51,7 +51,7 @@ All `tsconfig.json` files must include:
 **Best Practices (CLAUDE.md):**
 
 - [ ] Interfaces over types for object shapes
-- [ ] Use Enums for constant values (e.g., `PoliticalRole`, `DataSource`)
+- [ ] Constants use `as const` + type alias pattern (NOT TypeScript `enum` keyword — avoids `@typescript-eslint/no-unsafe-enum-comparison`)
 - [ ] Export all types by default
 - [ ] Use type guards instead of type assertions (`as`)
 - [ ] Destructure objects (e.g., `const { name } = user`)
@@ -92,7 +92,7 @@ All `tsconfig.json` files must include:
 
 > **Design Enforcement:** For any work involving UI components, pages, or visual styles in `apps/web/`,
 > **REQUIRED SUB-SKILL:** `web-frontend-design`. This skill governs design tokens, typography,
-> responsiveness, component specs, and accessibility as defined in `docs/assets/frontend_design_prd.md`.
+> responsiveness, component specs, and accessibility as defined in `docs/prd/frontend_design_prd.md`.
 
 ### 6. Managed Infrastructure on Supabase (ADR-006)
 
@@ -112,7 +112,7 @@ political-authority-highlighter/
 ├── packages/
 │   ├── db/           # Drizzle schema + clients
 │   ├── shared/       # Shared types, utils, constants
-│   └── scoring/      # Score calculation logic
+│   └── db/           # Drizzle schema + clients
 ├── infrastructure/   # Docker Compose, Caddy config
 ├── docs/prd/         # PRD, Architecture, ER
 └── .claude/skills/   # Enforcement skills
@@ -145,3 +145,4 @@ Any change that pushes total above $100/month requires explicit approval.
 |------|-------------|---------|
 | 2026-02-28 | 1.0 | Initial architecture enforcement skill |
 | 2026-03-09 | 1.2 | Migrate from Hetzner/Docker to Supabase, schema rename public_data→public |
+| 2026-03-15 | 1.2 | Fix stale "Use Enums" → `as const` pattern; fix `packages/scoring/` → `packages/db/` in tree |
