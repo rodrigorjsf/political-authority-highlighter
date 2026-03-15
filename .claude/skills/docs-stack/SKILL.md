@@ -12,17 +12,20 @@ Whenever external docs are fetched for a library this project uses, save the rel
 ## Trigger Conditions
 
 **Save docs when:**
+
 - WebFetch/WebSearch/context7 is used to research a library in the stack
 - A new pattern, gotcha, or breaking change is discovered during implementation
 - A doc file exists but the newly found info contradicts or extends it
 
 **Skip when:**
+
 - Docs are for a one-off CLI tool or utility not in package.json
 - The info is already fully captured in the existing doc file
 
 ## What to Save
 
 For each library, capture:
+
 1. **Version** — from `package.json` (document the actual version in use)
 2. **Key patterns** — copy-paste ready code snippets with file paths as comments
 3. **Gotchas** — things that burned time, non-obvious requirements, breaking changes
@@ -63,6 +66,7 @@ Omit: tutorial prose, marketing copy, features not used in the project.
 **Reference:** {direct URL to specific doc section}
 
 ---
+
 ```
 
 ## How to Update Existing Files
@@ -94,5 +98,6 @@ Keep this table accurate in `docs/stack/README.md`:
 | Next.js 15 | `docs/stack/nextjs-15.md` | searchParams Promise, useSearchParams/Suspense, Vitest mocking |
 | Fastify 5 | `docs/stack/fastify-5.md` | TypeBox plugin pattern, response schema, async plugin eslint |
 | Drizzle ORM | `docs/stack/drizzle-orm.md` | dual-schema, cursor pagination, noUncheckedIndexedAccess |
+| Supabase | `docs/stack/supabase-best-practices.md` | Free tier limits (500MB/50k MAU/5GB), pg-boss needs direct port 5432, API uses pooler port 6543 with prepare:false |
 
 **Before fetching external docs:** Check this table — the info may already be saved.

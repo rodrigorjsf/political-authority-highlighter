@@ -26,7 +26,7 @@ Enforces compliance with Brazilian data protection and transparency laws applica
 ### A. Legal Basis for Processing Politicians' Public Data
 
 - [ ] Legal basis documented: **Legitimate Interest (Art. 7, IX)** combined with **Publicly Accessible Data (Art. 7, par. 3)**
-- [ ] LIA (Legitimate Interest Assessment) document exists at `docs/compliance/LIA.md`
+- [ ] LIA (Legitimate Interest Assessment) document exists at `docs/compliance/LIA.md` (TODO — create when first needed)
 - [ ] LIA includes three-phase balancing test: (i) legitimate purpose, (ii) necessity, (iii) rights balancing + safeguards
 - [ ] Processing purpose aligned with public interest and transparency (Art. 7, par. 3)
 - [ ] No purpose deviation: data NOT used for marketing, political campaigns, or profiling
@@ -66,7 +66,7 @@ Enforces compliance with Brazilian data protection and transparency laws applica
 
 ### E. Data Processing Records (Art. 37)
 
-- [ ] Processing activities documented in `docs/compliance/ROPA.md` (Record of Processing Activities)
+- [ ] Processing activities documented in `docs/compliance/ROPA.md` (Record of Processing Activities) (TODO — create when first needed)
 - [ ] Each processing activity includes: purpose, legal basis, data categories, recipients, retention, security measures
 - [ ] Updated when new data sources are added or processing changes
 
