@@ -25,6 +25,7 @@ Maintains a **lean** GitHub Actions pipeline at `.github/workflows/ci.yml`. The 
 | Fastify | 5 | Build | Included via `pnpm build` |
 | pnpm audit | (via pnpm) | Security audit | Catches high/critical dependency vulnerabilities |
 | supabase/setup-cli | latest | Deploy (deploy.yml) | Supabase CLI for migrations and edge function deploys |
+| validate-deploy.yml | — | Post-CI (ci.yml trigger) | Validates CI + Vercel deploy + Supabase migrations after ci.yml completes on `development`; auto-fix via claude-code-action (max 1 retry per failure type) |
 
 ---
 
@@ -236,3 +237,4 @@ The default answer to "should I add this?" is **no**. Add only when the answer t
 | 2026-03-07 | 1.1 | Add pnpm audit to CI stack, add Security CI Steps section (DR-008, RNF-SEC-017), remove pnpm audit from exclusions |
 | 2026-03-09 | 1.2 | Document Supabase CLI in deploy workflow |
 | 2026-03-14 | 1.2 | Add mandatory local validation section: pnpm build + vercel build required before any PR |
+| 2026-03-14 | 1.2 | Add validate-deploy.yml to stack table; triggers off ci.yml, auto-fixes via claude-code-action |
