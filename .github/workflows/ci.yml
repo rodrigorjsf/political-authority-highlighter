@@ -37,7 +37,7 @@ jobs:
         run: pnpm test
 
       - name: Build
-        run: pnpm build
+        run: pnpm build --output public
 
       - name: Vercel Build Validation
         run: npx vercel build --yes --token ${{ secrets.VERCEL_TOKEN }} || npx vercel build --yes
