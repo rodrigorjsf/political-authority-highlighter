@@ -2,7 +2,7 @@ name: Validate Deploy
 
 on:
   workflow_run:
-    workflows: ["CI", "Deploy staging CI"]
+    workflows: ["CI"]
     branches: [development]
     types: [completed]
 
