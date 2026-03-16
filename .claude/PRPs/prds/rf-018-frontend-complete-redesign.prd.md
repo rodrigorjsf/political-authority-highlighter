@@ -561,7 +561,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
   - ✅ Tailwind v4 full migration — installed `@tailwindcss/postcss`, fixed breaking changes (shadow-sm→shadow-xs)
 - **Validation**: ✅ `pnpm typecheck` (5 packages), ✅ `pnpm lint`, ✅ `pnpm build`, ✅ `vercel build`
 
-### Phase 2: Custom Fonts
+### Phase 2: Custom Fonts ✅ complete — PR #39
 - **Goal**: Load Inter and JetBrains Mono via `next/font` with `display: swap` for 3G users
 - **Scope**:
   - Import fonts in `apps/web/src/app/layout.tsx` using `next/font/google`
@@ -570,7 +570,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
   - Verify no Cumulative Layout Shift (CLS > 0) via Lighthouse
 - **Mandatory gates**: Chrome DevTools shows Inter rendering; no CLS in Lighthouse; run `docs:update-docs`
 
-### Phase 3: Dark Mode
+### Phase 3: Dark Mode ✅ complete — PR #39
 - **Goal**: System preference auto-applies; user can toggle; no FOUC
 - **Scope**:
   - Create `ThemeScript` server component (inline script for FOUC prevention in `<head>`)
@@ -579,7 +579,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
   - Add `ThemeScript` before all other children in root layout
 - **Mandatory gates**: Toggle switches modes; OS preference detected on first load; no FOUC on hard refresh; run `docs:update-docs`
 
-### Phase 4: Home Page
+### Phase 4: Home Page ✅ complete — PR #39
 - **Goal**: `/` loads with hero, API-fetched featured politicians, CTA button
 - **Scope**:
   - Create `apps/web/src/app/page.tsx`
