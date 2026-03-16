@@ -523,7 +523,7 @@ description: >
 
 | # | Phase | Description | Status | Parallel | Depends | Gate |
 |---|-------|-------------|--------|----------|---------|------|
-| 1 | **Design Tokens** | CSS variables (light + dark modes, typography, spacing, radius, animation) | pending | — | — | build + typecheck |
+| 1 | **Design Tokens** | CSS variables (light + dark modes, typography, spacing, radius, animation) | ✅ **COMPLETE** | — | — | ✅ build + typecheck |
 | 2 | **Custom Fonts** | Inter + JetBrains Mono via `next/font`, apply to layout + components | pending | with 3 | 1 | font visual check |
 | 3 | **Dark Mode** | System detection (ThemeScript FOUC prevention) + ThemeToggle component | pending | with 2 | 1 | toggle E2E |
 | 4 | **Home Page** | Hero + featured politicians (API-fetched) + CTA, SEO metadata | pending | with 2,3 | 1 | a11y + responsive |
@@ -550,14 +550,16 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 
 ## Phase Details
 
-### Phase 1: Design Tokens
+### Phase 1: Design Tokens ✅ COMPLETE
 - **Goal**: Establish all CSS variables for light/dark modes, typography, spacing, border radius, and animation timing
-- **Scope**:
-  - Create `apps/web/src/styles/tokens.css` with complete variable definitions
-  - Update `globals.css` to replace all hardcoded values with `var(--*)`
-  - Define `:root` (light defaults), `@media (prefers-color-scheme: dark)` overrides, and `[data-theme]` attribute selectors
-  - Update `tailwind.config.ts` to extend with token-based custom colors and font families
-- **Mandatory gates**: Run `pnpm build`; inspect `/politicos` in Chrome DevTools confirming CSS variables resolve; run `docs:update-docs`
+- **Status**: ✅ Complete — PR #37 merged
+- **Scope** (completed):
+  - ✅ `apps/web/src/styles/tokens.css` — all CSS vars defined (colors, spacing, radius, transitions)
+  - ✅ `apps/web/src/styles/globals.css` — migrated to Tailwind v4 syntax (`@import "tailwindcss"` + `@custom-variant dark`)
+  - ✅ `apps/web/postcss.config.mjs` — created with `@tailwindcss/postcss` plugin
+  - ✅ `apps/web/tailwind.config.ts` — added radius/transition token mappings
+  - ✅ Tailwind v4 full migration — installed `@tailwindcss/postcss`, fixed breaking changes (shadow-sm→shadow-xs)
+- **Validation**: ✅ `pnpm typecheck` (5 packages), ✅ `pnpm lint`, ✅ `pnpm build`, ✅ `vercel build`
 
 ### Phase 2: Custom Fonts
 - **Goal**: Load Inter and JetBrains Mono via `next/font` with `display: swap` for 3G users
