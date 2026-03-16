@@ -523,7 +523,7 @@ description: >
 
 | # | Phase | Description | Status | Parallel | Depends | Gate |
 |---|-------|-------------|--------|----------|---------|------|
-| 1 | **Design Tokens** | CSS variables (light + dark modes, typography, spacing, radius, animation) | pending | — | — | build + typecheck |
+| 1 | **Design Tokens** | CSS variables (light + dark modes, typography, spacing, radius, animation) | ✅ **COMPLETE** | — | — | ✅ build + typecheck |
 | 2 | **Custom Fonts** | Inter + JetBrains Mono via `next/font`, apply to layout + components | pending | with 3 | 1 | font visual check |
 | 3 | **Dark Mode** | System detection (ThemeScript FOUC prevention) + ThemeToggle component | pending | with 2 | 1 | toggle E2E |
 | 4 | **Home Page** | Hero + featured politicians (API-fetched) + CTA, SEO metadata | pending | with 2,3 | 1 | a11y + responsive |
