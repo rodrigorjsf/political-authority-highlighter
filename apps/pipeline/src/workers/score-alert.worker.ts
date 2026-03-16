@@ -42,21 +42,28 @@ export async function processScoreAlert(
 
   logger.info({ politicianId, count: subscriptions.length }, 'Sending score alerts')
 
-  for (const sub of subscriptions) {
-    const email = decryptEmail(sub.emailEncrypted) // decrypted in-memory only
-    const unsubscribeUrl = `${env.API_BASE_URL}/api/v1/subscribe/unsubscribe?token=${sub.unsubscribeToken}`
+  // Batch emails for concurrent sending (50 at a time) to avoid blocking worker
+  const BATCH_SIZE = 50
+  for (let i = 0; i < subscriptions.length; i += BATCH_SIZE) {
+    const batch = subscriptions.slice(i, i + BATCH_SIZE)
+    await Promise.all(
+      batch.map(async (sub) => {
+        const email = decryptEmail(sub.emailEncrypted) // decrypted in-memory only
+        const unsubscribeUrl = `${env.API_BASE_URL}/api/v1/subscribe/unsubscribe?token=${sub.unsubscribeToken}`
 
-    const { data: sendResult, error } = await resend.emails.send({
-      from: `PAH <${env.ALERTS_FROM_EMAIL}>`,
-      to: [email],
-      subject: `Atualização de pontuação: ${politician.name}`,
-      html: `<p>A pontuação de integridade de <strong>${politician.name}</strong> foi atualizada para <strong>${newScore}/100</strong>.</p><p><a href="https://autoridade-politica.com.br/politicos/${slug}">Ver perfil</a></p><p><small><a href="${unsubscribeUrl}">Cancelar inscrição</a></small></p>`,
-    })
+        const { data: sendResult, error } = await resend.emails.send({
+          from: `PAH <${env.ALERTS_FROM_EMAIL}>`,
+          to: [email],
+          subject: `Atualização de pontuação: ${politician.name}`,
+          html: `<p>A pontuação de integridade de <strong>${politician.name}</strong> foi atualizada para <strong>${newScore}/100</strong>.</p><p><a href="https://autoridade-politica.com.br/politicos/${slug}">Ver perfil</a></p><p><small><a href="${unsubscribeUrl}">Cancelar inscrição</a></small></p>`,
+        })
 
-    if (error) {
-      logger.error({ code: error.name, politicianId }, `Alert email failed: ${error.message}`)
-    } else {
-      logger.info({ emailId: sendResult.id, politicianId }, 'Alert email sent')
-    }
+        if (error) {
+          logger.error({ code: error.name, politicianId }, `Alert email failed: ${error.message}`)
+        } else {
+          logger.info({ emailId: sendResult.id, politicianId }, 'Alert email sent')
+        }
+      }),
+    )
   }
 }

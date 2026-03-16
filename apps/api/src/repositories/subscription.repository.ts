@@ -21,8 +21,12 @@ export function createSubscriptionRepository(db: PublicDb): {
     },
 
     /**
-     * Inserts a pending subscription (or silently ignores if token hash already exists).
-     * onConflictDoNothing: prevents duplicate emails from revealing pending subscription state.
+     * Inserts a pending subscription.
+     * The `onConflictDoNothing()` only applies to `confirmTokenHash` collisions
+     * (which are practically impossible since a new random token is generated each time).
+     * Multiple pending subscriptions for the same email will be successfully inserted
+     * with different tokens. This behavior is correct for security: duplicate requests
+     * do not reveal whether a subscription already exists.
      */
     async insertPendingSubscription(params: {
       politicianId: string
