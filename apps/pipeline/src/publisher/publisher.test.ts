@@ -5,6 +5,9 @@ vi.stubEnv('DATABASE_URL', 'postgresql://test:test@localhost:5432/test')
 vi.stubEnv('DATABASE_URL_WRITER', 'postgresql://test:test@localhost:5432/test')
 vi.stubEnv('TRANSPARENCIA_API_KEY', 'test-key')
 vi.stubEnv('CPF_ENCRYPTION_KEY', 'a'.repeat(64)) // 32 bytes hex-encoded
+vi.stubEnv('EMAIL_ENCRYPTION_KEY', 'a'.repeat(64))
+vi.stubEnv('RESEND_API_KEY', 'test-key')
+vi.stubEnv('ALERTS_FROM_EMAIL', 'test@test.com')
 
 // Mock DB schema imports to avoid pgSchema('public') runtime error in tests
 vi.mock('@pah/db/public-schema', () => ({

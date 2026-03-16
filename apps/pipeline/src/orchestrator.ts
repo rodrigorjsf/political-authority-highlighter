@@ -1,3 +1,4 @@
+import type PgBoss from 'pg-boss'
 import type { PipelineDb } from '@pah/db/clients'
 import { politicianIdentifiers } from '@pah/db/internal-schema'
 import { createPublisher } from './publisher/index.js'
@@ -23,6 +24,7 @@ import { logger } from './config/logger.js'
  */
 export async function runPipeline(
   db: PipelineDb,
+  boss: PgBoss,
   source: DataSource,
 ): Promise<{ success: boolean; recordsProcessed: number }> {
   const publisher = createPublisher(db)
@@ -38,7 +40,15 @@ export async function runPipeline(
         const transformed = deputies.map(transformCamaraDeputy)
         for (const p of transformed) {
           const { id } = await publisher.upsertPolitician(p)
-          await scorePolitician(db, id)
+          const result = await scorePolitician(db, id)
+          if (result.needsAlert) {
+            await boss.send('score-alert', {
+              politicianId: id,
+              slug: p.slug,
+              newScore: result.overallScore,
+            })
+            logger.info({ politicianId: id }, 'Score-alert job enqueued')
+          }
         }
         recordsProcessed = transformed.length
         await publisher.upsertDataSourceStatus(source, recordsProcessed)
@@ -49,7 +59,15 @@ export async function runPipeline(
         const transformed = senadores.map(transformSenador)
         for (const p of transformed) {
           const { id } = await publisher.upsertPolitician(p)
-          await scorePolitician(db, id)
+          const result = await scorePolitician(db, id)
+          if (result.needsAlert) {
+            await boss.send('score-alert', {
+              politicianId: id,
+              slug: p.slug,
+              newScore: result.overallScore,
+            })
+            logger.info({ politicianId: id }, 'Score-alert job enqueued')
+          }
         }
         recordsProcessed = transformed.length
         await publisher.upsertDataSourceStatus(source, recordsProcessed)

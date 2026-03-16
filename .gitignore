@@ -72,3 +72,6 @@ tmp/
 
 .claude/settings.json
 docs/assets/inspirations/
+
+.gemini/
+gha-creds-*.json

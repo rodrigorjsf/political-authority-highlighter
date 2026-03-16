@@ -8,6 +8,10 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   TRANSPARENCIA_API_KEY: z.string(),
   CPF_ENCRYPTION_KEY: z.string().regex(/^[0-9a-f]{64}$/), // 32 bytes hex-encoded
+  EMAIL_ENCRYPTION_KEY: z.string().regex(/^[0-9a-f]{64}$/), // 32 bytes hex-encoded (RF-POST-002)
+  RESEND_API_KEY: z.string().min(1), // RF-POST-002: transactional email
+  ALERTS_FROM_EMAIL: z.string().email(), // RF-POST-002: sender address
+  API_BASE_URL: z.string().url().default('http://localhost:3001'), // RF-POST-002: for unsubscribe URLs
   VERCEL_REVALIDATE_TOKEN: z.string().optional(),
   CRON_SCHEDULE_CAMARA: z.string().default('0 2 * * *'),
   CRON_SCHEDULE_SENADO: z.string().default('0 3 * * *'),

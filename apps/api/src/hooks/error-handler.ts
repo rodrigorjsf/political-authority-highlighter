@@ -11,6 +11,17 @@ export class NotFoundError extends Error {
   }
 }
 
+/**
+ * RF-POST-002: Token not found or expired error.
+ * Returns 400 for BOTH "not found" AND "expired" cases — prevents enumeration attacks.
+ */
+export class TokenNotFoundError extends Error {
+  constructor() {
+    super('Token not found or expired')
+    this.name = 'TokenNotFoundError'
+  }
+}
+
 /** Domain-specific error for invalid input that passes schema validation. */
 export class ValidationError extends Error {
   constructor(
@@ -32,6 +43,17 @@ export function errorHandler(error: Error, request: FastifyRequest, reply: Fasti
       type: 'https://autoridade-politica.com.br/errors/not-found',
       title: `${error.resource} not found`,
       status: 404,
+      detail: error.message,
+      instance: request.url,
+    })
+    return
+  }
+
+  if (error instanceof TokenNotFoundError) {
+    void reply.status(400).send({
+      type: 'https://autoridade-politica.com.br/errors/token-not-found',
+      title: 'Token not found or expired',
+      status: 400,
       detail: error.message,
       instance: request.url,
     })

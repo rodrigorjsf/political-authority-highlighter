@@ -11,6 +11,7 @@ import {
   numeric,
   integer,
   index,
+  unique,
   customType,
 } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
@@ -245,3 +246,47 @@ export const dataSourceStatus = publicData.table('data_source_status', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
+
+/**
+ * Pending email subscriptions awaiting double opt-in confirmation (RF-POST-002).
+ * Email stored in plaintext temporarily (24h TTL) — only during confirmation window.
+ * Confirm token stored as SHA-256 hash to prevent replay attacks if DB is compromised.
+ */
+export const pendingSubscriptions = publicData.table(
+  'pending_subscriptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    politicianId: uuid('politician_id').notNull().references(() => politicians.id),
+    email: varchar('email', { length: 254 }).notNull(),
+    confirmTokenHash: varchar('confirm_token_hash', { length: 64 }).notNull().unique(),
+    expiresAt: timestamp('expires_at').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_pending_subscriptions_politician').on(table.politicianId),
+  ],
+)
+
+/**
+ * Active email alert subscriptions (RF-POST-002).
+ * Email is AES-256-GCM encrypted at rest — same pattern as CPF in internal_data.
+ * emailHash (SHA-256) is used for deduplication without decrypting.
+ * unsubscribeToken stored plaintext (low-privilege: worst case is someone unsubscribes a user).
+ */
+export const alertSubscriptions = publicData.table(
+  'alert_subscriptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    politicianId: uuid('politician_id').notNull().references(() => politicians.id),
+    emailEncrypted: text('email_encrypted').notNull(),
+    emailHash: varchar('email_hash', { length: 64 }).notNull(),
+    unsubscribeToken: varchar('unsubscribe_token', { length: 64 }).notNull().unique(),
+    confirmedAt: timestamp('confirmed_at').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_alert_subscriptions_politician').on(table.politicianId),
+    index('idx_alert_subscriptions_email_hash').on(table.emailHash),
+    unique('uq_alert_subscriptions_politician_email').on(table.politicianId, table.emailHash),
+  ],
+)
