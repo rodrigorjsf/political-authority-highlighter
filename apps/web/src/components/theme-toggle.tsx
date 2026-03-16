@@ -13,7 +13,8 @@ export function ThemeToggle(): React.JSX.Element {
     setMounted(true)
     const stored = localStorage.getItem(STORAGE_KEY)
     const current = document.documentElement.getAttribute('data-theme')
-    setTheme((stored ?? current ?? 'light') as 'light' | 'dark')
+    const value = stored ?? current ?? 'light'
+    setTheme(value === 'dark' ? 'dark' : 'light')
   }, [])
 
   const toggle = (): void => {
