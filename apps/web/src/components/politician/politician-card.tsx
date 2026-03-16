@@ -29,7 +29,7 @@ export function PoliticianCard({
     : '—'
 
   return (
-    <article className="rounded-lg border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+    <article className="rounded-lg border border-border bg-card p-4 shadow-xs transition-shadow hover:shadow-md">
       <Link
         href={`/politicos/${slug}`}
         className="block rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"

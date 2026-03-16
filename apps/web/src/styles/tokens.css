@@ -34,10 +34,15 @@
 
   /* Border Radius */
   --radius-full: 9999px;
-  --radius-2xl: 1rem;
+  --radius-2xl: 1.25rem;
   --radius-xl: 0.75rem;
   --radius-lg: 0.5rem;
   --radius-md: 0.375rem;
+
+  /* Animation Timing */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 200ms ease-in-out;
+  --transition-slow: 300ms ease-in-out;
 }
 
 /* System Dark Mode */

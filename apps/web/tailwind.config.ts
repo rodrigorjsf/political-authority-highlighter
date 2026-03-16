@@ -40,9 +40,17 @@ const config: Config = {
         mono: ['var(--font-mono)', 'monospace'],
       },
       borderRadius: {
+        full: 'var(--radius-full)',
+        '2xl': 'var(--radius-2xl)',
+        xl: 'var(--radius-xl)',
         lg: 'var(--radius-lg)',
         md: 'var(--radius-md)',
         sm: 'calc(var(--radius-md) - 2px)',
+      },
+      transitionDuration: {
+        fast: '150ms',
+        normal: '200ms',
+        slow: '300ms',
       },
     },
   },
