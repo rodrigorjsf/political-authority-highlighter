@@ -1,7 +1,10 @@
+import { Resend } from 'resend'
 import type PgBoss from 'pg-boss'
+import type { PipelineDb } from '@pah/db/clients'
 import { env } from './config/env.js'
 import { logger } from './config/logger.js'
 import { DataSource } from './types.js'
+import { processScoreAlert, type ScoreAlertPayload } from './workers/score-alert.worker.js'
 
 const QUEUES = [
   `pipeline:${DataSource.CAMARA}`,
@@ -60,4 +63,29 @@ export async function registerWorkers(
   }
 
   logger.info('Pipeline workers registered')
+}
+
+/**
+ * Registers the score-alert queue and its worker (RF-POST-002).
+ * Must be called after boss.start() and before any runPipeline calls.
+ */
+export async function registerScoreAlertWorker(
+  boss: PgBoss,
+  db: PipelineDb,
+  resend: Resend,
+): Promise<void> {
+  // createQueue MUST include name field (pg-boss v10 quirk)
+  await boss.createQueue('score-alert', {
+    name: 'score-alert',
+    retryLimit: 3,
+    retryDelay: 60,
+    retryBackoff: true,
+  })
+
+  // Handler receives Job[] ARRAY (pg-boss v10 batch API)
+  await boss.work<ScoreAlertPayload>('score-alert', { batchSize: 5 }, async (jobs) => {
+    await Promise.allSettled(jobs.map((job) => processScoreAlert(db, resend, job.data)))
+  })
+
+  logger.info('Score-alert worker registered')
 }

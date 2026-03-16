@@ -1,8 +1,9 @@
 import PgBoss from 'pg-boss'
+import { Resend } from 'resend'
 import { createPipelineDb } from '@pah/db/clients'
 import { env } from './config/env.js'
 import { logger } from './config/logger.js'
-import { startScheduler, registerWorkers } from './scheduler.js'
+import { startScheduler, registerWorkers, registerScoreAlertWorker } from './scheduler.js'
 import { runPipeline } from './orchestrator.js'
 import { DataSource } from './types.js'
 
@@ -17,16 +18,20 @@ async function main(): Promise<void> {
   await boss.start()
   logger.info('pg-boss started')
 
+  // Initialize Resend client (RF-POST-002)
+  const resend = new Resend(env.RESEND_API_KEY)
+
   // Initialize scheduler and register workers
   await startScheduler(boss)
   await registerWorkers(boss, {
-    [DataSource.CAMARA]: () => runPipeline(db, DataSource.CAMARA),
-    [DataSource.SENADO]: () => runPipeline(db, DataSource.SENADO),
-    [DataSource.TRANSPARENCIA]: () => runPipeline(db, DataSource.TRANSPARENCIA),
-    [DataSource.TSE]: () => runPipeline(db, DataSource.TSE),
-    [DataSource.TCU]: () => runPipeline(db, DataSource.TCU),
-    [DataSource.CGU]: () => runPipeline(db, DataSource.CGU),
+    [DataSource.CAMARA]: () => runPipeline(db, boss, DataSource.CAMARA),
+    [DataSource.SENADO]: () => runPipeline(db, boss, DataSource.SENADO),
+    [DataSource.TRANSPARENCIA]: () => runPipeline(db, boss, DataSource.TRANSPARENCIA),
+    [DataSource.TSE]: () => runPipeline(db, boss, DataSource.TSE),
+    [DataSource.TCU]: () => runPipeline(db, boss, DataSource.TCU),
+    [DataSource.CGU]: () => runPipeline(db, boss, DataSource.CGU),
   })
+  await registerScoreAlertWorker(boss, db, resend)
 
   logger.info('Pipeline initialized and running')
 

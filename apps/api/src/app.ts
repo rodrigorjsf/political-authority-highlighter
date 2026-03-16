@@ -1,9 +1,13 @@
 import Fastify from 'fastify'
+import { Resend } from 'resend'
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import rateLimit from '@fastify/rate-limit'
 import { createPublicDb } from '@pah/db/clients'
+import { createSubscriptionRepository } from './repositories/subscription.repository.js'
+import { createSubscriptionService } from './services/subscription.service.js'
+import { createSubscriptionsRoute } from './routes/subscriptions.route.js'
 import { createPoliticianRepository } from './repositories/politician.repository.js'
 import { createPoliticianService } from './services/politician.service.js'
 import { createPoliticiansRoute } from './routes/politicians.route.js'
@@ -66,6 +70,9 @@ export function buildApp() {
   const committeeService = createCommitteeService(committeeRepository)
   const sourceRepository = createSourceRepository(db)
   const sourceService = createSourceService(sourceRepository)
+  const resend = new Resend(env.RESEND_API_KEY)
+  const subscriptionRepository = createSubscriptionRepository(db)
+  const subscriptionService = createSubscriptionService(subscriptionRepository, resend)
 
   void app.register(createExpensesRoute({ expenseService }), { prefix: '/api/v1' })
   // Routes
@@ -75,6 +82,7 @@ export function buildApp() {
   void app.register(createProposalsRoute({ proposalService }), { prefix: '/api/v1' })
   void app.register(createCommitteesRoute({ committeeService }), { prefix: '/api/v1' })
   void app.register(createSourcesRoute({ sourceService }), { prefix: '/api/v1' })
+  void app.register(createSubscriptionsRoute({ subscriptionService }), { prefix: '/api/v1' })
 
   // Health check (no prefix)
   void app.get(

@@ -15,6 +15,7 @@
     "@pah/db": "workspace:*",
     "@pah/shared": "workspace:*",
     "pg-boss": "^10.4.2",
+    "resend": "^4.0.0",
     "axios": "^1.6.0",
     "fast-xml-parser": "^5.4.2",
     "csv-parse": "^6.1.0",

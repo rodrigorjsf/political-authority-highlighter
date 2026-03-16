@@ -19,6 +19,8 @@ export interface ScoreResult {
   financialScore: number
   anticorruptionScore: number
   overallScore: number
+  /** RF-POST-002: true when overallScore diff ≥ 5 or exclusionFlag changed vs previous run */
+  needsAlert: boolean
 }
 
 /**
@@ -53,6 +55,15 @@ export async function scorePolitician(db: PipelineDb, politicianId: string): Pro
     throw new Error(`Politician ${politicianId} not found`)
   }
 
+  // RF-POST-002: Fetch previous score for diff detection (before upsert)
+  const [prevScore] = await db
+    .select({
+      overallScore: integrityScores.overallScore,
+      exclusionFlag: integrityScores.exclusionFlag,
+    })
+    .from(integrityScores)
+    .where(eq(integrityScores.politicianId, politicianId))
+
   const billCount = billResult?.count ?? 0
   const voteCount = voteResult?.count ?? 0
   const expenseCount = expenseResult?.count ?? 0
@@ -69,6 +80,13 @@ export async function scorePolitician(db: PipelineDb, politicianId: string): Pro
     financialScore,
     anticorruptionScore,
   })
+
+  // RF-POST-002: Detect meaningful score change (diff ≥ 5 or exclusion flag flipped)
+  // prevScore === undefined means first run — never alert on initial scoring
+  const needsAlert =
+    prevScore !== undefined &&
+    (Math.abs(overallScore - prevScore.overallScore) >= 5 ||
+      politician.exclusionFlag !== prevScore.exclusionFlag)
 
   // Upsert integrity score
   await db
@@ -97,6 +115,6 @@ export async function scorePolitician(db: PipelineDb, politicianId: string): Pro
       },
     })
 
-  logger.debug({ politicianId, overallScore }, 'Scored politician')
-  return { transparencyScore, legislativeScore, financialScore, anticorruptionScore, overallScore }
+  logger.debug({ politicianId, overallScore, needsAlert }, 'Scored politician')
+  return { transparencyScore, legislativeScore, financialScore, anticorruptionScore, overallScore, needsAlert }
 }

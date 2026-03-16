@@ -6,6 +6,7 @@ import { ApiError, fetchPoliticianBySlug, fetchPoliticians } from '../../../lib/
 import { ScoreBreakdown } from '../../../components/politician/score-breakdown'
 import { ExclusionNotice } from '../../../components/politician/exclusion-notice'
 import { PoliticianJsonLd } from '../../../components/seo/json-ld'
+import { SubscribeForm } from '../../../components/politician/subscribe-form'
 
 export const revalidate = 3600
 
@@ -190,6 +191,9 @@ export default async function PoliticianProfilePage({
           Saiba mais
         </a>
       </p>
+
+      {/* Score alert subscription (RF-POST-002) */}
+      <SubscribeForm slug={politician.slug} />
     </main>
     </>
   )
