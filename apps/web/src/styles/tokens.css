@@ -21,8 +21,8 @@
   --color-ring: #1D4ED8;
 
   /* Typography Scales */
-  --font-sans: 'Inter', 'Plus Jakarta Sans', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Roboto Mono', monospace;
+  --font-sans: var(--font-inter, 'Inter'), 'Plus Jakarta Sans', sans-serif;
+  --font-mono: var(--font-jetbrains-mono, 'JetBrains Mono'), 'Roboto Mono', monospace;
 
   /* Spacing */
   --space-1: 0.25rem; /* 4px */

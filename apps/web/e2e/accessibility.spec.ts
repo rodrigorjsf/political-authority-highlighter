@@ -18,6 +18,11 @@ async function checkA11y(page: Page, testInfo: TestInfo): Promise<void> {
 }
 
 test.describe('Accessibility — WCAG 2.1 AA', () => {
+  test('home page', async ({ page }, testInfo) => {
+    await page.goto('/')
+    await checkA11y(page, testInfo)
+  })
+
   test('listagem de políticos', async ({ page }, testInfo) => {
     await page.goto('/politicos')
     await checkA11y(page, testInfo)
