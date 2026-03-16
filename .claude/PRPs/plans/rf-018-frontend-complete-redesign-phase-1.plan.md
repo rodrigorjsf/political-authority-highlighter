@@ -33,12 +33,27 @@ The current `apps/web/src/styles/globals.css` uses HSL color variables within th
 
 **Description**: Create a new CSS file to hold all design tokens (colors, typography scales, border radii, transitions). It must include `:root` for light mode defaults, `@media (prefers-color-scheme: dark)` for system dark mode, and `[data-theme="light"]`/`[data-theme="dark"]` for user overrides, strictly adhering to the `frontend_design_prd.md` hex codes.
 
+**MIRROR**: `docs/prd/frontend_design_prd.md:27-140` — Follow exact design tokens documented in the PRD.
+
 ```css
 /* What to create */
-:root { /* Light mode colors, fonts, radius, transitions */ }
-@media (prefers-color-scheme: dark) { :root { /* Dark mode colors */ } }
-[data-theme="light"] { /* Light mode colors */ }
-[data-theme="dark"] { /* Dark mode colors */ }
+:root {
+  /* Light mode core */
+  --color-background: #FFFFFF;
+  --color-surface: #F8FAFC;
+  /* ...rest from PRD */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #0F172A;
+    /* ...dark equivalents from PRD */
+  }
+}
+
+[data-theme="dark"] {
+  /* Copy of prefers-color-scheme: dark contents for manual toggle support */
+}
 ```
 
 **Validation**: `pnpm --filter @pah/web run lint`
@@ -52,6 +67,23 @@ The current `apps/web/src/styles/globals.css` uses HSL color variables within th
 
 **Description**: Import `tokens.css` at the top of the file (after Tailwind directives). Remove all the legacy HSL variable definitions inside `:root`. Ensure the base layer uses the new CSS variables (e.g., `background-color: var(--color-background); color: var(--color-text-primary);`).
 
+**MIRROR**: `apps/web/src/styles/globals.css:2-4` — Preserve existing tailwind base/components/utilities imports, just add tokens.css after.
+
+```css
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@import "./tokens.css";
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+  }
+}
+```
+
 **Validation**: `pnpm --filter @pah/web run lint`
 
 ---
@@ -62,6 +94,26 @@ The current `apps/web/src/styles/globals.css` uses HSL color variables within th
 **Lines**: approx. 10-38
 
 **Description**: Update the `theme.extend` section to map Tailwind utility classes to the new CSS variables defined in `tokens.css`. Update `colors` section to map core colors (e.g. `background: 'var(--color-background)'`). Update `fontFamily` to use `var(--font-sans)` and `var(--font-mono)`. Update `borderRadius` to use `--radius-md` etc.
+
+**MIRROR**: `tailwind.config.ts:15-30` — Keep the structure but replace `hsl(var(--...))` with standard `var(--color-...)` calls pointing to tokens.
+
+```typescript
+// What to change
+extend: {
+  colors: {
+    background: "var(--color-background)",
+    foreground: "var(--color-text-primary)",
+    muted: {
+      DEFAULT: "var(--color-surface)",
+      foreground: "var(--color-text-secondary)",
+    },
+    // ...other mappings
+  },
+  fontFamily: {
+    sans: ["var(--font-sans)", "sans-serif"],
+  },
+}
+```
 
 **Validation**: `pnpm --filter @pah/web run typecheck`
 
