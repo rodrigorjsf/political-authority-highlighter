@@ -43,7 +43,7 @@ export function SearchBar(): React.JSX.Element {
         placeholder="Buscar por nome..."
         aria-label="Buscar por nome"
         minLength={2}
-        className="w-64 rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        className="w-64 min-h-[44px] rounded-md border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-ring/50 focus:outline-none focus:ring-2 focus:ring-ring"
       />
     </div>
   )

@@ -83,7 +83,7 @@ export default async function CommitteesPage({
             </thead>
             <tbody>
               {result.data.map((committee) => (
-                <tr key={committee.id} className="border-b border-border">
+                <tr key={committee.id} className="border-b border-border transition-colors hover:bg-muted">
                   <td className="py-3 pr-4">{committee.committeeName}</td>
                   <td className="py-3 pr-4">
                     <span className="rounded-full border border-border px-2 py-0.5 text-xs">

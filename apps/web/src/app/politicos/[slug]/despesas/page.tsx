@@ -99,7 +99,7 @@ export default async function ExpensesPage({
             </thead>
             <tbody>
               {result.data.map((expense: Expense) => (
-                <tr key={expense.id} className="border-b border-border">
+                <tr key={expense.id} className="border-b border-border transition-colors hover:bg-muted">
                   <td className="py-3 pr-4 text-muted-foreground whitespace-nowrap">
                     {String(expense.month).padStart(2, '0')}/{expense.year}
                   </td>
@@ -135,7 +135,7 @@ export default async function ExpensesPage({
         {cursor !== undefined && (
           <Link
             href={`/politicos/${slug}/despesas`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
+            className="inline-flex min-h-[44px] items-center rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
           >
             ← Início
           </Link>
@@ -143,7 +143,7 @@ export default async function ExpensesPage({
         {result.cursor !== null && (
           <Link
             href={`/politicos/${slug}/despesas?cursor=${result.cursor}`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
+            className="inline-flex min-h-[44px] items-center rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
           >
             Próxima →
           </Link>

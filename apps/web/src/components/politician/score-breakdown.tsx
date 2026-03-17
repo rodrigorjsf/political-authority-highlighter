@@ -24,7 +24,7 @@ function ScoreItem({ label, value, maxValue }: ScoreItemProps): React.JSX.Elemen
     <div role="listitem">
       <div className="mb-1 flex items-center justify-between">
         <span className="text-sm text-muted-foreground">{label}</span>
-        <span className="text-sm font-medium tabular-nums">
+        <span className="font-mono text-sm font-medium tabular-nums">
           {value}/{maxValue}
         </span>
       </div>

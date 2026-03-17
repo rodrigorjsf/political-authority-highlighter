@@ -79,14 +79,14 @@ export function PoliticianCombobox({
           aria-autocomplete="list"
           aria-expanded={isOpen}
           aria-controls={`suggestions-${paramName}`}
-          className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="flex-1 min-h-[44px] rounded-md border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-ring/50 focus:outline-none focus:ring-2 focus:ring-ring"
         />
         {query !== '' && (
           <button
             type="button"
             onClick={handleClear}
             aria-label={`Limpar seleção de ${label}`}
-            className="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
+            className="min-h-[44px] min-w-[44px] rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
           >
             ✕
           </button>

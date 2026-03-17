@@ -11,7 +11,7 @@ export default function NotFound(): React.JSX.Element {
       <p className="text-muted-foreground">O político ou página que você procura não existe.</p>
       <Link
         href="/politicos"
-        className="text-primary underline focus:outline-none focus:ring-2 focus:ring-ring"
+        className="text-primary underline transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
       >
         Ver todos os políticos
       </Link>

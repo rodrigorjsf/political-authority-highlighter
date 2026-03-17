@@ -68,7 +68,7 @@ export function StateFilter(): React.JSX.Element {
         value={searchParams.get('state') ?? ''}
         onChange={handleChange}
         aria-label="Filtrar por estado"
-        className="rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        className="min-h-[44px] rounded-md border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-ring/50 focus:outline-none focus:ring-2 focus:ring-ring"
       >
         {STATE_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>

@@ -54,7 +54,7 @@ function SourceRow({ source }: { source: DataSourceStatus }): React.JSX.Element 
   const statusLabel = STATUS_LABELS[source.status] ?? source.status
 
   return (
-    <tr className="border-b border-border">
+    <tr className="border-b border-border transition-colors hover:bg-muted">
       <td className="py-3 pr-4 text-sm font-medium text-foreground">
         {url !== undefined ? (
           <a

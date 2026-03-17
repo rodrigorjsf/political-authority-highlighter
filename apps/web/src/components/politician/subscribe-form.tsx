@@ -80,13 +80,13 @@ export function SubscribeForm({ slug }: SubscribeFormProps): React.JSX.Element {
           placeholder="seu@email.com"
           aria-label="Endereço de email para alertas"
           disabled={state === 'loading'}
-          className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="flex-1 min-h-[44px] rounded-md border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-ring/50 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <button
           type="submit"
           disabled={state === 'loading' || email.length === 0}
           aria-busy={state === 'loading'}
-          className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="min-h-[44px] rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all duration-200 hover:-translate-y-[1px] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
         >
           {state === 'loading' ? 'Enviando...' : 'Inscrever-se'}
         </button>

@@ -83,12 +83,12 @@ export function ComparisonTable({
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.label} className="border-b border-border last:border-0">
-                <td className="sticky left-0 z-10 bg-card p-4 text-sm font-medium text-muted-foreground">
+              <tr key={row.label} className="group border-b border-border last:border-0 transition-colors hover:bg-muted">
+                <td className="sticky left-0 z-10 bg-card p-4 text-sm font-medium text-muted-foreground transition-colors group-hover:bg-muted">
                   {row.label}
                 </td>
-                <td className="p-4 text-sm font-semibold tabular-nums text-primary">{row.a}</td>
-                <td className="p-4 text-sm font-semibold tabular-nums text-primary">{row.b}</td>
+                <td className="p-4 text-sm font-semibold font-mono tabular-nums text-primary">{row.a}</td>
+                <td className="p-4 text-sm font-semibold font-mono tabular-nums text-primary">{row.b}</td>
               </tr>
             ))}
           </tbody>
