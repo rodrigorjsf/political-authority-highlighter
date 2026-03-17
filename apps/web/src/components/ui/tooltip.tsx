@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useId, useState } from 'react'
 
 interface TooltipProps {
   content: string
@@ -16,7 +16,7 @@ interface TooltipProps {
  */
 export function Tooltip({ content, children, className = '' }: TooltipProps): React.JSX.Element {
   const [visible, setVisible] = useState(false)
-  const tooltipId = useRef(`tooltip-${Math.random().toString(36).slice(2)}`)
+  const tooltipId = useId()
 
   return (
     <span
@@ -27,12 +27,13 @@ export function Tooltip({ content, children, className = '' }: TooltipProps): Re
       onBlur={() => setVisible(false)}
     >
       {/* Wrap children with describedby reference */}
-      <span aria-describedby={visible ? tooltipId.current : undefined}>{children}</span>
+      <span aria-describedby={visible ? tooltipId : undefined}>{children}</span>
 
       {/* Tooltip bubble */}
       <span
-        id={tooltipId.current}
+        id={tooltipId}
         role="tooltip"
+        aria-hidden={!visible}
         className={`pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-2.5 py-1 text-xs font-medium text-background shadow-md motion-safe:transition-opacity motion-safe:duration-150 ${
           visible ? 'opacity-100' : 'opacity-0'
         } ${className}`}

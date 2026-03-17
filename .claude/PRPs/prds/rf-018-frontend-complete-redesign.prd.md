@@ -403,14 +403,6 @@ For headless CI, a `docker-compose.test.yml` targets API + Web only (DB = `supab
   - **Header token**: Replaced hardcoded `bg-white/70 dark:bg-[#0b0e14]/70` with `bg-background/70` in `layout-client.tsx`
 - **Success signal**: 70 unit tests pass; `pnpm build` passes; navigation passes audit; all pages consistently use design tokens in both modes
 
-- **Goal**: Validate already-built navigation, add remaining page fade transitions, perform final cross-page design audit
-- **Scope**:
-  - **Navigation validation**: Verify glassmorphism header, sidebar, mobile tab bar, tablet drawer built in Phase 5 meet all PRD spec requirements (blur values, touch targets, keyboard nav, active states, aria-current)
-  - **Page fade transitions**: Add `animate-in fade-in duration-300` on `<main>` content wrapper with `motion-safe:` prefix
-  - **Cross-page audit**: Verify all 10+ pages consistently use design tokens, dark mode, custom fonts (listing, profile overview, profile tabs x5, metodologia, fontes, not-found, error)
-  - **Sticky hover fix validation**: Confirm 44px touch targets and sticky hover prevention from PR #40 review feedback
-- **Success signal**: Navigation passes keyboard navigation test; page transitions render at 60fps; all pages visually consistent in both modes; `pnpm build` + `pnpm --filter @pah/web test` pass
-
 **Phase 7: Testing Infrastructure**
 
 - **Goal**: Local full-stack environment that mirrors production for E2E test validation
