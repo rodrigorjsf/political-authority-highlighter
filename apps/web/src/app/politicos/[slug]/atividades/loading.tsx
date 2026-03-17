@@ -1,6 +1,11 @@
 export default function CommitteesLoading(): React.JSX.Element {
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="container mx-auto px-4 py-8 focus:outline-none"
+      aria-label="Carregando atividades"
+    >
       {/* Breadcrumb skeleton */}
       <div className="mb-4 h-4 w-32 motion-safe:animate-pulse rounded bg-muted" />
 

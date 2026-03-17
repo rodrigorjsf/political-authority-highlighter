@@ -98,7 +98,7 @@ export default async function PoliticianProfilePage({
   return (
     <>
       <PoliticianJsonLd politician={politician} />
-      <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
+      <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 motion-safe:animate-page-in focus:outline-none">
       {/* Profile header */}
       <div className="mb-8 flex flex-col gap-6 sm:flex-row">
         {/* Photo or initials fallback */}

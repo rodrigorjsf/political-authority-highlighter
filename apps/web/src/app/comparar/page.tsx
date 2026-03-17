@@ -82,7 +82,7 @@ export default async function ComparePage({ searchParams }: Props): Promise<Reac
   const hasError = bothSelected && (politicianA === null || politicianB === null)
 
   return (
-    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 motion-safe:animate-page-in focus:outline-none">
       <h1 className="mb-6 text-2xl font-bold text-foreground">Comparar Políticos</h1>
 
       <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2">

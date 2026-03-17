@@ -52,7 +52,7 @@ export default async function ProposalsPage({
   const result = await fetchPoliticianProposals(slug, proposalFilters)
 
   return (
-    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 motion-safe:animate-page-in focus:outline-none">
       {/* Breadcrumb */}
       <Link
         href={`/politicos/${slug}`}

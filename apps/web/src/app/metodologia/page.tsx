@@ -19,7 +19,7 @@ const METHODOLOGY_VERSION = 'v1.0'
  */
 export default function MetodologiaPage(): React.JSX.Element {
   return (
-    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 motion-safe:animate-page-in focus:outline-none">
       <section aria-labelledby="how-scores-work">
         <h1 id="how-scores-work" className="mb-6 text-2xl font-bold text-foreground">
           Como calculamos a pontuação de integridade

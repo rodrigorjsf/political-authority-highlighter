@@ -51,7 +51,7 @@ export default async function VotesPage({
   const participationPct = (result.participationRate * 100).toFixed(1)
 
   return (
-    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 motion-safe:animate-page-in focus:outline-none">
       {/* Breadcrumb */}
       <Link
         href={`/politicos/${slug}`}

@@ -11,7 +11,7 @@ export default function ErrorPage({
     <main
       id="main-content"
       tabIndex={-1}
-      className="flex min-h-[50vh] flex-col items-center justify-center gap-4 focus:outline-none"
+      className="flex min-h-[50vh] flex-col items-center justify-center gap-4 motion-safe:animate-page-in focus:outline-none"
     >
       <h1 className="text-2xl font-bold">Ocorreu um erro inesperado</h1>
       <p className="text-muted-foreground">

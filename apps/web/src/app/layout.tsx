@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import PlausibleProvider from 'next-plausible'
 import { ThemeScript } from '../components/theme-script'
-import { ThemeToggle } from '../components/theme-toggle'
+import { LayoutClient } from '../components/navigation/layout-client'
 import '../styles/globals.css'
 
 const inter = Inter({
@@ -55,14 +55,11 @@ export default function RootLayout({
         <body className="min-h-screen bg-background font-sans antialiased">
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-20 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             Ir para o conteúdo principal
           </a>
-          <div className="fixed right-4 top-4 z-50">
-            <ThemeToggle />
-          </div>
-          {children}
+          <LayoutClient>{children}</LayoutClient>
         </body>
       </PlausibleProvider>
     </html>
