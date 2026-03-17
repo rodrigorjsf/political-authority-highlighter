@@ -102,15 +102,13 @@ pnpm test
 
 Runs all unit tests via Turborepo. No services need to be running.
 
-### Integration Tests (API — requires DB)
-
-Start the database first (`pnpm dev:db`), then:
+### Integration Tests (API — isolated, no DB required)
 
 ```bash
 pnpm --filter @pah/api test:integration
 ```
 
-Integration tests use Testcontainers (PostgreSQL) — they spin up their own DB containers and do not require Supabase.
+Integration tests use Testcontainers (PostgreSQL) — they spin up their own DB containers and do not require Supabase to be running.
 
 ### E2E Tests (requires full stack)
 
