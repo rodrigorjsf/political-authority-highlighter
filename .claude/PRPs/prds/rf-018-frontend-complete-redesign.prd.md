@@ -41,6 +41,7 @@ The Political Authority Highlighter MVP is functionally complete with good respo
 **Complete implementation of the Frontend Design PRD** across all pages + new home page + comprehensive local testing infrastructure + reusable project skills.
 
 **What we're building:**
+
 1. **Design System** — Dark mode + light mode with semantic CSS variables; custom fonts (Inter, Plus Jakarta Sans, JetBrains Mono) with full typography scale
 2. **Home Page** — Hero + featured politicians + CTA to listing
 3. **Component Refinement** — Buttons, cards, navigation with glassmorphism; all interactive states (hover, focus, active, disabled)
@@ -95,15 +96,18 @@ The Political Authority Highlighter MVP is functionally complete with good respo
 ## Users & Context
 
 ### Primary User
+
 - **Who**: Brazilian citizen, 18+ years old, any literacy level, diverse device (low-end Android common), may use 3G network
 - **Current behavior**: Searches "deputado name" on Google, finds fragmented data across multiple government sites
 - **Trigger moment**: Before voting, when evaluating a candidate, when sharing info with friends
 - **Success state**: Finds politician's data in one place, understands score, sees voting history, feels confident
 
 ### Job to Be Done
+
 "When I don't know a trustworthy politician, I want to find and understand data about them in a friendly and understandable way, so I can check all data from the politicians and choose some to vote or share."
 
 ### Non-Users
+
 - Politicians managing their own profiles (future feature, not MVP)
 - Government officials auditing the platform
 - Paid/authenticated users (free public access only)
@@ -128,6 +132,7 @@ Before building new infrastructure, this PRD explicitly uses existing project ca
 | Skill creation | `customaize-agent:test-skill` | Create web + API specific test skills |
 
 **New capabilities needed** (not currently available):
+
 - Visual regression test suite (`apps/web/e2e/visual-regression.spec.ts`)
 - Context-specific test skills for `apps/web/` and `apps/api/`
 - Full-stack local dev startup script
@@ -139,21 +144,28 @@ Before building new infrastructure, this PRD explicitly uses existing project ca
 These apply to **every implementation phase** in this PRD:
 
 ### Rule 1: Design Skill Gate (UI Phases Only)
+
 Before implementing any UI change (Phases 1–8):
+
 ```
 MUST invoke: /web-frontend-design skill
 ```
+
 This skill enforces the Frontend Design PRD. Do not write any JSX, CSS, or Tailwind classes without it.
 
 ### Rule 2: Documentation Gate (All Phases)
+
 At the **end of every phase** before marking it complete:
+
 ```
 MUST execute: /docs:update-docs
 MUST evaluate: if .github/workflows/ need updates for the change
 ```
 
 ### Rule 3: Testing Gate (All Phases)
+
 Tests must pass **before** a phase is marked complete. For UI phases (1–8):
+
 ```
 MUST run: pnpm --filter @pah/web test
 MUST run: pnpm build (full build check)
@@ -162,7 +174,9 @@ MUST verify: no a11y violations introduced
 ```
 
 ### Rule 4: Skill Replication (Phase 12)
+
 Any skill created during Phase 12 **must**:
+
 ```
 MUST be created using: /customaize-agent:test-skill
 MUST be placed in both: .claude/skills/{skill-name}/ AND .agents/skills/{skill-name}/
@@ -492,6 +506,7 @@ description: >
 ```
 
 **Skill body must follow progressive disclosure:**
+
 - `SKILL.md` — overview + quick commands (under 100 lines)
 - `unit-testing.md` — Vitest + RTL patterns, mock setup
 - `e2e-testing.md` — Playwright patterns, visual regression workflow
@@ -511,6 +526,7 @@ description: >
 ```
 
 **Skill body must follow progressive disclosure:**
+
 - `SKILL.md` — overview + quick commands (under 100 lines)
 - `unit-testing.md` — service + transformer tests, mocking patterns
 - `integration-testing.md` — Testcontainers setup, real DB queries
@@ -524,10 +540,10 @@ description: >
 | # | Phase | Description | Status | Parallel | Depends | Gate |
 |---|-------|-------------|--------|----------|---------|------|
 | 1 | **Design Tokens** | CSS variables (light + dark modes, typography, spacing, radius, animation) | ✅ **COMPLETE** | — | — | ✅ build + typecheck |
-| 2 | **Custom Fonts** | Inter + JetBrains Mono via `next/font`, apply to layout + components | pending | with 3 | 1 | font visual check |
-| 3 | **Dark Mode** | System detection (ThemeScript FOUC prevention) + ThemeToggle component | pending | with 2 | 1 | toggle E2E |
-| 4 | **Home Page** | Hero + featured politicians (API-fetched) + CTA, SEO metadata | pending | with 2,3 | 1 | a11y + responsive |
-| 5 | **Component Refinement** | Buttons, cards, forms, tables, badges per PRD spec | pending | — | 1,2,3 | visual + a11y |
+| 2 | **Custom Fonts** | Inter + JetBrains Mono via `next/font`, apply to layout + components | ✅ **COMPLETE** | with 3 | 1 | font visual check |
+| 3 | **Dark Mode** | System detection (ThemeScript FOUC prevention) + ThemeToggle component | ✅ **COMPLETE** | with 2 | 1 | toggle E2E |
+| 4 | **Home Page** | Hero + featured politicians (API-fetched) + CTA, SEO metadata | ✅ **COMPLETE** | with 2,3 | 1 | a11y + responsive |
+| 5 | **Component Refinement** | Buttons, cards, forms, tables, badges per PRD spec | ✅ **COMPLETE** | — | 1,2,3 | visual + a11y |
 | 6 | **Navigation Redesign** | Glassmorphism header + desktop sidebar + mobile bottom tab bar | pending | with 5 | 1,2,3 | responsive + a11y |
 | 7 | **Micro-interactions** | Page transitions (300ms), button hovers, skeleton loaders, tooltips | pending | with 5,6 | 5 | perf + motion |
 | 8 | **Page Updates** | Apply tokens to all 10+ pages consistently | pending | — | 5,6,7 | full E2E pass |
@@ -551,6 +567,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 ## Phase Details
 
 ### Phase 1: Design Tokens ✅ COMPLETE
+
 - **Goal**: Establish all CSS variables for light/dark modes, typography, spacing, border radius, and animation timing
 - **Status**: ✅ Complete — PR #37 merged
 - **Scope** (completed):
@@ -562,6 +579,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 - **Validation**: ✅ `pnpm typecheck` (5 packages), ✅ `pnpm lint`, ✅ `pnpm build`, ✅ `vercel build`
 
 ### Phase 2: Custom Fonts ✅ complete — PR #39
+
 - **Goal**: Load Inter and JetBrains Mono via `next/font` with `display: swap` for 3G users
 - **Scope**:
   - Import fonts in `apps/web/src/app/layout.tsx` using `next/font/google`
@@ -571,6 +589,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 - **Mandatory gates**: Chrome DevTools shows Inter rendering; no CLS in Lighthouse; run `docs:update-docs`
 
 ### Phase 3: Dark Mode ✅ complete — PR #39
+
 - **Goal**: System preference auto-applies; user can toggle; no FOUC
 - **Scope**:
   - Create `ThemeScript` server component (inline script for FOUC prevention in `<head>`)
@@ -580,6 +599,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 - **Mandatory gates**: Toggle switches modes; OS preference detected on first load; no FOUC on hard refresh; run `docs:update-docs`
 
 ### Phase 4: Home Page ✅ complete — PR #39
+
 - **Goal**: `/` loads with hero, API-fetched featured politicians, CTA button
 - **Scope**:
   - Create `apps/web/src/app/page.tsx`
@@ -589,7 +609,8 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
   - SEO: `export const metadata = { title, description, openGraph }` at page level
 - **Mandatory gates**: Page builds; passes aXe-core; CTA links to `/politicos`; responsive on 3 viewports; run `docs:update-docs`
 
-### Phase 5: Component Refinement
+### Phase 5: Component Refinement ✅ complete — branch `feat/rf-018-phase5-component-refinement`
+
 - **Goal**: All components visually match Frontend Design PRD specifications
 - **Scope**:
   - **Buttons**: primary (solid `bg-[--color-primary]`), secondary (outline); hover: `-translate-y-[1px]` + shadow; disabled: `opacity-50 cursor-not-allowed`
@@ -601,6 +622,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 - **Mandatory gates**: All components render in both modes; no hardcoded color values; run `pnpm --filter @pah/web test`; run `docs:update-docs`
 
 ### Phase 6: Navigation Redesign
+
 - **Goal**: Glassmorphism header, flat sidebar, mobile bottom tab bar
 - **Scope**:
   - **Header**: `sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-[#0b0e14]/70 border-b border-[--color-border]`; includes SearchBar + ThemeToggle
@@ -610,6 +632,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 - **Mandatory gates**: Glassmorphism blur visible in both modes; tab bar accessible via keyboard; all nav items ≥ 44×44px; run `docs:update-docs`
 
 ### Phase 7: Micro-interactions & Animations
+
 - **Goal**: Purposeful, accessible animations for all state changes
 - **Scope**:
   - **Page transitions**: `animate-in fade-in duration-300` on `<main>` content wrapper
@@ -620,6 +643,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 - **Mandatory gates**: 60fps on devtools profiler; no animation fires on `prefers-reduced-motion: reduce`; run `docs:update-docs`
 
 ### Phase 8: Page Updates
+
 - **Goal**: Apply design tokens and all Phase 1–7 work consistently across every page
 - **Scope** — all pages must use tokens, support dark mode, use custom fonts:
   - `src/app/politicos/page.tsx` (listing)
@@ -635,6 +659,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 - **Mandatory gates**: `pnpm build` passes; `vercel build --yes` passes; full Playwright E2E suite passes; run `docs:update-docs`
 
 ### Phase 9: Local Full-Stack Environment
+
 - **Goal**: One-command local stack that mirrors production environment for test validation
 - **Scope**:
   - Document 3-terminal workflow in `TESTING.md` (supabase start → api dev → web dev)
@@ -646,6 +671,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 - **Mandatory gates**: All 3 services start without error; home page loads; politician listing loads; API returns data; run `docs:update-docs`
 
 ### Phase 10: Visual Regression Testing
+
 - **Goal**: 30 baseline screenshots (5 pages × 3 viewports × 2 themes) stored in repo
 - **Scope**:
   - Create `apps/web/e2e/visual-regression.spec.ts` per design in Technical Approach section
@@ -656,6 +682,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 - **Mandatory gates**: All 30 screenshots generated; re-run shows 0 diffs; update process documented; run `docs:update-docs`
 
 ### Phase 11: A11y Testing Enhancement
+
 - **Goal**: Zero WCAG 2.1 AA violations on all pages in both light and dark modes
 - **Scope**:
   - Expand `apps/web/e2e/accessibility.spec.ts` to cover all pages (per Technical Approach spec)
@@ -667,6 +694,7 @@ Phase 1 (foundation) → Phases 2, 3, 4, 9 in parallel
 - **Mandatory gates**: 0 violations in both modes; keyboard nav tested; run `docs:update-docs`
 
 ### Phase 12: Skills, CI/CD & Documentation
+
 - **Goal**: Sustainable infrastructure: test skills, CI gates, complete documentation
 - **Scope**:
 
