@@ -1,6 +1,21 @@
 import type { Metadata } from 'next'
+import { Inter, JetBrains_Mono } from 'next/font/google'
 import PlausibleProvider from 'next-plausible'
+import { ThemeScript } from '../components/theme-script'
+import { ThemeToggle } from '../components/theme-toggle'
 import '../styles/globals.css'
+
+const inter = Inter({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -24,7 +39,14 @@ export default function RootLayout({
   children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <html lang="pt-BR">
+    <html
+      lang="pt-BR"
+      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <ThemeScript />
+      </head>
       <PlausibleProvider
         domain={process.env['NEXT_PUBLIC_PLAUSIBLE_DOMAIN'] ?? 'autoridade-politica.com.br'}
         enabled={process.env['NEXT_PUBLIC_PLAUSIBLE_ENABLED'] === 'true'}
@@ -37,6 +59,9 @@ export default function RootLayout({
           >
             Ir para o conteúdo principal
           </a>
+          <div className="fixed right-4 top-4 z-50">
+            <ThemeToggle />
+          </div>
           {children}
         </body>
       </PlausibleProvider>
