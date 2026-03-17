@@ -52,6 +52,15 @@ const config: Config = {
         normal: '200ms',
         slow: '300ms',
       },
+      keyframes: {
+        'page-fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(4px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'page-in': 'page-fade-in 300ms ease-out both',
+      },
     },
   },
   plugins: [],

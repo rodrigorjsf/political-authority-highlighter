@@ -1,6 +1,11 @@
 export default function PoliticianProfileLoading(): React.JSX.Element {
   return (
-    <main className="container mx-auto px-4 py-8" aria-label="Carregando perfil do político">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="container mx-auto px-4 py-8 focus:outline-none"
+      aria-label="Carregando perfil do político"
+    >
       <div className="mb-8 flex flex-col gap-6 sm:flex-row">
         {/* Photo skeleton */}
         <div className="h-32 w-32 flex-shrink-0 motion-safe:animate-pulse rounded-full bg-muted" />

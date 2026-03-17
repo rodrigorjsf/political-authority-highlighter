@@ -23,7 +23,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
   const result = await fetchPoliticians({ limit: 3 }).catch(() => ({ data: [], cursor: null }))
 
   return (
-    <main id="main-content" tabIndex={-1} className="focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="motion-safe:animate-page-in focus:outline-none">
       {/* Hero */}
       <section className="container mx-auto px-4 py-16 text-center">
         <h1 className="mb-4 text-4xl font-bold text-foreground sm:text-5xl">

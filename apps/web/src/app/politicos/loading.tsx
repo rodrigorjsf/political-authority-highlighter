@@ -1,7 +1,12 @@
 /** Skeleton loader matching the card grid layout — prevents CLS (RNF-PERF-003) */
 export default function Loading(): React.JSX.Element {
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="container mx-auto px-4 py-8 focus:outline-none"
+      aria-label="Carregando lista de políticos"
+    >
       <div className="mb-6 h-8 w-32 motion-safe:animate-pulse rounded bg-muted" />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 12 }).map((_, i) => (

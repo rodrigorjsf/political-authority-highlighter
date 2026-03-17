@@ -47,7 +47,7 @@ export default async function PoliticosPage({ searchParams }: Props): Promise<Re
   if (search !== undefined) baseParams.set('search', search)
 
   return (
-    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 focus:outline-none">
+    <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8 motion-safe:animate-page-in focus:outline-none">
       <h1 className="mb-6 text-2xl font-bold text-foreground">Políticos</h1>
 
       {/* Search bar — primary search action above filter bar */}

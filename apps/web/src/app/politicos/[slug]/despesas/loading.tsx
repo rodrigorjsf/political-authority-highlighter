@@ -2,7 +2,12 @@ import React from 'react'
 
 export default function ExpensesLoading(): React.JSX.Element {
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="container mx-auto px-4 py-8 focus:outline-none"
+      aria-label="Carregando despesas"
+    >
       {/* Breadcrumb skeleton */}
       <div className="mb-4 h-5 w-32 motion-safe:animate-pulse rounded bg-muted" />
 
