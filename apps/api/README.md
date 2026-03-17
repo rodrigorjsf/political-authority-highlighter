@@ -13,14 +13,17 @@ Backend REST API for the Political Authority Highlighter. Built with **Fastify 5
 ## Endpoints
 
 ```
-GET /politicians                         # List with filters and cursor pagination
-GET /politicians/:slug                   # Profile with latest score
-GET /politicians/:slug/bills             # Paginated authored bills
-GET /politicians/:slug/votes             # Paginated vote records
-GET /politicians/:slug/expenses          # Paginated expenses (RF-012)
-GET /scores/ranking                      # Ranking by overall score
-GET /sources/status                      # Data freshness
-GET /health                              # Health check
+GET  /politicians                              # List with filters and cursor pagination
+GET  /politicians/:slug                        # Profile with latest score
+GET  /politicians/:slug/bills                  # Paginated authored bills
+GET  /politicians/:slug/votes                  # Paginated vote records
+GET  /politicians/:slug/expenses               # Paginated expenses
+POST /politicians/:slug/subscribe              # Email score alert opt-in (double opt-in, 202)
+GET  /subscribe/confirm                        # Confirm email subscription
+GET  /subscribe/unsubscribe                    # One-click unsubscribe (idempotent)
+GET  /scores/ranking                           # Ranking by overall score
+GET  /sources/status                           # Data freshness
+GET  /health                                   # Health check
 ```
 
 ## Development

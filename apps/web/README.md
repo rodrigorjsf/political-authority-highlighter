@@ -7,9 +7,11 @@ Frontend for the Political Authority Highlighter. Built with **Next.js 15**, **R
 - **Server-First** — UI rendered via Server Components (RSC). LCP < 1.0s.
 - **URL State** — Filters and pagination stored in URL search parameters.
 - **Neutrality** — Neutral palette (grays, blues) without party colors.
+- **Dark Mode** — System-aware and user-togglable via `next-themes`.
 - **ISR** — Static profiles with 1-hour revalidation.
 - **Accessibility** — WCAG 2.1 AA compliant.
 - **Modern Styling** — Tailwind CSS 4 and **shadcn/ui**.
+- **Analytics** — Plausible (LGPD-compliant, zero cookies).
 
 ## Performance
 
@@ -23,6 +25,10 @@ Frontend for the Political Authority Highlighter. Built with **Next.js 15**, **R
 ```
 src/
 ├── app/        # Pages, layouts, API routes
+│   ├── politicos/    # Catalog and politician profiles
+│   ├── comparar/     # Politician comparison (/comparar?a=...&b=...)
+│   ├── metodologia/  # Scoring methodology
+│   └── fontes/       # Data sources
 ├── components/ # UI primitives and domain components
 ├── lib/        # API client and SEO helpers
 └── e2e/        # Playwright tests
@@ -42,3 +48,4 @@ pnpm test:e2e         # Run Playwright E2E tests
 
 - `NEXT_PUBLIC_API_URL` — Backend API URL.
 - `VERCEL_REVALIDATE_TOKEN` — ISR revalidation secret.
+- `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` — Plausible analytics domain (optional).

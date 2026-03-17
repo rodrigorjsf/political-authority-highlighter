@@ -84,7 +84,7 @@ Methodology at `/metodologia`.
 
 ### Prerequisites
 
-- Node.js 20+, pnpm 9+, [Supabase CLI](https://supabase.com/docs/guides/cli) (for local DB). Optional: Docker if you prefer the legacy compose-based Postgres.
+- Node.js 22+, pnpm 9+, Docker, [Supabase CLI](https://supabase.com/docs/guides/cli) (included as a devDependency — available after `pnpm install`).
 
 ### Setup
 
@@ -102,8 +102,10 @@ Local Postgres runs on port **54322** (Supabase default). To reset the DB and re
 ## Development
 
 ```bash
-pnpm dev          # Start apps
-pnpm build        # Build artifacts
+pnpm dev:db       # Start Supabase local DB (port 54322)
+pnpm dev:api      # Start Fastify API (port 3001)
+pnpm dev          # Start all apps
+pnpm build        # Build all packages and apps
 pnpm lint         # Run ESLint
 pnpm typecheck    # Run type checks
 pnpm test         # Run unit and integration tests
@@ -111,8 +113,10 @@ vercel build      # Run the Vercel build phase (OBRIGATÓRIO PASSAR COM SUCESSO)
 pnpm test:e2e     # Run Playwright E2E tests
 ```
 
+See [TESTING.md](TESTING.md) for the full 3-terminal local stack workflow.
+
 - **Quality:** Strict TypeScript, Prettier, Conventional Commits.
-- **Testing:** Vitest (80%+ coverage), Testcontainers, Playwright.
+- **Testing:** Vitest (80%+ coverage), Testcontainers, Playwright. See [TESTING.md](TESTING.md).
 
 ## Compliance
 
@@ -135,8 +139,10 @@ pnpm test:e2e     # Run Playwright E2E tests
 - [x] Phase 3: Profile Overview
 - [x] Phase 4: Legislative Activity
 - [x] Phase 5: Financial Transparency
-- [ ] Phase 6: Ingestion Pipeline
-- [ ] Phase 7: Deployment
+- [x] Phase 6: Ingestion Pipeline (all 6 source adapters)
+- [x] Phase 7: Testing Infrastructure & Frontend Redesign
+- [x] Post-MVP: Comparison, Email Alerts, Plausible Analytics, WCAG 2.1 AA
+- [ ] Production Deployment
 
 ## License
 
