@@ -29,10 +29,10 @@ export function PoliticianCard({
     : '—'
 
   return (
-    <article className="rounded-lg border border-border bg-card p-4 shadow-xs transition-shadow hover:shadow-md">
+    <article className="rounded-xl border border-border bg-card p-4 shadow-xs transition-shadow hover:shadow-md">
       <Link
         href={`/politicos/${slug}`}
-        className="block rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        className="block rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       >
         <div className="flex items-start gap-3">
           {/* Photo — 60x60 with SVG placeholder fallback */}
@@ -76,7 +76,7 @@ export function PoliticianCard({
           aria-label={`Pontuação de integridade: ${overallScore} de 100`}
         >
           <span className="text-xs text-muted-foreground">Pontuação de integridade</span>
-          <span className="tabular-nums text-sm font-semibold text-primary">
+          <span className="font-mono tabular-nums text-sm font-semibold text-primary">
             {overallScore}/100
           </span>
         </div>

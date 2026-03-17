@@ -36,7 +36,7 @@ export default function MetodologiaPage(): React.JSX.Element {
         <h2 id="formula" className="mb-3 text-lg font-semibold text-foreground">
           Fórmula
         </h2>
-        <div className="rounded-lg border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="font-mono text-sm text-foreground">
             Pontuação = Transparência + Atividade Legislativa + Regularidade Financeira +
             Anti-Corrupção
@@ -53,28 +53,28 @@ export default function MetodologiaPage(): React.JSX.Element {
           Componentes do Score
         </h2>
         <dl className="space-y-4">
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-xl border border-border bg-card p-4">
             <dt className="font-semibold text-foreground">Transparência (0–25)</dt>
             <dd className="mt-1 text-sm text-muted-foreground">
               Mede a disponibilidade de dados públicos do parlamentar nas 6 fontes oficiais.
               Ausência de dados reduz este componente, não indica má conduta.
             </dd>
           </div>
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-xl border border-border bg-card p-4">
             <dt className="font-semibold text-foreground">Atividade Legislativa (0–25)</dt>
             <dd className="mt-1 text-sm text-muted-foreground">
               Mede participação em votações nominais, autoria de projetos de lei e atuação em
               comissões parlamentares.
             </dd>
           </div>
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-xl border border-border bg-card p-4">
             <dt className="font-semibold text-foreground">Regularidade Financeira (0–25)</dt>
             <dd className="mt-1 text-sm text-muted-foreground">
               Analisa despesas de gabinete (CEAP/CEAPS) e declarações de patrimônio ao TSE em
               relação a padrões históricos.
             </dd>
           </div>
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-xl border border-border bg-card p-4">
             <dt className="font-semibold text-foreground">Anti-Corrupção (0 ou 25)</dt>
             <dd className="mt-1 text-sm text-muted-foreground">
               Componente binário: 25 pontos se nenhum registro encontrado em bases públicas de
@@ -174,7 +174,7 @@ export default function MetodologiaPage(): React.JSX.Element {
         <h2 id="anticorrupcao" className="mb-3 text-lg font-semibold text-foreground">
           Componente Anti-Corrupção
         </h2>
-        <div className="rounded-lg border border-border bg-muted p-4">
+        <div className="rounded-xl border border-border bg-muted p-4">
           <p className="text-sm text-muted-foreground">
             Quando informações de bases públicas de anticorrupção afetam este componente, o impacto
             é visível na pontuação, mas os detalhes do registro não são expostos. Para consultar as

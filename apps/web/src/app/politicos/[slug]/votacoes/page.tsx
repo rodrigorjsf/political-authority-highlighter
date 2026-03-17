@@ -88,7 +88,7 @@ export default async function VotesPage({
             </thead>
             <tbody>
               {result.data.map((vote) => (
-                <tr key={vote.id} className="border-b border-border">
+                <tr key={vote.id} className="border-b border-border transition-colors hover:bg-muted">
                   <td className="py-3 pr-4 text-muted-foreground whitespace-nowrap">
                     {vote.sessionDate}
                   </td>
@@ -125,7 +125,7 @@ export default async function VotesPage({
         {cursor !== undefined && (
           <Link
             href={`/politicos/${slug}/votacoes`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
+            className="rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
           >
             ← Início
           </Link>
@@ -133,7 +133,7 @@ export default async function VotesPage({
         {result.cursor !== null && (
           <Link
             href={`/politicos/${slug}/votacoes?cursor=${result.cursor}`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
+            className="rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
           >
             Próxima →
           </Link>

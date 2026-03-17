@@ -144,10 +144,10 @@ export default async function PoliticianProfilePage({
         </div>
 
         {/* Overall score */}
-        <div className="flex flex-col items-center justify-center rounded-lg border border-border p-4">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-border p-4">
           <span className="text-xs text-muted-foreground">Pontuação de Integridade</span>
           <span
-            className="mt-1 text-4xl font-bold tabular-nums"
+            className="mt-1 font-mono text-4xl font-bold tabular-nums"
             aria-label={`Pontuação de integridade: ${politician.overallScore} de 100`}
           >
             {politician.overallScore}
@@ -175,7 +175,7 @@ export default async function PoliticianProfilePage({
             <li key={tab.href}>
               <Link
                 href={`/politicos/${slug}/${tab.href}`}
-                className="block rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted sm:inline"
+                className="block rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring sm:inline"
               >
                 {tab.label}
               </Link>

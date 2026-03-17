@@ -79,7 +79,7 @@ export default async function BillsPage({
             </thead>
             <tbody>
               {result.data.map((bill) => (
-                <tr key={bill.id} className="border-b border-border">
+                <tr key={bill.id} className="border-b border-border transition-colors hover:bg-muted">
                   <td className="py-3 pr-4 font-mono whitespace-nowrap">
                     {bill.sourceUrl !== null ? (
                       <a
@@ -116,7 +116,7 @@ export default async function BillsPage({
         {cursor !== undefined && (
           <Link
             href={`/politicos/${slug}/projetos`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
+            className="rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
           >
             ← Início
           </Link>
@@ -124,7 +124,7 @@ export default async function BillsPage({
         {result.cursor !== null && (
           <Link
             href={`/politicos/${slug}/projetos?cursor=${result.cursor}`}
-            className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
+            className="rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
           >
             Próxima →
           </Link>
