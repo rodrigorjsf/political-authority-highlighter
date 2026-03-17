@@ -86,7 +86,7 @@ export function PoliticianCombobox({
             type="button"
             onClick={handleClear}
             aria-label={`Limpar seleção de ${label}`}
-            className="rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
+            className="min-h-[44px] min-w-[44px] rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
           >
             ✕
           </button>

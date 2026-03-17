@@ -175,7 +175,7 @@ export default async function PoliticianProfilePage({
             <li key={tab.href}>
               <Link
                 href={`/politicos/${slug}/${tab.href}`}
-                className="block rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring sm:inline"
+                className="flex min-h-[44px] items-center rounded-md border border-border px-4 py-2 text-sm transition-colors hover:bg-muted active:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring sm:inline-flex"
               >
                 {tab.label}
               </Link>
