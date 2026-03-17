@@ -290,6 +290,7 @@ Check `docs/stack/` before fetching from web — the info may already be saved.
 | `project-deploy-validator` | After PR to `development` | CI + Vercel + Supabase migration validation |
 | `project-create-github-issue` | After plan creation or before implementation | GitHub issue from `*.plan.md` |
 | `docs-stack` | External doc research or new gotcha found | Stack documentation save/update |
+| `copilot-instructions-sync` | After PRD, CLAUDE.md, skill, or architecture changes | `.github/copilot-instructions.md` sync with project state |
 
 ---
 
