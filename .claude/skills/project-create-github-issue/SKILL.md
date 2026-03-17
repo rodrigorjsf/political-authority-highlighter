@@ -8,15 +8,20 @@ description: Use when a new *.plan.md file is created (especially via prp-core:p
 ## Purpose
 
 Every implementation plan (`*.plan.md`) must have a corresponding GitHub issue in the
-`rodrigorjsf/political-authority-highlighter` repo. This skill delegates that work to the
-`github-issue-creator` agent, which runs in parallel and never blocks the main workflow.
+`rodrigorjsf/political-authority-highlighter` repo. This skill delegates that work to a
+background agent that runs in parallel and never blocks the main workflow.
+
+**Automated trigger**: A PostToolUse hook (`plan-issue-reminder.sh`) fires after every
+`Write` tool call — if the written file matches `*.plan.md`, it outputs a reminder.
+You MUST act on that reminder by following the invocation steps below.
 
 ---
 
 ## When to Use
 
-**Trigger 1 — After plan creation:**
-Run this skill immediately after `/prp-core:prp-plan` saves a new `*.plan.md` file.
+**Trigger 1 — After plan creation (hook-assisted):**
+When the `plan-issue-reminder` hook outputs a reminder after a `*.plan.md` file is written,
+invoke this skill immediately. Do NOT ignore the hook output.
 
 **Trigger 2 — Before/during implementation:**
 When `/prp-core:prp-implement` is invoked, fire this skill **in parallel** — do NOT block or delay
@@ -26,12 +31,13 @@ the implementation skill. It is fire-and-forget.
 
 ## How to Invoke
 
-Delegate to the ´[github-issue-creator](../../agents/github-issue-creator.md) agent using the `Agent` tool. Always run in the background
-so the parent workflow is never blocked.
+Delegate to a `general-purpose` agent using the `Agent` tool. Always run in the background
+so the parent workflow is never blocked. The agent prompt must include the full workflow
+from `.claude/agents/github-issue-creator.md`.
 
 ```
 Agent tool call:
-  subagent_type: "github-issue-creator"
+  subagent_type: "general-purpose"
   model: "haiku"
   run_in_background: true
   description: "Create GitHub issue from plan"
@@ -39,16 +45,21 @@ Agent tool call:
     Create a GitHub issue from this plan file:
     {plan file path}
 
-    Follow the complete workflow in your instructions:
-    1. Locate and read the plan file
-    2. Check for an existing issue (skip if found)
-    3. Extract plan sections
-    4. Create required labels
-    5. Create the issue with the full body template
+    Read the plan file, then read .claude/agents/github-issue-creator.md for the
+    complete step-by-step workflow:
+    1. Read the plan file
+    2. Check for an existing issue (gh issue list --search)
+    3. Extract plan sections (Summary, User Story, Problem, Solution, Metadata, etc.)
+    4. Create required labels (plan, feature/bug/refactor, complexity:*)
+    5. Create the issue with gh issue create using the full body template
+    6. Report the created issue URL
+
+    Repository: rodrigorjsf/political-authority-highlighter
+    Always use --repo flag on every gh command.
 ```
 
 Replace `{plan file path}` with the actual path, e.g.:
-`.claude/PRPs/plans/post-mvp-phase-2-accessibility.plan.md`
+`.claude/PRPs/plans/rf-018-phase7-testing-infrastructure.plan.md`
 
 If the plan path is not known, use the most recently modified `*.plan.md` in `.claude/PRPs/plans/`.
 
@@ -59,7 +70,7 @@ If the plan path is not known, use the most recently modified `*.plan.md` in `.c
 When `/prp-core:prp-implement` is invoked:
 
 1. **Do NOT block** the implementation workflow.
-2. Launch the `github-issue-creator` agent in the background (see above).
+2. Launch the agent in the background (see above).
 3. Continue with implementation immediately — the agent runs in parallel.
 4. When the agent completes, its result will be shown automatically.
 5. A failure in the agent (network, auth) must never interrupt the implementation.
@@ -72,4 +83,6 @@ When `/prp-core:prp-implement` is invoked:
 |---------|-----|
 | Waiting for the agent before continuing | Always `run_in_background: true` |
 | Passing no plan path in the prompt | Always include the plan file path in the agent prompt |
-| Running the workflow inline instead of via agent | Always delegate — never execute the gh commands directly from here |
+| Running the workflow inline instead of via agent | Always delegate — never execute the gh commands directly |
+| Using `subagent_type: "github-issue-creator"` | Use `"general-purpose"` — custom agent names are not valid subagent types |
+| Ignoring the hook reminder | The hook fires for a reason — always act on it |

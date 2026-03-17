@@ -328,7 +328,7 @@ For headless CI, a `docker-compose.test.yml` targets API + Web only (DB = `supab
 | 4 | **Home Page** | Hero + featured politicians (API-fetched) + CTA, SEO metadata | complete | with 2,3 | 1 | `.claude/PRPs/plans/completed/rf-018-phase2-3-4-fonts-darkmode-homepage.plan.md` |
 | 5 | **Component Refinement** | Buttons, cards, forms, tables, badges per PRD spec | complete | - | 1,2,3 | `.claude/PRPs/plans/completed/rf-018-phase5-component-refinement.plan.md` |
 | 6 | **Navigation & Interactions** | Validate navigation (built in Phase 5), add page fade transitions, final audit | complete | - | 5 | `.claude/PRPs/plans/rf-018-phase6-navigation-interactions.plan.md` |
-| 7 | **Testing Infrastructure** | Local full-stack env + TESTING.md + docker-compose.test.yml + convenience scripts | pending | - | - | - |
+| 7 | **Testing Infrastructure** | Local full-stack env + TESTING.md + docker-compose.test.yml + convenience scripts | in-progress | - | - | `.claude/PRPs/plans/rf-018-phase7-testing-infrastructure.plan.md` |
 | 8 | **Visual Regression** | 30 baseline screenshots (5 pages x 3 viewports x light + dark) | pending | with 9 | 6,7 | - |
 | 9 | **A11y Enhancement** | Full WCAG 2.1 AA scan all pages, both themes; dark mode variants; contrast audit | pending | with 8 | 6 | - |
 | 10 | **Skills + CI/CD + Docs** | Web + API test skills, `.agents/skills/` replication, CI/CD updates, `docs:update-docs` | pending | - | 8,9 | - |
@@ -519,4 +519,4 @@ Brazilian government transparency tools (e.g., Atlas Politico, Ranking dos Polit
 
 *Generated: 2026-03-15*
 *Revised: 2026-03-16 (v1.2 -- restructured to PRP template; consolidated phases 6-8 based on codebase reality; resolved 3 open questions; added Research Summary and MVP Scope)*
-*Status: IN-PROGRESS -- Phases 1-5 complete, 6-10 pending*
+*Status: IN-PROGRESS -- Phases 1-6 complete, Phase 7 in-progress, 8-10 pending*
