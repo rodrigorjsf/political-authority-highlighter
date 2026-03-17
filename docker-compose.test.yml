@@ -1,0 +1,73 @@
+# docker-compose.test.yml — CI E2E test environment
+#
+# Orchestrates API + Web services for headless E2E testing.
+# The database is NOT included here — Supabase CLI must be started separately:
+#
+#   supabase start   # starts Postgres on host port 54322
+#
+# Usage:
+#   docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
+#
+# Note: network_mode: host gives containers direct access to Supabase on localhost:54322.
+# This requires Linux. On macOS/Windows, use host.docker.internal instead of 127.0.0.1.
+#
+# Phase 10 will integrate this into the GitHub Actions CI workflow.
+
+services:
+  api:
+    image: node:22-alpine
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - pnpm-store:/root/.local/share/pnpm
+    command: >
+      sh -c "
+        corepack enable &&
+        pnpm install --frozen-lockfile &&
+        pnpm --filter @pah/api dev
+      "
+    network_mode: host
+    environment:
+      DATABASE_URL_READER: ${DATABASE_URL_READER:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}
+      NODE_ENV: test
+      RESEND_API_KEY: ${RESEND_API_KEY:-re_test_dummy}
+      EMAIL_ENCRYPTION_KEY: ${EMAIL_ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+      ALERTS_FROM_EMAIL: ${ALERTS_FROM_EMAIL:-test@example.com}
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:3001}
+      LOG_LEVEL: warn
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3001/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 90s
+
+  web:
+    image: node:22-alpine
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - pnpm-store:/root/.local/share/pnpm
+    command: >
+      sh -c "
+        corepack enable &&
+        pnpm install --frozen-lockfile &&
+        pnpm --filter @pah/web build &&
+        pnpm --filter @pah/web start
+      "
+    network_mode: host
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api/v1}
+      NODE_ENV: test
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000 || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 24
+      start_period: 180s
+
+volumes:
+  pnpm-store:
