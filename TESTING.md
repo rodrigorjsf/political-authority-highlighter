@@ -191,17 +191,77 @@ Open `http://localhost:3000/politicos/ana-lima-sp` — should show Ana Lima's pr
 
 ---
 
-## Snapshot Update Workflow (Phase 8)
+## Visual Regression Tests
 
-Visual regression baselines will be added in Phase 8 under `apps/web/e2e/__snapshots__/`.
+Baselines are stored in `apps/web/e2e/__snapshots__/` and committed to the repository.
 
-Once Phase 8 is complete, to update baseline screenshots:
+**Coverage**: 30 screenshots — 5 pages × 3 viewports × 2 themes
+
+| Pages | Viewports | Themes |
+|-------|-----------|--------|
+| `/`, `/politicos`, `/metodologia`, `/fontes`, `/politicos/ana-lima-sp` | 375×667, 768×1024, 1920×1080 | `light`, `dark` |
+
+**Tolerance**: 2% pixel ratio (`maxDiffPixelRatio: 0.02`) — handles sub-pixel anti-aliasing differences.
+
+**Snapshot naming**: `{page}-{viewport}-{theme}-chromium.png`
+Example: `home-mobile-dark-chromium.png`
+
+### Prerequisites
+
+The full local stack must be running before generating or verifying baselines:
+
+```bash
+# Terminal 1
+pnpm dev:db        # supabase start — wait for "Started"
+
+# Terminal 2
+pnpm dev:api       # Fastify API on :3001
+
+# Terminal 3
+pnpm dev:web       # Next.js on :3000
+```
+
+Verify stack is ready:
+
+```bash
+curl http://localhost:3001/health               # → {"status":"ok"}
+curl http://localhost:3001/api/v1/politicians?limit=1  # → { data: [...] }
+```
+
+### Generate new baselines
+
+Run this when creating baselines for the first time, or after intentional design changes:
 
 ```bash
 pnpm --filter @pah/web test:e2e -- --update-snapshots
 ```
 
-Commit the updated snapshot files alongside any intentional UI changes.
+Commit the updated snapshot files alongside the design change. Include a note in the PR
+description explaining what changed visually and why.
+
+### Verify no regressions
+
+Run this to confirm no pages have changed since the last baseline:
+
+```bash
+pnpm --filter @pah/web test:e2e -- visual-regression
+```
+
+All 30 tests must pass (exit 0). If a test fails, Playwright generates a diff image in
+`apps/web/playwright-report/`. Run `npx playwright show-report` to view the visual diff.
+
+### When to update snapshots
+
+- After intentional design changes (token updates, component redesigns)
+- After changes to `tokens.css`, `globals.css`, or any component in `apps/web/src/components/`
+- When adding a new page to the visual regression suite
+- **Never** update snapshots to suppress a legitimate regression — investigate first
+
+### OS compatibility note
+
+Baselines are pixel-exact and OS-specific. If baselines were generated on macOS and CI runs
+on Linux (or vice versa), font rendering differences may cause failures. In that case,
+regenerate baselines on Linux to match CI, or rely on the 2% tolerance.
 
 ---
 

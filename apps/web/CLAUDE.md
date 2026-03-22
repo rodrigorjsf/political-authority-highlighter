@@ -2,12 +2,69 @@
 
 # Stack: Next.js 15 (App Router) | React 19 | Tailwind CSS 4 | shadcn/ui
 
-# Last Updated: 2026-03-07 | PRD Version: 1.1
+# Last Updated: 2026-03-22 | PRD Version: 1.2
+
+## Workflow Orchestration
+
+### 1. Plan Mode Default
+
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan immediately - don't keep pushing
+- Use plan mode for verification steps, not just building
+- Write detailed specs upfront to reduce ambiguity
+
+### 2. Subagent Strategy
+
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- For complex problems, throw more compute at it via subagents
+- One task per subagent for focused execution
+
+### 3. Self-Improvement Loop
+
+- After ANY correction from the user: update "tasks/lessons.md" with the pattern
+- Write rules for yourself that prevent the same mistake
+- Ruthlessly iterate on these lessons until mistake rate drops
+- Review lessons at session start for relevant project
+
+### 4. Verification Before Done
+
+- Never mark a task complete without proving it works
+- Diff behavior between main and your changes when relevant
+- Ask yourself: "Would a staff engineer approve this?"
+- Run tests, check logs, demonstrate correctness
+
+### 5. Demand Elegance (Balanced)
+
+- For non-trivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
+- Skip this for simple, obvious fixes - don't over-engineer
+- Challenge your own work before presenting it
+
+### 6. Autonomous Bug Fixing
+
+- When given a bug report: just fix it. Don't ask for hand-holding
+- Point at logs, errors, failing tests - then resolve them
+- Zero context switching required from the user
+- Go fix failing CI tests without being told how
+
+## Task Management
+
+1. **PLan First**: Write plan to 'tasks/todo.md" with checkable items
+2. **Verify Plan**: Check in before starting implementation
+3. **Track Progress**: Mark items complete as you go
+4. **Explain Changes**: High-level summary at each step
+5. **Document Results*: Add review section to 'tasks/todo.md*
+6. **Capture Lessons**: Update 'tasks/lessons.md' after corrections
 
 ## Core Principles
 
 > Primary: Clean Code (Martin), The Pragmatic Programmer (Hunt/Thomas), SOLID Principles
 > Secondary: 12-Factor App (environment config)
+
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
 
 1. **Server Components by Default (Clean Architecture -- minimize client boundary)**: Every component is a React Server Component unless it needs browser interactivity (state, event handlers, browser APIs). This eliminates client-side JavaScript for data display pages, achieving LCP under 2 seconds. Mark a component as `'use client'` only when strictly necessary.
 
@@ -1045,3 +1102,4 @@ const securityHeaders = [
 | 2026-02-28 | 1.0         | Initial frontend development guide                                                                                        |
 | 2026-03-07 | 1.1         | Add Frontend Security First principle (DR-008), full CSP header, client bundle protection, error sanitization, SRI policy |
 | 2026-03-15 | 1.2         | Add principle 6: Frontend Design PRD compliance (`docs/prd/frontend_design_prd.md`); add UI Conventions design authority note; add anti-pattern for skipping PRD; add Sloth UI as visual reference |
+| 2026-03-22 | 1.2         | Sync metadata with root CLAUDE.md (PRD version, last updated date) |
