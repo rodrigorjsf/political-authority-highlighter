@@ -5,6 +5,7 @@ const isCI = Boolean(process.env.CI)
 
 export default defineConfig({
   testDir: './e2e',
+  snapshotDir: './e2e/__snapshots__',
   timeout: 30_000,
   expect: { timeout: 10_000 },
   ...(isCI ? { workers: 1 } : {}),
