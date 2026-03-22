@@ -55,14 +55,9 @@ const MOCK_SOURCES_RESPONSE = {
   ],
 }
 
-/**
- * Intercept all API calls made by Server Components during SSR and client
- * navigation. Using `page.route` here covers fetch() calls made by Next.js
- * SSR (via Node's fetch) as well as client-side requests.
- *
- * Pattern: `**/api/v1/**` matches both absolute and relative API URLs
- * that Next.js Server Components emit during SSR.
- */
+// Intercept all API calls made by Server Components during SSR and client
+// navigation. Using page.route covers fetch() calls made by Next.js SSR as
+// well as client-side requests.
 async function mockApiRoutes(page: Page): Promise<void> {
   await page.route('**/api/v1/politicians/ana-lima-sp', (route) =>
     route.fulfill({ json: MOCK_PROFILE_RESPONSE }),
