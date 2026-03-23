@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const BASE_URL = `http://localhost:3000`
+const PORT = process.env['WEB_PORT'] ?? '3000'
+const BASE_URL = `http://localhost:${PORT}`
 const isCI = Boolean(process.env.CI)
 
 export default defineConfig({
@@ -15,7 +16,7 @@ export default defineConfig({
   webServer: {
     command: isCI
       ? 'pnpm --filter @pah/web build && pnpm --filter @pah/web start'
-      : 'pnpm --filter @pah/web dev',
+      : `npx next dev -p ${PORT}`,
     url: BASE_URL,
     reuseExistingServer: !isCI,
     timeout: isCI ? 180_000 : 120_000,

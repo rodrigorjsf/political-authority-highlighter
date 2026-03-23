@@ -203,29 +203,24 @@ Baselines are stored in `apps/web/e2e/__snapshots__/` and committed to the repos
 
 **Tolerance**: 2% pixel ratio (`maxDiffPixelRatio: 0.02`) — handles sub-pixel anti-aliasing differences.
 
-**Snapshot naming**: `{page}-{viewport}-{theme}-chromium.png`
-Example: `home-mobile-dark-chromium.png`
+**Snapshot naming**: `{page}-{viewport}-{theme}-chromium-{os}.png`
+Example: `home-mobile-dark-chromium-linux.png`
+Stored in subdirectory: `apps/web/e2e/__snapshots__/visual-regression.spec.ts-snapshots/`
 
 ### Prerequisites
 
-The full local stack must be running before generating or verifying baselines:
+Visual regression tests intercept all API calls with deterministic mock data (see `apps/web/e2e/visual-regression.spec.ts`). No database, Supabase, or API server is needed.
+
+Playwright auto-starts the Next.js dev server if one is not already running. If port 3000 is occupied by another process, run with an explicit port:
 
 ```bash
-# Terminal 1
-pnpm dev:db        # supabase start — wait for "Started"
-
-# Terminal 2
-pnpm dev:api       # Fastify API on :3001
-
-# Terminal 3
-pnpm dev:web       # Next.js on :3000
+WEB_PORT=3001 pnpm --filter @pah/web test:e2e -- visual-regression --update-snapshots
 ```
 
-Verify stack is ready:
+System requirement: Playwright Chromium browser dependencies must be installed:
 
 ```bash
-curl http://localhost:3001/health               # → {"status":"ok"}
-curl http://localhost:3001/api/v1/politicians?limit=1  # → { data: [...] }
+npx playwright install-deps chromium  # requires sudo on Linux
 ```
 
 ### Generate new baselines
