@@ -4,7 +4,7 @@ Exports three path-specific entries: `@pah/db/public-schema`, `@pah/db/internal-
 
 ## Access Rules
 
-- `apps/api/` may only import `@pah/db/public-schema` — never `internal-schema` or `clients`
+- `apps/api/` may import `@pah/db/public-schema` and `@pah/db/clients` (for `createPublicDb` and `PublicDb` type) — never `internal-schema`
 - `apps/pipeline/` may import all three
 - `apps/web/` must never import from `@pah/db` (enforced by ESLint + `server-only`)
 - The package has `server-only` as a dependency — importing it in any Client Component throws at build time

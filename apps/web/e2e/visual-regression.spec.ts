@@ -55,9 +55,9 @@ const MOCK_SOURCES_RESPONSE = {
   ],
 }
 
-// Intercept all API calls made by Server Components during SSR and client
-// navigation. Using page.route covers fetch() calls made by Next.js SSR as
-// well as client-side requests.
+// Intercept client-side API calls made during navigation. SSR fetches from
+// Server Components are handled by the mock API server started in playwright.config.ts
+// (page.route only intercepts browser-level requests, not Node.js server requests).
 async function mockApiRoutes(page: Page): Promise<void> {
   await page.route('**/api/v1/politicians/ana-lima-sp', (route) =>
     route.fulfill({ json: MOCK_PROFILE_RESPONSE }),
@@ -76,7 +76,7 @@ for (const viewport of VIEWPORTS) {
       test.use({ viewport: { width: viewport.width, height: viewport.height } })
 
       test.beforeEach(async ({ page }) => {
-        // Intercept API calls before navigation so SSR fetch is mocked too.
+        // Intercept client-side API calls (SSR is handled by the mock API server).
         await mockApiRoutes(page)
         // Disable CSS animations so screenshots are never captured mid-transition.
         await page.emulateMedia({ reducedMotion: 'reduce' })

@@ -209,12 +209,15 @@ Stored in subdirectory: `apps/web/e2e/__snapshots__/visual-regression.spec.ts-sn
 
 ### Prerequisites
 
-Visual regression tests intercept all API calls with deterministic mock data (see `apps/web/e2e/visual-regression.spec.ts`). No database, Supabase, or API server is needed.
+Visual regression tests use deterministic mock data. Playwright auto-starts two servers:
 
-Playwright auto-starts the Next.js dev server if one is not already running. If port 3000 is occupied by another process, run with an explicit port:
+1. **Mock API server** (`e2e/mock-api-server.mjs`) on port 3001 — handles SSR fetches from Server Components. `page.route()` only intercepts browser-level requests, not Node.js server requests.
+2. **Next.js dev/prod server** on `WEB_PORT` (default 3000).
+
+No database or Supabase needed. If port 3000 is occupied, use:
 
 ```bash
-WEB_PORT=3001 pnpm --filter @pah/web test:e2e -- visual-regression --update-snapshots
+WEB_PORT=3002 pnpm --filter @pah/web test:e2e -- visual-regression --update-snapshots
 ```
 
 System requirement: Playwright Chromium browser dependencies must be installed:
