@@ -15,6 +15,10 @@ Local reference for library patterns.
 | [plausible-analytics.md](./plausible-analytics.md) | Plausible Analytics | — | 2026-03-10 |
 | [ceap-expenses-rf012.md](./ceap-expenses-rf012.md) | Expenses | — | 2026-03-08 |
 | [pipeline-rf013.md](./pipeline-rf013.md) | Pipeline stack (pg-boss, csv-parse, fast-xml-parser, crypto, p-limit, axios-retry) | Multiple | 2026-03-10 |
+| [google-stitch-sdk.md](./google-stitch-sdk.md) | `@google/stitch-sdk` — programmatic UI generation, screen edit/variants, stitchTools(), StitchProxy | 0.0.3 | 2026-03-22 |
+| [google-stitch-mcp.md](./google-stitch-mcp.md) | Official Stitch MCP server (`stitch.googleapis.com/mcp`) — tools, auth, `.mcp.json` config | — | 2026-03-22 |
+| [google-stitch-design-md.md](./google-stitch-design-md.md) | DESIGN.md format + Effective Prompting best practices — bidirectional design contract | — | 2026-03-22 |
+| [google-stitch-skills.md](./google-stitch-skills.md) | Official Stitch skills (`google-labs-code/stitch-skills`) — design-md, stitch-design, react-components | — | 2026-03-22 |
 
 ## Scope
 

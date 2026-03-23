@@ -54,6 +54,7 @@ We'll know we're right when:
 | **Visual Regression Baseline** | 30 screenshots stored in repo | Playwright `toHaveScreenshot()` |
 | **Local Stack** | Documented 3-terminal workflow | `TESTING.md` + manual verification |
 | **Test Skills** | Both `web` and `api` skills deployed | Skill file existence in `.claude/skills/` AND `.agents/skills/` |
+| **Stitch Design Sync** | Bidirectional sync operational | DESIGN.md committed; hook fires on token edits; `/stitch-pull` works; Stitch project renders all 5 pages |
 
 ## Open Questions
 
@@ -64,6 +65,8 @@ We'll know we're right when:
 - [x] ~~**Featured politicians endpoint**: Resolved — API uses `limit=3` and client-side sort fallback; `.catch(() => [])` for build-time.~~
 - [x] ~~**Home page illustration**: Resolved — data-driven hero with stats + text, no illustration needed.~~
 - [x] ~~**Inter vs Plus Jakarta Sans**: Resolved — Inter is primary (`--font-inter`), Plus Jakarta Sans is CSS fallback in `--font-sans` stack.~~
+- [ ] **Stitch API key provisioning**: How to obtain `STITCH_API_KEY` — via Google Cloud Console project or Stitch Labs invite? Document in TESTING.md.
+- [ ] **Stitch Labs phase duration**: Stitch is free during Google Labs phase. If it transitions to paid, evaluate cost impact and alternative (Figma, Penpot).
 
 ---
 
@@ -114,6 +117,7 @@ When I don't know a trustworthy politician, I want to find and understand data a
 | Should | Skeleton loaders matching data shapes (cards, tables, text) | UX polish |
 | Should | Advanced button hover translation (`-translate-y-[1px]` + shadow) | Vibe polish |
 | Could | Animated progress bars on score gauges | Nice-to-have |
+| Should | Google Stitch bidirectional design sync (MCP + SDK + DESIGN.md + hooks + skills) | Visual design collaboration; prevents design drift; enables non-developer design iteration |
 | Won't | Custom OG image generation | Defer; static fallback OK |
 
 ### MVP Scope
@@ -308,6 +312,9 @@ For headless CI, a `docker-compose.test.yml` targets API + Web only (DB = `supab
 | Animation jank on low-end Android | MEDIUM | CSS transforms only; respect `prefers-reduced-motion` |
 | aXe-core false negatives | MEDIUM | Supplement with manual keyboard navigation test |
 | Skill token bloat | LOW | Apply progressive disclosure; keep SKILL.md < 100 lines |
+| Stitch Labs phase ends (paid pricing) | LOW | Evaluate cost; DESIGN.md + skills work without Stitch (documentation-only mode); migrate to Figma/Penpot if needed |
+| Stitch MCP API latency on auto-push hook | MEDIUM | Hook script exits immediately for non-design files; SDK sync is fire-and-forget with timeout; graceful fallback to local DESIGN.md only |
+| DESIGN.md drift (manual edits bypass hook) | LOW | PR gate in `finishing-a-development-branch` detects stale DESIGN.md; `/stitch-sync` skill for manual reconciliation |
 
 ---
 
@@ -329,9 +336,10 @@ For headless CI, a `docker-compose.test.yml` targets API + Web only (DB = `supab
 | 5 | **Component Refinement** | Buttons, cards, forms, tables, badges per PRD spec | complete | - | 1,2,3 | `.claude/PRPs/plans/completed/rf-018-phase5-component-refinement.plan.md` |
 | 6 | **Navigation & Interactions** | Validate navigation (built in Phase 5), add page fade transitions, final audit | complete | - | 5 | `.claude/PRPs/plans/rf-018-phase6-navigation-interactions.plan.md` |
 | 7 | **Testing Infrastructure** | Local full-stack env + TESTING.md + docker-compose.test.yml + convenience scripts | complete | - | - | `.claude/PRPs/plans/completed/rf-018-phase7-testing-infrastructure.plan.md` |
-| 8 | **Visual Regression** | 30 baseline screenshots (5 pages x 3 viewports x light + dark) | pending | with 9 | 6,7 | - |
+| 8 | **Visual Regression** | 30 baseline screenshots (5 pages x 3 viewports x light + dark) | complete | with 9 | 6,7 | `.claude/PRPs/plans/completed/rf-018-phase8-visual-regression.plan.md` |
 | 9 | **A11y Enhancement** | Full WCAG 2.1 AA scan all pages, both themes; dark mode variants; contrast audit | pending | with 8 | 6 | - |
 | 10 | **Skills + CI/CD + Docs** | Web + API test skills, `.agents/skills/` replication, CI/CD updates, `docs:update-docs` | pending | - | 8,9 | - |
+| 11 | **Stitch Design Sync** | Google Stitch bidirectional design sync: MCP setup, SDK, DESIGN.md, auto-push hook, pull/sync/design skills, PR gate | pending | - | 5,10 | - |
 
 ### Phase Details
 
@@ -469,9 +477,45 @@ For headless CI, a `docker-compose.test.yml` targets API + Web only (DB = `supab
 
 - **Success signal**: Both skills deployed to `.claude/skills/` AND `.agents/skills/`; CI passes with new steps; `pnpm build` + `vercel build --yes` pass; `docs:update-docs` executed; memory updated
 
+**Phase 11: Stitch Design Sync**
+
+- **Goal**: Bidirectional design sync between code and Google Stitch for continuous visual design collaboration
+- **Scope**:
+
+  MCP + SDK Setup:
+  - Add official Stitch MCP server to `.mcp.json` (endpoint: `https://stitch.googleapis.com/mcp`, auth: `X-Goog-Api-Key` header) — see `docs/stack/google-stitch-mcp.md`
+  - Install `@google/stitch-sdk` as dev dependency in monorepo root — API reference at `docs/stack/google-stitch-sdk.md`
+  - Install official Stitch skills globally (`design-md`, `stitch-design`, `react-components` from `google-labs-code/stitch-skills`) — see `docs/stack/google-stitch-skills.md`
+  - Add `STITCH_API_KEY` and `STITCH_PROJECT_ID` to `.env.example`
+  - All interactions follow official docs only: <https://stitch.withgoogle.com/docs/>
+
+  DESIGN.md Generation:
+  - Generate `.stitch/DESIGN.md` from existing `tokens.css` + `globals.css` + `tailwind.config.ts` — use PAH template in `docs/stack/google-stitch-design-md.md`
+  - Content: product context, political neutrality constraints, color palette (light + dark with hex codes), typography (Inter + JetBrains Mono), spacing scale, border radius tokens, animation timing, component patterns (navigation, cards, buttons, scores, tables)
+  - Import DESIGN.md into Stitch project; verify all 5 PAH pages render correctly
+  - Commit `.stitch/DESIGN.md`; add `.stitch/cache/` and `.stitch/.credentials` to `.gitignore`
+
+  Auto-Push Hook (Code → Stitch):
+  - Create `scripts/stitch-sync-push.mjs` — parses design files, compares with DESIGN.md, regenerates if changed, syncs via SDK (patterns in `docs/stack/google-stitch-sdk.md`)
+  - Configure `PostToolUse` hook on `Edit|Write` matching design file patterns: `tokens.css`, `globals.css`, `components/ui/**`, `components/navigation/**`, `theme-*.tsx`, `tailwind.config.ts`, `frontend_design_prd.md`
+  - Graceful fallback: without `STITCH_API_KEY`, regenerates DESIGN.md locally only (zero error, documentation-only mode)
+
+  Skills (use `customaize-agent:create-skill`):
+  - `/stitch-pull`: Pull design changes from Stitch → code (`extract_design_context` MCP tool → compare → apply to `tokens.css`) — MCP tool ref: `docs/stack/google-stitch-mcp.md`
+  - `/stitch-sync`: Bidirectional reconciliation with conflict resolution UI
+  - `/stitch-design`: New design work in Stitch following Effective Prompting guidelines — see `docs/stack/google-stitch-design-md.md` + <https://stitch.withgoogle.com/docs/learn/prompting/>
+  - Deploy all 3 skills to `.claude/skills/` AND `.agents/skills/`
+
+  PR Gate:
+  - Update `finishing-a-development-branch` skill: if design files changed in branch, verify `.stitch/DESIGN.md` is up to date
+
+- **Success signal**: `.stitch/DESIGN.md` generated and committed; DESIGN.md imported in Stitch with all 5 PAH pages visible; PostToolUse hook fires on token edits and regenerates DESIGN.md; `/stitch-pull` successfully pulls design changes; all 3 Stitch skills deployed to both skill locations; PR gate warns on stale DESIGN.md
+- **Design doc**: `docs/plans/2026-03-22-stitch-design-sync-design.md`
+- **Stack docs**: `docs/stack/google-stitch-sdk.md` | `docs/stack/google-stitch-mcp.md` | `docs/stack/google-stitch-design-md.md` | `docs/stack/google-stitch-skills.md`
+
 ### Parallelism Notes
 
-Phases 8 and 9 can run in parallel in separate worktrees: visual regression (Phase 8) and a11y enhancement (Phase 9) touch different test files (`visual-regression.spec.ts` vs `accessibility.spec.ts`) and have no shared state. Both depend on Phase 6 (pages finalized) and Phase 7 (local stack for running E2E tests). Phase 10 must wait for both 8 and 9 because the test skills need to document the visual regression and a11y workflows that those phases create.
+Phases 8 and 9 can run in parallel in separate worktrees: visual regression (Phase 8) and a11y enhancement (Phase 9) touch different test files (`visual-regression.spec.ts` vs `accessibility.spec.ts`) and have no shared state. Both depend on Phase 6 (pages finalized) and Phase 7 (local stack for running E2E tests). Phase 10 must wait for both 8 and 9 because the test skills need to document the visual regression and a11y workflows that those phases create. Phase 11 (Stitch Design Sync) depends on Phase 5 (components finalized) and Phase 10 (skills infrastructure established) — it cannot run in parallel with Phase 10 because it builds on the skills infrastructure and replicates to the same `.agents/skills/` directory.
 
 ### Process Rules (All Phases)
 
@@ -480,7 +524,8 @@ These apply to every implementation phase:
 1. **Design Skill Gate** (UI Phases 1-6): Invoke `/web-frontend-design` skill before implementing any UI change.
 2. **Documentation Gate** (All Phases): Run `docs:update-docs` at the end of every phase. Evaluate if `.github/workflows/` need updates.
 3. **Testing Gate** (All Phases): `pnpm --filter @pah/web test` + `pnpm build` must pass before a phase is marked complete.
-4. **Skill Replication** (Phase 10): Skills created using `/customaize-agent:test-skill` must be placed in both `.claude/skills/` AND `.agents/skills/`.
+4. **Skill Replication** (Phase 10, 11): Skills created using `/customaize-agent:test-skill` or `/customaize-agent:create-skill` must be placed in both `.claude/skills/` AND `.agents/skills/`.
+5. **Stitch Sync Gate** (Phase 11+): All Stitch interactions must follow official documentation only (<https://stitch.withgoogle.com/docs/>). All prompts to Stitch must follow the Effective Prompting guide (<https://stitch.withgoogle.com/docs/learn/prompting/>) — summarized in `docs/stack/google-stitch-design-md.md`.
 
 ---
 
@@ -498,6 +543,9 @@ These apply to every implementation phase:
 | Skill structure | Progressive disclosure (SKILL.md + referenced files) | Single large SKILL.md | Follows Anthropic best practices; reduces token usage; easier to maintain |
 | Skill replication | `.claude/skills/` AND `.agents/skills/` | One location only | User requirement; ensures availability in all execution contexts |
 | Phase consolidation (v1.2) | Merge Phases 6+7+8 into single Phase 6 | Keep original 12 phases | Navigation, skeletons, tooltips, button hovers already built in Phase 5; remaining work (page transitions + audit) fits one phase |
+| Design tool integration (v1.3) | Google Stitch (official MCP + SDK) | Figma, Penpot, no tool | Stitch has native MCP server, DESIGN.md agent-friendly format, SDK for programmatic access; free during Labs phase; bidirectional sync possible via hooks |
+| Stitch sync approach (v1.3) | Hook-driven auto-sync (bidirectional) | Manual skill-only, hybrid (hook reminder + manual sync) | Maximum automation prevents design drift; PostToolUse hook detects design file changes automatically; graceful fallback when API key unavailable |
+| Stitch MCP source (v1.3) | Official remote server (`stitch.googleapis.com/mcp`) | Community packages (`@_davideast/stitch-mcp`, etc.) | Official server is maintained by Google; user requirement to use only official docs and integrations |
 
 ---
 
@@ -514,9 +562,11 @@ Brazilian government transparency tools (e.g., Atlas Politico, Ranking dos Polit
 - Supabase CLI local development is already the project standard; no new infrastructure needed for testing.
 - Playwright visual regression (`toHaveScreenshot`) is stable and supports cross-browser baseline comparison.
 - Phase 5 delivered significantly more than originally scoped (navigation, skeletons, tooltips), reducing remaining work from ~7 UI phases to ~1 validation phase.
+- Google Stitch (launched Google I/O 2025, free during Labs phase) provides native MCP server at `stitch.googleapis.com/mcp`, `@google/stitch-sdk` for programmatic access, and agent-friendly DESIGN.md format for design system portability. Official skills repo at `google-labs-code/stitch-skills` includes `design-md`, `stitch-design`, and `react-components` skills. Effective Prompting guide at `stitch.withgoogle.com/docs/learn/prompting/` defines best practices for AI-driven design iteration. Full stack documentation: `docs/stack/google-stitch-sdk.md`, `docs/stack/google-stitch-mcp.md`, `docs/stack/google-stitch-design-md.md`, `docs/stack/google-stitch-skills.md`.
 
 ---
 
 *Generated: 2026-03-15*
 *Revised: 2026-03-16 (v1.2 -- restructured to PRP template; consolidated phases 6-8 based on codebase reality; resolved 3 open questions; added Research Summary and MVP Scope)*
-*Status: IN-PROGRESS -- Phases 1-7 complete, 8-10 pending*
+*Revised: 2026-03-22 (v1.3 -- added Phase 11: Stitch Design Sync; new decisions, risks, success metrics, open questions; design doc at `docs/plans/2026-03-22-stitch-design-sync-design.md`)*
+*Status: IN-PROGRESS -- Phases 1-7 complete, 8-11 pending*
