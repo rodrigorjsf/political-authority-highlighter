@@ -35,4 +35,4 @@ This package must have **zero** entries in `dependencies` and `devDependencies` 
 
 ## No `enum` Keyword
 
-Use `const` + `as const` pattern — see `.claude/rules/no-enum.md`.
+Use `const` + `as const` pattern — see `.claude/rules/typescript.md`.
