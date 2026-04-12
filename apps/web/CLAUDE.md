@@ -41,9 +41,7 @@ Key directories: `src/app/` (pages), `src/components/ui/` (shadcn primitives), `
 
 ## Code Standards
 
-**Formatting**: No semicolons, single quotes, 2-space indent, trailing commas. Enforced by Prettier.
-
-**No `enum` keyword** — use `const` + `as const` + type alias (see root CLAUDE.md).
+**Formatting**: No semicolons, single quotes, 2-space indent, trailing commas (Prettier-enforced).
 
 **No `useEffect` for data** that can be fetched in a Server Component. This is the most common mistake.
 

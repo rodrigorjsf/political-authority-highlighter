@@ -1,4 +1,4 @@
-# Shared Package -- Political Authority Highlighter
+# Shared Package — Political Authority Highlighter
 
 `packages/shared` has **zero external dependencies**. It exports domain types, constants, and utilities for use by all apps.
 
@@ -20,14 +20,12 @@ export const Role = { DEPUTADO: 'deputado', SENADOR: 'senador' } as const
 export type Role = typeof Role[keyof typeof Role]
 ```
 
-**Never use `enum` keyword for shared constants** — use `const` + `as const` + type alias. The `enum` keyword causes `@typescript-eslint/no-unsafe-enum-comparison` errors when comparing against interface fields typed as string unions.
-
 ## Current Value Exports (inline in `src/index.ts`)
 
-`Role`, `LegislativeSource`, `REVALIDATE` constants, `formatCurrency`, `formatDate`, `slugify` — all inlined directly, not re-exported from submodules.
+`Role`, `LegislativeSource`, `REVALIDATE` constants, `formatCurrency`, `formatDate` — all inlined directly, not re-exported from submodules.
 
 ## Adding New Exports
 
 1. **New type** → add to appropriate `src/types/*.ts` file, re-export as `export type { ... }` from `index.ts`
-2. **New value** (constant, function) → add implementation inline in `index.ts` or import from a local helper without submodule re-export
+2. **New value** (constant, function) → add implementation inline in `index.ts`
 3. **No new dependencies** — this package must stay dependency-free
